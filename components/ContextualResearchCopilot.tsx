@@ -61,7 +61,7 @@ function pageLabel(pathname: string): { label: string; hint: string } {
   if (pathname.startsWith('/ai-research-agent')) {
     return { label: 'Writing studio', hint: 'Ask about your manuscript or research' };
   }
-  return { label: 'Digital Research Manager', hint: 'Ask anything — or ask me to do it' };
+  return { label: 'RILOS', hint: 'Ask anything — or ask me to do it' };
 }
 
 const EXAMPLE_PROMPTS = [
@@ -109,7 +109,7 @@ const ContextualResearchCopilot: React.FC = () => {
 
     const pageContext = [
       `Current page: ${label} (${location.pathname})`,
-      `User is working in Digital Research Manager.`,
+      `User is working in RILOS.`,
       `Prefer INTERNAL library search and app actions before generating new content with AI.`,
       `You can take actions: find protocols/experiments, create notes, reminders/tasks, and calendar events.`,
     ].join('\n');

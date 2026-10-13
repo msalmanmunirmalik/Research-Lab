@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Card, { CardContent, CardHeader, CardTitle } from './ui/Card';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Select from './ui/Select';
 import { experimentService, Experiment, Milestone, Risk } from '../services/experimentService';
 import LinkedEntityChips, { buildWorkflowLinks } from './LinkedEntityChips';
+import {
+  evidenceFromRecordUrl,
+  notebookFromExperimentUrl,
+} from '../utils/evidenceChain';
 import {
   BeakerIcon,
   CalendarIcon,
@@ -60,11 +65,59 @@ const ExperimentDetailView: React.FC<ExperimentDetailViewProps> = ({
   const [newRisk, setNewRisk] = useState({ title: '', description: '', probability: 'medium', impact: 'medium', mitigation: '' });
   const [newComment, setNewComment] = useState({ comment: '', isInternal: true });
   const [newProgressEntry, setNewProgressEntry] = useState({ status: '', notes: '', durationLogged: 0, costLogged: 0 });
+  const [publicProtocols, setPublicProtocols] = useState<Array<{ externalId: string; title: string }>>([]);
+  const [relatedPapers, setRelatedPapers] = useState<Array<{ id: string; title: string; doi?: string }>>([]);
 
   useEffect(() => {
     loadProgressLog();
     loadComments();
   }, [experiment.id]);
+
+  useEffect(() => {
+    const tags = Array.isArray(experiment.tags) ? experiment.tags : [];
+    const query = [experiment.title, experiment.hypothesis, ...tags]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    if (query.length < 3) {
+      setPublicProtocols([]);
+      setRelatedPapers([]);
+      return;
+    }
+    const authToken = localStorage.getItem('authToken') || localStorage.getItem('token');
+    const base = (import.meta.env.VITE_API_URL || 'http://localhost:5002/api').replace(/\/$/, '');
+    fetch(`${base}/protocols/external/search?q=${encodeURIComponent(query.slice(0, 180))}`, {
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const rows = Array.isArray(data?.protocols) ? data.protocols : [];
+        setPublicProtocols(rows.slice(0, 6).map((item: any) => ({
+          externalId: String(item.externalId),
+          title: String(item.title),
+        })));
+      })
+      .catch(() => setPublicProtocols([]));
+
+    const paperQuery = String(experiment.title || '').trim();
+    if (paperQuery.length < 3) {
+      setRelatedPapers([]);
+      return;
+    }
+    fetch(`${base}/research/search?q=${encodeURIComponent(paperQuery.slice(0, 180))}&limit=4`, {
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const rows = Array.isArray(data?.papers) ? data.papers : [];
+        setRelatedPapers(rows.slice(0, 4).map((item: any) => ({
+          id: String(item.openalexId || item.doi || item.title),
+          title: String(item.title),
+          doi: item.doi || undefined,
+        })));
+      })
+      .catch(() => setRelatedPapers([]));
+  }, [experiment.title, experiment.hypothesis, experiment.tags]);
 
   const loadProgressLog = async () => {
     try {
@@ -215,6 +268,30 @@ const ExperimentDetailView: React.FC<ExperimentDetailViewProps> = ({
                 notebookEntryId: experiment.notebookEntryId,
               })}
             />
+            <Link
+              to={notebookFromExperimentUrl({
+                experimentId: experiment.id,
+                protocolId: experiment.protocolId,
+                title: experiment.title,
+              })}
+              className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-950 hover:bg-amber-100"
+            >
+              <DocumentTextIcon className="h-4 w-4 mr-2" />
+              Log in notebook
+            </Link>
+            <Link
+              to={evidenceFromRecordUrl({
+                experimentId: experiment.id,
+                protocolId: experiment.protocolId,
+                notebookEntryId: experiment.notebookEntryId,
+                title: experiment.title,
+                summary: experiment.description || experiment.hypothesis || '',
+              })}
+              className="inline-flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-950 hover:bg-emerald-100"
+            >
+              <ChartBarIcon className="h-4 w-4 mr-2" />
+              Create evidence
+            </Link>
             <Button variant="outline" onClick={() => onEdit(experiment)}>
               <EditIcon className="h-4 w-4 mr-2" />
               Edit
@@ -228,6 +305,42 @@ const ExperimentDetailView: React.FC<ExperimentDetailViewProps> = ({
             </Button>
           </div>
         </div>
+
+        {relatedPapers.length > 0 ? (
+          <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 text-sm text-slate-800">
+            <p className="font-medium">Related literature from OpenAlex</p>
+            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+              {relatedPapers.map((item) => (
+                item.doi ? (
+                  <a key={item.id} className="underline" href={`https://doi.org/${item.doi}`} target="_blank" rel="noreferrer">
+                    {item.title}
+                  </a>
+                ) : (
+                  <span key={item.id}>{item.title}</span>
+                )
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {publicProtocols.length > 0 ? (
+          <div className="px-6 py-3 bg-teal-50 border-b border-teal-100 text-sm text-teal-950">
+            <p className="font-medium">
+              We found {publicProtocols.length} relevant public protocols for this experiment.
+            </p>
+            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+              {publicProtocols.map((item) => (
+                <Link
+                  key={item.externalId}
+                  className="underline"
+                  to={`/protocols?q=${encodeURIComponent(item.title)}`}
+                >
+                  {item.title}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {/* Tabs */}
         <div className="border-b border-gray-200">

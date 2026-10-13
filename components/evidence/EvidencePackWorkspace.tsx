@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import LinkedEntityChips, { buildWorkflowLinks } from '../LinkedEntityChips';
 import ArtifactEditorHost from './ArtifactEditorHost';
 import PackReviewView from './PackReviewView';
 import EvidenceAIPanel from './EvidenceAIPanel';
+import { writingFromEvidenceUrl } from '../../utils/evidenceChain';
 import {
   CheckIcon,
   DocumentTextIcon,
@@ -205,7 +207,7 @@ const EvidencePackWorkspace: React.FC<Props> = ({
               <XMarkIcon className="w-5 h-5" />
             </button>
           </div>
-          <div className="mt-3">
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             <LinkedEntityChips
               links={buildWorkflowLinks({
                 protocolId: entry.protocolId,
@@ -213,6 +215,16 @@ const EvidencePackWorkspace: React.FC<Props> = ({
                 notebookEntryId: entry.notebookEntryId,
               })}
             />
+            <Link
+              to={writingFromEvidenceUrl({
+                evidenceId: entry.id,
+                title: entry.title,
+                summary: entry.summary,
+              })}
+              className="inline-flex items-center rounded-md border border-teal-200 bg-teal-50 px-2.5 py-1 text-[11px] font-medium text-teal-950 hover:bg-teal-100"
+            >
+              Continue in Writing Studio →
+            </Link>
           </div>
         </div>
 

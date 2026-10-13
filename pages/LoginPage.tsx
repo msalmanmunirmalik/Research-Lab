@@ -3,6 +3,7 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import LegalFooterLinks from '../components/LegalFooterLinks';
+import BrandMark from '../components/BrandMark';
 
 const inputClassName =
   'w-full border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-colors focus:border-teal-700 focus:ring-1 focus:ring-teal-700';
@@ -68,18 +69,13 @@ function LoginPage(): React.ReactElement {
         />
         <div className="absolute inset-0 bg-slate-950/70" />
         <div className="absolute inset-0 flex flex-col justify-between p-10 text-white">
-          <Link to="/" className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center bg-white text-sm font-semibold text-slate-900">
-              DR
-            </span>
-            <span className="landing-serif text-lg tracking-tight">Digital Research Manager</span>
-          </Link>
+          <BrandMark to="/" variant="light" />
           <div className="max-w-sm">
             <p className="landing-serif text-3xl leading-tight tracking-tight">
-              Your lab, one workspace.
+              Your lab, one operating system.
             </p>
             <p className="mt-4 text-sm leading-relaxed text-white/70">
-              Sign in to continue managing protocols, notebooks, data, and collaboration.
+              Sign in to continue protocols, notebooks, experiments, and writing in RILOS.
             </p>
           </div>
         </div>
@@ -87,12 +83,7 @@ function LoginPage(): React.ReactElement {
 
       <div className="flex flex-1 flex-col">
         <div className="flex items-center justify-between px-6 py-6 lg:px-12">
-          <Link to="/" className="flex items-center gap-3 lg:invisible">
-            <span className="flex h-8 w-8 items-center justify-center bg-slate-900 text-xs font-semibold text-white">
-              DR
-            </span>
-            <span className="landing-serif text-base tracking-tight">Digital Research Manager</span>
-          </Link>
+          <BrandMark to="/" variant="app" compact className="lg:invisible" />
           <Link
             to="/register"
             className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
@@ -105,7 +96,7 @@ function LoginPage(): React.ReactElement {
           <div className="w-full max-w-md">
             <h1 className="landing-serif text-3xl tracking-tight text-slate-900">Sign in</h1>
             <p className="mt-2 text-sm text-slate-600">
-              Welcome back to Digital Research Manager.
+              Welcome back to RILOS.
             </p>
 
             <form className="mt-10 space-y-5" onSubmit={handleSubmit}>
@@ -164,6 +155,12 @@ function LoginPage(): React.ReactElement {
                     )}
                   </button>
                 </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Link to="/forgot-password" className="text-sm font-medium text-teal-800 hover:text-teal-700">
+                  Forgot password?
+                </Link>
               </div>
 
               {error ? (

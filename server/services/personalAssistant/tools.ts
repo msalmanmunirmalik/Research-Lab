@@ -36,7 +36,7 @@ export type AssistantActionResult = {
 };
 
 export const ASSISTANT_TOOL_CATALOG = `
-You are the Digital Research Manager personal assistant. Prefer INTERNAL tools (no generation).
+You are the RILOS personal assistant. Prefer INTERNAL tools (no generation).
 
 Library / find tools (always use these first — never invent a protocol):
 1. find_protocol — Search the user's protocol library. args: { query: string, open_best?: boolean, limit?: number }

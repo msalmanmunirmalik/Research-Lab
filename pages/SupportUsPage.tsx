@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { getAuthHeaders, getAuthToken, resolveApiBaseUrl, formatApiNetworkError } from '../utils/apiBase';
 import { Link, useSearchParams } from 'react-router-dom';
+import BrandMark from '../components/BrandMark';
 
 const SUGGESTED_AMOUNTS = [10, 25, 50, 100] as const;
 
@@ -82,7 +83,7 @@ function SupportUsPage(): React.ReactElement {
 
     if (!checkoutAvailable) {
       window.location.href = `mailto:${config.contactEmail}?subject=${encodeURIComponent(
-        'Support Digital Research Manager'
+        'Support RILOS'
       )}&body=${encodeURIComponent(
         `I would like to contribute $${amountToCharge.toFixed(2)} to support the platform.\n\n${message}`
       )}`;
@@ -127,12 +128,7 @@ function SupportUsPage(): React.ReactElement {
     <div className="landing-page min-h-screen bg-[#F7F8F6] text-slate-900 antialiased">
       <header className="border-b border-slate-200/80 bg-[#F7F8F6]">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 lg:px-8">
-          <Link to="/" className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center bg-slate-900 text-xs font-semibold text-white">
-              DR
-            </span>
-            <span className="landing-serif text-lg tracking-tight">Digital Research Manager</span>
-          </Link>
+          <BrandMark to="/" variant="app" wordmark />
           <div className="flex items-center gap-3">
             <Link
               to="/login"
@@ -153,7 +149,7 @@ function SupportUsPage(): React.ReactElement {
       <main className="mx-auto max-w-6xl px-6 py-14 lg:px-8 lg:py-20">
         {status === 'success' ? (
           <div className="mb-10 border border-teal-200 bg-teal-50 px-5 py-4 text-sm text-teal-900">
-            Thank you. Your contribution helps keep Digital Research Manager free and improving for
+            Thank you. Your contribution helps keep RILOS free and improving for
             every lab.
           </div>
         ) : null}
@@ -170,7 +166,7 @@ function SupportUsPage(): React.ReactElement {
               Keep the platform free-and moving forward
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">
-              Digital Research Manager is free for researchers and labs. Contributions fund hosting,
+              RILOS is free for researchers and labs. Contributions fund hosting,
               AI tooling, security, and new features so science teams can keep working without paywalls.
             </p>
 
@@ -298,7 +294,7 @@ function SupportUsPage(): React.ReactElement {
 
             <p className="mt-4 text-xs leading-relaxed text-slate-500">
               {checkoutAvailable
-                ? 'You will be redirected to a secure checkout. Digital Research Manager remains free for all users.'
+                ? 'You will be redirected to a secure checkout. RILOS remains free for all users.'
                 : `Online payments are not configured yet. You can reach us at ${config.contactEmail}.`}
             </p>
           </section>
@@ -307,7 +303,7 @@ function SupportUsPage(): React.ReactElement {
 
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-          <p>© {new Date().getFullYear()} Digital Research Manager</p>
+          <p>© {new Date().getFullYear()} RILOS</p>
             <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link to="/" className="transition-colors hover:text-slate-800">
               Home

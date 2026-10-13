@@ -1,5 +1,6 @@
 import React from 'react';
-import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import BrandMark from './BrandMark';
 import {
   BookOpenIcon,
   BeakerIcon,
@@ -12,7 +13,15 @@ import {
   PackageIcon,
   CogIcon,
   DocumentTextIcon,
+  WrenchScrewdriverIcon,
   AcademicCapIcon,
+  CalendarIcon,
+  FireIcon,
+  ChatBubbleLeftRightIcon,
+  BarChartIcon,
+  FlaskConicalIcon,
+  SparklesIcon,
+  HeartIcon,
 } from './icons';
 
 interface SideNavProps {
@@ -26,6 +35,7 @@ interface NavItem {
   description: string;
   /** When set, clicking always navigates with this state (e.g. reset Writing Studio home). */
   resetState?: Record<string, unknown>;
+  end?: boolean;
 }
 
 interface NavSection {
@@ -33,6 +43,7 @@ interface NavSection {
   items: NavItem[];
 }
 
+/** RILOS seven-pillar IA — see docs/RILOS_ALIGNMENT_PLAN.md */
 const navSections: NavSection[] = [
   {
     items: [
@@ -40,32 +51,30 @@ const navSections: NavSection[] = [
         name: 'Dashboard',
         to: '/dashboard',
         icon: PresentationChartLineIcon,
-        description: 'Overview of your research activities',
+        description: 'Notes, reminders, and research pulse',
       },
       {
-        name: 'Personal notebook',
-        to: '/lab-notebook',
+        name: 'Wellbeing',
+        to: '/wellbeing',
+        icon: HeartIcon,
+        description: 'Private, voluntary researcher check-ins',
+      },
+    ],
+  },
+  {
+    label: 'Intelligence',
+    items: [
+      {
+        name: 'Grants & funding',
+        to: '/grants-fundings',
+        icon: BriefcaseIcon,
+        description: 'Discover grants, funding calls, and matches',
+      },
+      {
+        name: 'Literature',
+        to: '/writing-studio/tools/library',
         icon: BookOpenIcon,
-        description: 'Document experiments, ideas, and lab notes',
-      },
-      {
-        name: 'Protocol library',
-        to: '/protocols',
-        icon: BeakerIcon,
-        description: 'Reusable methods, SOPs, and step execution',
-      },
-      {
-        name: 'Research evidence',
-        to: '/data-results',
-        icon: ChartBarIcon,
-        description: 'Multi-format results: text, tables, sheets, figures, stats',
-      },
-      {
-        name: 'Writing studio',
-        to: '/writing-studio',
-        icon: DocumentTextIcon,
-        description: 'Draft, cite, check readiness, and export research manuscripts',
-        resetState: { studioHome: true },
+        description: 'Evidence and reference library in Writing Studio',
       },
     ],
   },
@@ -76,30 +85,71 @@ const navSections: NavSection[] = [
         name: 'Lab workspace',
         to: '/lab-workspace',
         icon: Squares2X2Icon,
-        description: 'Tasks, projects, lab resources, team, and messaging',
+        description: 'Tasks, projects, resources, team, and messaging',
       },
       {
-        name: 'Lab Floors',
-        to: '/lab-floors',
-        icon: AcademicCapIcon,
-        description: 'Practice starting in research through short branching scenarios',
+        name: 'Experiments',
+        to: '/experiment-tracker',
+        icon: FlaskConicalIcon,
+        description: 'Plan and track experiments from hypothesis to completion',
       },
     ],
   },
   {
-    label: 'Research network',
+    label: 'Records',
     items: [
       {
-        name: 'Grants & funding',
-        to: '/grants-fundings',
-        icon: BriefcaseIcon,
-        description: 'Discover grants, funding calls, and deadlines',
+        name: 'Protocols',
+        to: '/protocols',
+        icon: BeakerIcon,
+        description: 'Reusable methods, SOPs, and step execution',
       },
+      {
+        name: 'Notebook',
+        to: '/lab-notebook',
+        icon: BookOpenIcon,
+        description: 'Document experiments, ideas, and lab notes',
+      },
+      {
+        name: 'Evidence',
+        to: '/data-results',
+        icon: ChartBarIcon,
+        description: 'Curated results with provenance and interpretation',
+      },
+    ],
+  },
+  {
+    label: 'Analyze & write',
+    items: [
+      {
+        name: 'Analysis',
+        to: '/data-analysis',
+        icon: BarChartIcon,
+        description: 'Statistical analysis and visualization',
+      },
+      {
+        name: 'Writing studio',
+        to: '/writing-studio',
+        icon: DocumentTextIcon,
+        description: 'Draft, cite, check readiness, and export manuscripts',
+        resetState: { studioHome: true },
+      },
+      {
+        name: 'Research tools',
+        to: '/research-tools',
+        icon: WrenchScrewdriverIcon,
+        description: 'Calculators and designers for lab work',
+      },
+    ],
+  },
+  {
+    label: 'Network',
+    items: [
       {
         name: 'Networking',
         to: '/collaboration-networking',
         icon: UsersIcon,
-        description: 'Connect with researchers and collaborators',
+        description: 'Connect with researchers and labs',
       },
       {
         name: 'Data bank',
@@ -111,7 +161,42 @@ const navSections: NavSection[] = [
         name: 'Marketplace',
         to: '/marketplace',
         icon: PackageIcon,
-        description: 'Research supplies and expertise directory',
+        description: 'Supplies, expertise, and tenders directory',
+      },
+      {
+        name: 'Negative results',
+        to: '/negative-results',
+        icon: FireIcon,
+        description: 'Share failed experiments and earn transparency credit',
+      },
+      {
+        name: 'Events',
+        to: '/events-opportunities',
+        icon: CalendarIcon,
+        description: 'Conferences, exchanges, and summer schools',
+      },
+      {
+        name: 'Help forum',
+        to: '/help-forum',
+        icon: ChatBubbleLeftRightIcon,
+        description: 'Ask peers for protocol help and lab advice',
+      },
+    ],
+  },
+  {
+    label: 'Learn',
+    items: [
+      {
+        name: 'Lab Floors',
+        to: '/lab-floors',
+        icon: SparklesIcon,
+        description: 'Practice starting in research through scenarios and roleplay',
+      },
+      {
+        name: 'Trainings',
+        to: '/tools-trainings',
+        icon: AcademicCapIcon,
+        description: 'Lab orientation, safety, techniques, and skill courses',
       },
     ],
   },
@@ -123,28 +208,15 @@ const SideNav: React.FC<SideNavProps> = ({ onMobileLinkClick }) => {
 
   return (
     <div className="h-full flex flex-col bg-[#F8FAF9] border-r border-slate-200">
-      {/* Brand — same height as app header so chrome aligns */}
       <div className="h-14 px-4 flex items-center border-b border-slate-200 flex-shrink-0">
-        <Link
+        <BrandMark
           to="/dashboard"
+          variant="app"
+          compact
           onClick={onMobileLinkClick}
-          className="flex items-center gap-2.5 group min-w-0"
-        >
-          <div className="w-8 h-8 rounded-lg bg-teal-800 flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-[11px] font-semibold tracking-wide">DR</span>
-          </div>
-          <div className="min-w-0">
-            <p className="text-[13px] font-semibold text-slate-900 leading-tight tracking-tight truncate group-hover:text-teal-900 transition-colors">
-              Digital Research
-            </p>
-            <p className="text-[11px] text-slate-500 leading-tight mt-0.5 truncate">
-              Manager
-            </p>
-          </div>
-        </Link>
+        />
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-3 py-4 overflow-y-auto" data-testid="side-nav">
         <div className="space-y-6">
           {navSections.map((section, sectionIndex) => (
@@ -156,15 +228,14 @@ const SideNav: React.FC<SideNavProps> = ({ onMobileLinkClick }) => {
               )}
               <ul className="space-y-0.5">
                 {section.items.map((item) => (
-                  <li key={item.to}>
+                  <li key={`${item.name}-${item.to}`}>
                     <NavLink
                       to={item.to}
-                      end={item.to !== '/writing-studio'}
+                      end={item.end ?? item.to !== '/writing-studio'}
                       onClick={(e) => {
                         onMobileLinkClick?.();
                         if (item.resetState) {
                           e.preventDefault();
-                          // Always return to studio desk — even when already under /writing-studio/*
                           navigate(
                             { pathname: '/writing-studio', search: '' },
                             {
@@ -217,16 +288,23 @@ const SideNav: React.FC<SideNavProps> = ({ onMobileLinkClick }) => {
         </div>
       </nav>
 
-      {/* Footer */}
       <div className="px-3 py-3 border-t border-slate-200 flex-shrink-0 space-y-0.5">
-        <Link
+        <NavLink
           to="/settings"
           onClick={onMobileLinkClick}
-          className="flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-[13px] text-slate-600 hover:bg-slate-900/[0.04] hover:text-slate-900 transition-colors"
+          data-testid="nav-settings"
+          className={({ isActive }) =>
+            [
+              'flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-[13px] transition-colors',
+              isActive
+                ? 'bg-teal-800/[0.08] text-teal-950 font-medium'
+                : 'text-slate-600 hover:bg-slate-900/[0.04] hover:text-slate-900',
+            ].join(' ')
+          }
         >
           <CogIcon className="w-[15px] h-[15px] text-slate-400" aria-hidden="true" />
           Settings
-        </Link>
+        </NavLink>
       </div>
     </div>
   );

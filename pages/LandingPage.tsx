@@ -1,60 +1,61 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import LegalFooterLinks from '../components/LegalFooterLinks';
+import BrandMark from '../components/BrandMark';
 
 const SECTION_REVEAL_THRESHOLD = 0.15;
 
 const capabilities = [
   {
-    title: 'Lab Workspace',
+    title: 'Research intelligence',
     description:
-      'Projects, experiments, inventory, instruments, and team messaging in one operational hub.',
+      'Literature discovery, grant matching, and AI recommendations grounded in licensed scientific sources.',
   },
   {
-    title: 'AI Protocols',
+    title: 'Lab operations',
     description:
-      'Generate, search, compare, and execute protocols with desktop and mobile-ready workflows.',
+      'Projects, tasks, experiments, inventory, instruments, and team messaging in one hub.',
   },
   {
-    title: 'Lab Notebook',
+    title: 'Scientific records',
     description:
-      'Structured entries that keep methods, observations, and decisions audit-ready.',
+      'Protocols, notebooks, and evidence packs that keep methods and decisions audit-ready.',
   },
   {
-    title: 'Research Data Bank',
+    title: 'Analysis & writing',
     description:
-      'Organize results, negative findings, and reusable datasets across your lab.',
+      'Statistics, manuscripts, citations, and export — connected to your lab work.',
   },
   {
-    title: 'Research Network',
+    title: 'Research network',
     description:
-      'Grants, collaboration, events, help forums, and field trends in one place.',
+      'Collaboration, ethical data exchange, marketplace directory, events, and peer help.',
   },
   {
-    title: 'Marketplace',
+    title: 'Research education',
     description:
-      'Connect with suppliers and service providers without leaving your research workflow.',
+      'Lab Floors scenarios, AI roleplay, and trainings for people starting in research.',
   },
 ] as const;
 
 const workflow = [
   {
     step: '01',
-    title: 'Set up your lab',
+    title: 'Capture the idea',
     description:
-      'Create a workspace, invite your team, and define how projects move from idea to result.',
+      'Turn a question into a protocol and experiment plan without losing context.',
   },
   {
     step: '02',
-    title: 'Run the science',
+    title: 'Run and record',
     description:
-      'Use notebooks, AI protocols, experiments, and instruments as a single operational layer.',
+      'Execute work in the lab workspace, notebook, and evidence packs as one chain.',
   },
   {
     step: '03',
-    title: 'Share and grow',
+    title: 'Analyze and publish',
     description:
-      'Publish findings, find funding, and collaborate across labs with clear attribution.',
+      'Move from results to analysis and manuscript with provenance still attached.',
   },
 ] as const;
 
@@ -113,14 +114,7 @@ function LandingPage(): React.ReactElement {
     <div className="landing-page min-h-screen bg-[#F7F8F6] text-slate-900 antialiased">
       <header className="absolute inset-x-0 top-0 z-30">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6 lg:px-8">
-          <Link to="/" className="flex items-center gap-3 text-white">
-            <span className="flex h-9 w-9 items-center justify-center bg-white text-sm font-semibold tracking-tight text-slate-900">
-              DR
-            </span>
-            <span className="landing-serif hidden text-lg tracking-tight sm:block">
-              Digital Research Manager
-            </span>
-          </Link>
+          <BrandMark to="/" variant="light" className="text-white" />
           <div className="flex items-center gap-2 sm:gap-4">
             <Link
               to="/support"
@@ -162,21 +156,21 @@ function LandingPage(): React.ReactElement {
                 heroReady ? 'landing-rise landing-rise-delay-1' : 'opacity-0'
               }`}
             >
-              Digital Research Manager
+              RILOS
             </p>
             <h1
               className={`mx-auto mt-6 max-w-2xl text-xl font-medium leading-snug text-white/95 sm:text-2xl ${
                 heroReady ? 'landing-rise landing-rise-delay-2' : 'opacity-0'
               }`}
             >
-              One operating system for modern research labs.
+              Research Intelligence & Operating System
             </h1>
             <p
               className={`mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg ${
                 heroReady ? 'landing-rise landing-rise-delay-3' : 'opacity-0'
               }`}
             >
-              Run experiments, protocols, data, and collaboration from a single professional workspace.
+              Connect scientific discovery, laboratory operations, and researcher wellbeing — without losing context from idea to publication.
             </p>
             <div
               className={`mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row ${
@@ -207,9 +201,8 @@ function LandingPage(): React.ReactElement {
               Built for the full research lifecycle
             </h2>
             <p className="max-w-xl text-lg leading-relaxed text-slate-600">
-              Digital Research Manager connects lab operations with AI-assisted protocols,
-              structured notebooks, shared data, funding discovery, and a research network-
-              so your team spends less time coordinating tools and more time doing science.
+              RILOS connects what researchers know, what laboratories do, and what science
+              produces — so your team spends less time coordinating tools and more time on discovery.
             </p>
           </div>
         </div>
@@ -288,10 +281,10 @@ function LandingPage(): React.ReactElement {
             <div>
               <p className="text-xs font-semibold tracking-[0.18em] text-teal-800">FREE FOR ALL</p>
               <h2 className="landing-serif mt-3 text-3xl tracking-tight text-slate-900 sm:text-4xl">
-                Help keep Digital Research Manager running
+                Help keep RILOS running
               </h2>
               <p className="mt-4 max-w-xl text-lg leading-relaxed text-slate-600">
-                The platform stays free for researchers and labs. Contributions fund hosting,
+                Early access stays free for researchers and labs. Contributions fund hosting,
                 security, AI tools, and ongoing product innovation.
               </p>
             </div>
@@ -338,14 +331,9 @@ function LandingPage(): React.ReactElement {
         <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12 lg:px-8">
           <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-start">
             <div>
-              <div className="flex items-center gap-3">
-                <span className="flex h-8 w-8 items-center justify-center bg-white text-xs font-semibold text-slate-900">
-                  DR
-                </span>
-                <span className="landing-serif text-lg text-white">Digital Research Manager</span>
-              </div>
+              <BrandMark to="/" variant="light" showTagline />
               <p className="mt-3 max-w-sm text-sm leading-relaxed text-slate-400">
-                Professional infrastructure for research labs, teams, and scientific collaboration.
+                Research intelligence and laboratory operations for academic and applied labs.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-slate-400">
@@ -359,7 +347,7 @@ function LandingPage(): React.ReactElement {
             </div>
           </div>
           <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} Digital Research Manager
+            © {new Date().getFullYear()} RILOS
           </p>
         </div>
       </footer>

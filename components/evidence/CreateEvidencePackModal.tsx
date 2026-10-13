@@ -46,7 +46,9 @@ const CreateEvidencePackModal: React.FC<Props> = ({
   const [protocolId, setProtocolId] = useState(initial?.protocolId || '');
   const [experimentId, setExperimentId] = useState(initial?.experimentId || '');
   const [notebookEntryId, setNotebookEntryId] = useState(initial?.notebookEntryId || '');
-  const [showLinks, setShowLinks] = useState(false);
+  const [showLinks, setShowLinks] = useState(
+    Boolean(initial?.protocolId || initial?.experimentId || initial?.notebookEntryId)
+  );
   const [error, setError] = useState('');
 
   const submit = async (e: React.FormEvent) => {

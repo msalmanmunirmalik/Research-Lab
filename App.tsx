@@ -48,8 +48,10 @@ import LabPublicPage from './pages/LabPublicPage';
 import WritingStudioPage from './pages/WritingStudioPage';
 import ExperimentTrackerPage from './pages/ExperimentTrackerPage';
 import LabFloorsPage from './pages/LabFloorsPage';
+import WellbeingPage from './pages/WellbeingPage';
 import ContextualResearchCopilot from './components/ContextualResearchCopilot';
 import { RedirectToWritingStudio } from './components/RedirectToWritingStudio';
+import BrandMark from './components/BrandMark';
 import { HeartIcon } from './components/icons';
 
 const LabSectionRedirect: React.FC<{ section: string; tab?: string }> = ({ section, tab }) => {
@@ -151,16 +153,8 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 7h16M4 12h16M4 17h16" />
                   </svg>
                 </button>
-                <div className="min-w-0 lg:hidden flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-lg bg-teal-800 flex items-center justify-center flex-shrink-0">
-                    <span className="text-[11px] font-semibold tracking-wide text-white">DR</span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-semibold text-slate-900 truncate leading-tight">
-                      Digital Research
-                    </p>
-                    <p className="text-[11px] text-slate-500 truncate leading-tight">Manager</p>
-                  </div>
+                <div className="min-w-0 lg:hidden">
+                  <BrandMark to="/dashboard" variant="app" compact />
                 </div>
               </div>
 
@@ -460,6 +454,15 @@ const AppContent: React.FC = () => {
           </ProtectedRoute>
         }
       />
+      
+      <Route
+        path="/wellbeing"
+        element={
+          <ProtectedRoute>
+            <AppLayout><WellbeingPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/experiment-tracker"
         element={
@@ -645,14 +648,8 @@ const AppContent: React.FC = () => {
           </ProtectedRoute>
         } 
       />
-      <Route
-        path="/conference-news"
-        element={
-          <ProtectedRoute>
-            <AppLayout><ConferenceNewsPage /></AppLayout>
-          </ProtectedRoute>
-        }
-      />
+            {/* Conference News UI is empty; Events is the source of truth (RILOS alignment). */}
+      <Route path="/conference-news" element={<Navigate to="/events-opportunities" replace />} />
       <Route
         path="/notifications"
         element={

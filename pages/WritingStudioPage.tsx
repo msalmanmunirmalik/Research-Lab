@@ -568,15 +568,26 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state]);
 
-  // One-shot notices (?notice=slides)
+  // One-shot notices (?notice=slides|evidence)
   useEffect(() => {
     const notice = searchParams.get('notice');
-    if (notice !== 'slides') return;
-    setMessage(
-      'Slides are an export from a manuscript. Open a draft, then use Export → Slides.'
-    );
+    if (notice !== 'slides' && notice !== 'evidence') return;
+    if (notice === 'slides') {
+      setMessage(
+        'Slides are an export from a manuscript. Open a draft, then use Export → Slides.'
+      );
+    } else {
+      const evidenceTitle = searchParams.get('title');
+      setMessage(
+        evidenceTitle
+          ? `Continue from evidence “${evidenceTitle}”. Open or create a draft, then cite sources from your library.`
+          : 'Continue from an evidence pack. Open or create a draft, then cite sources from your library.'
+      );
+    }
     const next = new URLSearchParams(searchParams);
     next.delete('notice');
+    next.delete('evidenceId');
+    next.delete('title');
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
 

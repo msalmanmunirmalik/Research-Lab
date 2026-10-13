@@ -756,7 +756,7 @@ const PackReviewView: React.FC<Props> = ({
           )}
 
           <footer className="mt-14 pt-6 border-t border-slate-200 text-[11px] text-slate-400 flex flex-wrap justify-between gap-2 print:mt-8">
-            <span>Digital Research Manager · Evidence pack review</span>
+            <span>RILOS · Evidence pack review</span>
             <span>{artifacts.length} artifact{artifacts.length === 1 ? '' : 's'}</span>
           </footer>
         </div>

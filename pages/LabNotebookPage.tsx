@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import Card, { CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -22,6 +22,7 @@ import {
   smartParseNotebookText,
   notebookPayloadToFormInitial,
 } from '../utils/notebookImport';
+import { evidenceFromRecordUrl } from '../utils/evidenceChain';
 import { 
   BookOpenIcon,
   PlusIcon, 
@@ -140,6 +141,7 @@ interface SmartSuggestion {
 const LabNotebookPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [entries, setEntries] = useState<LabNotebookEntry[]>([]);
   
   // Simplified state management
@@ -168,6 +170,29 @@ const LabNotebookPage: React.FC = () => {
     setShowViewModal(true);
   }, []);
   const { focusedId } = useEntityDeepLink(entries, openHighlightedEntry);
+
+  // Evidence-chain handoff: /lab-notebook?create=experiment&experimentId=&protocolId=&title=
+  useEffect(() => {
+    const create = searchParams.get('create');
+    const experimentId = searchParams.get('experimentId');
+    const protocolId = searchParams.get('protocolId');
+    const title = searchParams.get('title');
+    if (create !== 'experiment' && !experimentId && !protocolId) return;
+
+    setFormInitialData({
+      title: title || '',
+      experimentId: experimentId || '',
+      protocolId: protocolId || '',
+    });
+    setShowExperimentForm(true);
+
+    const next = new URLSearchParams(searchParams);
+    next.delete('create');
+    next.delete('experimentId');
+    next.delete('protocolId');
+    next.delete('title');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
   
   // Summary generation state
   const [generatingSummary, setGeneratingSummary] = useState(false);
@@ -1476,6 +1501,21 @@ const LabNotebookPage: React.FC = () => {
                     experimentId: selectedEntry.experimentId || selectedEntry.experiment_id,
                   })}
                 />
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    to={evidenceFromRecordUrl({
+                      notebookEntryId: selectedEntry.id,
+                      experimentId:
+                        selectedEntry.experimentId || selectedEntry.experiment_id || null,
+                      protocolId: selectedEntry.protocolId || selectedEntry.protocol_id || null,
+                      title: selectedEntry.title,
+                      summary: selectedEntry.results || selectedEntry.content?.slice(0, 240) || '',
+                    })}
+                    className="inline-flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-950 hover:bg-emerald-100"
+                  >
+                    Create evidence pack →
+                  </Link>
+                </div>
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Entry Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

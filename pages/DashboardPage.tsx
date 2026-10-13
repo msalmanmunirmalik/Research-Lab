@@ -382,32 +382,32 @@ const DashboardPage: React.FC = () => {
 
   const quickActions = [
     {
-      icon: BeakerIcon,
-      title: 'Start experiment',
-      description: 'Track a new experiment',
-      well: 'from-sky-500 to-sky-700 shadow-sky-200/50',
-      link: '/experiment-tracker',
-    },
-    {
       icon: DocumentTextIcon,
       title: 'Add protocol',
-      description: 'Document a method',
+      description: 'Idea → method',
       well: 'from-emerald-500 to-teal-700 shadow-emerald-200/50',
       link: '/protocols',
     },
     {
+      icon: BeakerIcon,
+      title: 'Start experiment',
+      description: 'Method → run',
+      well: 'from-sky-500 to-sky-700 shadow-sky-200/50',
+      link: '/experiment-tracker',
+    },
+    {
       icon: BookOpenIcon,
       title: 'Open notebook',
-      description: 'Write a lab note',
+      description: 'Run → record',
       well: 'from-slate-600 to-slate-800 shadow-slate-200/50',
       link: '/lab-notebook',
     },
     {
-      icon: FireIcon,
-      title: 'Share failed experiment',
-      description: 'Build transparency credit',
-      well: 'from-orange-500 to-red-600 shadow-orange-200/40',
-      link: '/negative-results',
+      icon: PencilSquareIcon,
+      title: 'Writing studio',
+      description: 'Evidence → manuscript',
+      well: 'from-teal-600 to-cyan-800 shadow-teal-200/40',
+      link: '/writing-studio',
     },
   ];
 
@@ -418,7 +418,7 @@ const DashboardPage: React.FC = () => {
     <div className="mx-auto max-w-7xl space-y-5">
       <PageHeader
         title={`Welcome back, ${user?.first_name || 'Researcher'}`}
-        subtitle="Your notes, reminders, and research pulse — from notebook to lab workspace."
+        subtitle="Your RILOS pulse — notes, reminders, and the path from protocol to publication."
         accent="sky"
         icon={<BeakerIcon />}
         actions={

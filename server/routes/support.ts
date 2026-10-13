@@ -88,7 +88,7 @@ async function createStripeCheckoutSession(
   params.append('line_items[0][price_data][currency]', currency);
   params.append(
     'line_items[0][price_data][product_data][name]',
-    'Support Digital Research Manager'
+    'Support RILOS'
   );
   params.append(
     'line_items[0][price_data][product_data][description]',

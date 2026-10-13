@@ -1,5 +1,7 @@
 # Local development (current stack)
 
+Product branding: **RILOS** — see `docs/RILOS_ALIGNMENT_PLAN.md`.
+
 ## Canonical ports
 
 | Service | Port |
@@ -29,7 +31,7 @@ Health check: `pnpm run wait:api` or `curl http://127.0.0.1:5002/api/health`
 
 - `VITE_API_URL=/api` — same-origin via Vite proxy (see `.env`)
 - `PORT=5002` — Express
-- `MYSQL_*` — XAMPP MySQL (`researchlab`)
+- `MYSQL_*` — XAMPP MySQL. This machine has used database name `researchlab`. `env.example` uses `digital_research_manager`. Set `MYSQL_DB` explicitly to the database the API already uses before migrating. Backup and restore: `docs/BACKUP_AND_RESTORE.md`. Do not run `pnpm db:reset`.
 
 ## If login shows “API not reachable”
 

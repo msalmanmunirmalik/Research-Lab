@@ -604,7 +604,7 @@ const AIResearchAgentPage: React.FC<{ embedded?: boolean }> = ({ embedded = fals
       ) : (
         <PageHeader
           title="Research agent"
-          subtitle="A workbench for literature, writing, experiment design, analysis, and funding — grounded in how you already work in Digital Research Manager."
+          subtitle="A workbench for literature, writing, experiment design, analysis, and funding — grounded in how you already work in RILOS."
           accent="sky"
           icon={<SparklesIcon />}
           actions={

@@ -18,7 +18,7 @@ const fallbackPolicy: Policy = {
   version: 'draft',
   effective_date: new Date().toISOString(),
   language: 'en',
-  content: `By creating an account or using Digital Research Manager, you agree to these Terms and our Privacy Policy.
+  content: `By creating an account or using RILOS (Research Intelligence & Operating System), you agree to these Terms and our Privacy Policy.
 
 Use the platform only for lawful research and collaboration. Keep your credentials confidential.
 

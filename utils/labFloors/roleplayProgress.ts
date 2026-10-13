@@ -1,27 +1,58 @@
 import type { RoleplayModule, RoleplayRunProgress } from './roleplayTypes';
 
-const STORAGE_KEY = 'drm_lab_floors_roleplay_v1';
+const STORAGE_KEY = 'rilos_lab_floors_roleplay_v1';
+const LEGACY_STORAGE_KEY = 'drm_lab_floors_roleplay_v1';
 
-export function loadRoleplayRun(moduleId: string): RoleplayRunProgress | null {
+function queueSync(roleplay: Record<string, RoleplayRunProgress>) {
+  void import('./sync').then((m) => m.scheduleLabFloorsPush(undefined, roleplay));
+}
+
+function migrateLegacy(): void {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const all = JSON.parse(raw) as Record<string, RoleplayRunProgress>;
-    return all[moduleId] || null;
+    if (localStorage.getItem(STORAGE_KEY)) return;
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy) localStorage.setItem(STORAGE_KEY, legacy);
   } catch {
-    return null;
+    /* ignore */
   }
 }
 
-export function saveRoleplayRun(run: RoleplayRunProgress): void {
+function readAll(): Record<string, RoleplayRunProgress> {
+  migrateLegacy();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    const all = raw ? (JSON.parse(raw) as Record<string, RoleplayRunProgress>) : {};
-    all[run.moduleId] = { ...run, updatedAt: new Date().toISOString() };
+    if (!raw) return {};
+    return JSON.parse(raw) as Record<string, RoleplayRunProgress>;
+  } catch {
+    return {};
+  }
+}
+
+function writeAll(all: Record<string, RoleplayRunProgress>, sync = true): void {
+  try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
   } catch {
     /* private mode / quota */
   }
+  if (sync) queueSync(all);
+}
+
+export function loadAllRoleplayRuns(): Record<string, RoleplayRunProgress> {
+  return readAll();
+}
+
+export function replaceAllRoleplayRuns(all: Record<string, RoleplayRunProgress>): void {
+  writeAll(all, false);
+}
+
+export function loadRoleplayRun(moduleId: string): RoleplayRunProgress | null {
+  return readAll()[moduleId] || null;
+}
+
+export function saveRoleplayRun(run: RoleplayRunProgress): void {
+  const all = readAll();
+  all[run.moduleId] = { ...run, updatedAt: new Date().toISOString() };
+  writeAll(all);
 }
 
 export function startRoleplayRun(module: RoleplayModule): RoleplayRunProgress {

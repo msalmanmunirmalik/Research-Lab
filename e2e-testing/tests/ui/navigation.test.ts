@@ -9,18 +9,18 @@ describe('UI Navigation Tests', () => {
   test('Should navigate to all main pages', async () => {
     const pages = [
       { name: 'Dashboard', path: '/dashboard' },
-      { name: 'Personal NoteBook', path: '/lab-notebook' },
-      { name: 'Protocol library', path: '/protocols' },
-      { name: 'My data & results', path: '/data-results' },
+      { name: 'Notebook', path: '/lab-notebook' },
+      { name: 'Protocols', path: '/protocols' },
+      { name: 'Evidence', path: '/data-results' },
       { name: 'Lab workspace', path: '/lab-workspace' },
+      { name: 'Experiments', path: '/experiment-tracker' },
       { name: 'Lab Floors', path: '/lab-floors' },
-      { name: 'Research Tools', path: '/research-tools' },
+      { name: 'Trainings', path: '/tools-trainings' },
+      { name: 'Research tools', path: '/research-tools' },
       { name: 'Marketplace', path: '/marketplace' },
-      { name: 'Journals Directory', path: '/journals-directory' },
       { name: 'Writing studio', path: '/writing-studio' },
-      // Note: /writing-studio/compose/* and /writing-studio/m/* are immersive (no app SideNav).
-      // Desk/list above keeps AppLayout chrome.
-      { name: 'Statistical Analysis Tools', path: '/statistical-analysis-tools' },
+      { name: 'Analysis', path: '/data-analysis' },
+      { name: 'Grants', path: '/grants-fundings' },
       { name: 'Profile', path: '/profile' },
       { name: 'Settings', path: '/settings' },
     ];
@@ -52,15 +52,18 @@ describe('UI Navigation Tests', () => {
     
     // Test navigation links
     const navLinks = [
+      '[data-testid="nav-dashboard"]',
       '[data-testid="nav-lab-notebook"]',
       '[data-testid="nav-protocols"]',
       '[data-testid="nav-data-results"]',
+      '[data-testid="nav-experiment-tracker"]',
+      '[data-testid="nav-lab-floors"]',
       '[data-testid="nav-research-tools"]',
-      '[data-testid="nav-supplier-marketplace"]',
-      '[data-testid="nav-journals-directory"]',
-      '[data-testid="nav-ai-presentations"]',
-      '[data-testid="nav-statistical-analysis-tools"]',
-      '[data-testid="nav-profile"]',
+      '[data-testid="nav-tools-trainings"]',
+      '[data-testid="nav-marketplace"]',
+      '[data-testid="nav-writing-studio"]',
+      '[data-testid="nav-data-analysis"]',
+      '[data-testid="nav-grants-fundings"]',
       '[data-testid="nav-settings"]',
     ];
 

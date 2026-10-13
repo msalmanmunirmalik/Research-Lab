@@ -6,14 +6,30 @@ import type {
   SkillVerdict,
 } from './types';
 
-const STORAGE_KEY = 'drm_lab_floors_progress_v1';
+const STORAGE_KEY = 'rilos_lab_floors_progress_v1';
+const LEGACY_STORAGE_KEY = 'drm_lab_floors_progress_v1';
+
+function queueSync(floors: LabFloorsProgress) {
+  void import('./sync').then((m) => m.scheduleLabFloorsPush(floors));
+}
 
 const DEFAULT: LabFloorsProgress = {
   role: 'phd',
   completions: {},
 };
 
+function migrateLegacy(): void {
+  try {
+    if (localStorage.getItem(STORAGE_KEY)) return;
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy) localStorage.setItem(STORAGE_KEY, legacy);
+  } catch {
+    /* ignore */
+  }
+}
+
 function readRaw(): LabFloorsProgress {
+  migrateLegacy();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...DEFAULT, completions: {} };
@@ -27,16 +43,22 @@ function readRaw(): LabFloorsProgress {
   }
 }
 
-function writeRaw(progress: LabFloorsProgress) {
+function writeRaw(progress: LabFloorsProgress, sync = true) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
   } catch {
     /* private mode / quota */
   }
+  if (sync) queueSync(progress);
 }
 
 export function loadLabFloorsProgress(): LabFloorsProgress {
   return readRaw();
+}
+
+/** Replace local cache without triggering another server push (used during hydrate). */
+export function replaceLabFloorsProgress(progress: LabFloorsProgress): void {
+  writeRaw(progress, false);
 }
 
 export function setLabFloorsRole(role: RoleId): LabFloorsProgress {

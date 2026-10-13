@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../components/PageHeader';
 import FloorsHub from '../components/lab-floors/FloorsHub';
@@ -18,6 +18,7 @@ import {
   isRoleplayComplete,
   loadRoleplayRun,
 } from '../utils/labFloors/roleplayProgress';
+import { hydrateLabFloorsFromServer } from '../utils/labFloors/sync';
 import type { LabFloorsProgress, RoleId } from '../utils/labFloors/types';
 import '../styles/labFloors.css';
 
@@ -28,6 +29,21 @@ const LabFloorsPage: React.FC = () => {
   const [activeFloorId, setActiveFloorId] = useState<string | null>(null);
   const [activeRoleplayId, setActiveRoleplayId] = useState<string | null>(null);
   const [roleplayStampTick, setRoleplayStampTick] = useState(0);
+  const [syncNote, setSyncNote] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const hydrated = await hydrateLabFloorsFromServer();
+      if (cancelled || !hydrated) return;
+      setProgress(hydrated.floors);
+      setRoleplayStampTick((n) => n + 1);
+      setSyncNote('Progress synced to your account');
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const activeFloor = activeFloorId ? getLabFloor(activeFloorId) : null;
   const activeRoleplay = activeRoleplayId ? getRoleplayModule(activeRoleplayId) : null;
@@ -51,10 +67,15 @@ const LabFloorsPage: React.FC = () => {
     <div className="lf-page space-y-5">
       <PageHeader
         title="Lab Floors"
-        subtitle="Practice starting in research — AI roleplay for a full PhD starter year, plus short choice floors."
+        subtitle="Practice starting in research — AI roleplay and short choice floors. Progress saves to your RILOS account."
         accent="teal"
         icon={<AcademicCapIcon />}
       />
+      {syncNote ? (
+        <p className="text-[12px] text-teal-800/80 -mt-2" role="status">
+          {syncNote}
+        </p>
+      ) : null}
 
       {activeRoleplay ? (
         <RoleplayStudio

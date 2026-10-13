@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import DataResultForm, { DataResultFormValues } from '../components/DataResultForm';
@@ -264,6 +264,7 @@ function CompletenessRing({ score, size = 40 }: { score: number; size?: number }
 
 const DataResultsPage: React.FC = () => {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeView, setActiveView] = useState<WorkspaceView>('library');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filterType, setFilterType] = useState<string>('all');
@@ -285,6 +286,28 @@ const DataResultsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusBusyId, setStatusBusyId] = useState<string | null>(null);
+
+  // Evidence-chain handoff: /data-results?create=1&experimentId=&protocolId=&notebookEntryId=&title=
+  useEffect(() => {
+    const create = searchParams.get('create');
+    if (create !== '1' && create !== 'true') return;
+
+    setAddFormInitial({
+      title: searchParams.get('title') || '',
+      summary: searchParams.get('summary') || '',
+      protocolId: searchParams.get('protocolId') || '',
+      experimentId: searchParams.get('experimentId') || '',
+      notebookEntryId: searchParams.get('notebookEntryId') || '',
+      type: 'experiment',
+    } as Partial<DataResultFormValues>);
+    setShowAddModal(true);
+
+    const next = new URLSearchParams(searchParams);
+    ['create', 'title', 'summary', 'protocolId', 'experimentId', 'notebookEntryId'].forEach((k) =>
+      next.delete(k)
+    );
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const normalizeRow = useCallback((r: any, fallbackAuthor = ''): ResearchDataEntry => {
     const filesRaw = Array.isArray(r.files) ? r.files : [];

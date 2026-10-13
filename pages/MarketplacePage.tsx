@@ -600,7 +600,7 @@ const MarketplacePage: React.FC = () => {
                   <a
                     href={mailto(
                       supplier.contact_email,
-                      `Inquiry via Digital Research Manager - ${supplier.company_name}`
+                      `Inquiry via RILOS - ${supplier.company_name}`
                     )}
                     className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800"
                   >
@@ -693,7 +693,7 @@ const MarketplacePage: React.FC = () => {
                   <a
                     href={mailto(
                       provider.contact_email,
-                      `Inquiry via Digital Research Manager - ${provider.display_name}`
+                      `Inquiry via RILOS - ${provider.display_name}`
                     )}
                     className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800"
                   >
@@ -782,7 +782,7 @@ const MarketplacePage: React.FC = () => {
                   <a
                     href={mailto(
                       tender.contact_email,
-                      `Tender response via Digital Research Manager - ${tender.title}`
+                      `Tender response via RILOS - ${tender.title}`
                     )}
                     className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800"
                   >
@@ -862,7 +862,7 @@ const MarketplacePage: React.FC = () => {
               <a
                 href={mailto(
                   detailSupplier.supplier.contact_email,
-                  `Inquiry via Digital Research Manager - ${detailSupplier.supplier.company_name}`
+                  `Inquiry via RILOS - ${detailSupplier.supplier.company_name}`
                 )}
                 className="inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800"
               >
@@ -950,7 +950,7 @@ const MarketplacePage: React.FC = () => {
               <a
                 href={mailto(
                   detailProvider.provider.contact_email,
-                  `Inquiry via Digital Research Manager - ${detailProvider.provider.display_name}`
+                  `Inquiry via RILOS - ${detailProvider.provider.display_name}`
                 )}
                 className="inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800"
               >
@@ -1024,7 +1024,7 @@ const MarketplacePage: React.FC = () => {
                 <a
                   href={mailto(
                     detailTender.contact_email,
-                    `Tender response via Digital Research Manager - ${detailTender.title}`
+                    `Tender response via RILOS - ${detailTender.title}`
                   )}
                   className="inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800"
                 >

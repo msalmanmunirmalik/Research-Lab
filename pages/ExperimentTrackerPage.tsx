@@ -83,6 +83,7 @@ const ExperimentTrackerPage = ({ embedded = false }: ExperimentTrackerPageProps)
   const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<ExperimentTemplate | null>(null);
   const [linkedProtocolId, setLinkedProtocolId] = useState<string>('');
+  const [methodNote, setMethodNote] = useState('');
   const [prefillTitle, setPrefillTitle] = useState<string>('');
 
   const openHighlightedExperiment = useCallback((experiment: Experiment) => {
@@ -103,14 +104,23 @@ const ExperimentTrackerPage = ({ embedded = false }: ExperimentTrackerPageProps)
   useEffect(() => {
     const protocolId = searchParams.get('protocolId');
     const title = searchParams.get('title');
-    if (protocolId || title) {
+    const methodDoi = searchParams.get('methodDoi');
+    const methodUrl = searchParams.get('methodUrl');
+    if (protocolId || title || methodDoi) {
       if (protocolId) setLinkedProtocolId(protocolId);
       if (title) setPrefillTitle(title);
+      if (methodDoi || methodUrl) {
+        setMethodNote(
+          `SpringerProtocols metadata only. DOI: ${methodDoi || 'none'}. ${methodUrl || ''} The full protocol is not stored in RILOS.`
+        );
+      }
       setShowNewExperimentModal(true);
       setActiveView('experiments');
       const next = new URLSearchParams(searchParams);
       next.delete('protocolId');
       next.delete('title');
+      next.delete('methodDoi');
+      next.delete('methodUrl');
       setSearchParams(next, { replace: true });
     }
   }, [searchParams, setSearchParams]);
@@ -123,6 +133,7 @@ const ExperimentTrackerPage = ({ embedded = false }: ExperimentTrackerPageProps)
       data.problems ? `Problems: ${data.problems}` : '',
       data.troubleshooting ? `Troubleshooting: ${data.troubleshooting}` : '',
       data.resultsLink || data.notes || '',
+      methodNote,
     ].filter(Boolean);
 
     return {

@@ -10,6 +10,7 @@ import {
 import { BeakerIcon, ChartBarIcon, CheckCircleIcon, XMarkIcon } from './icons';
 import { useEntityOptions } from '../hooks/useEntityOptions';
 import EntityLinkSelect from './EntityLinkSelect';
+import { evidenceFromRecordUrl, experimentFromProtocolUrl } from '../utils/evidenceChain';
 
 interface ExperimentFormData {
   title: string;
@@ -286,21 +287,34 @@ const ExperimentForm: React.FC<ExperimentFormProps> = ({
             <Button
               type="button"
               variant="outline"
-              onClick={() => window.open('/data-results', '_blank')}
+              onClick={() =>
+                window.open(
+                  evidenceFromRecordUrl({
+                    title: formData.title,
+                    protocolId: formData.protocolId,
+                    experimentId: formData.experimentId,
+                    summary: formData.resultsLink || formData.description || '',
+                  }),
+                  '_blank'
+                )
+              }
               className="border-slate-300 text-[13px] text-slate-700"
             >
               <ChartBarIcon className="mr-1.5 h-4 w-4" />
-              Attach data later
+              Create evidence pack
             </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                const params = new URLSearchParams();
-                if (formData.title) params.set('title', formData.title);
-                if (formData.protocolId) params.set('protocolId', formData.protocolId);
-                window.open(`/experiment-tracker?${params.toString()}`, '_blank');
-              }}
+              onClick={() =>
+                window.open(
+                  experimentFromProtocolUrl({
+                    title: formData.title,
+                    protocolId: formData.protocolId,
+                  }),
+                  '_blank'
+                )
+              }
               className="border-slate-300 text-[13px] text-slate-700"
             >
               <BeakerIcon className="mr-1.5 h-4 w-4" />

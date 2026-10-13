@@ -1,9 +1,11 @@
 /**
  * Lab Floors AI roleplay — character replies for PhD Starter Year etc.
  * Uses the same platform/user AI access path as other chat features.
+ * Also persists floors + roleplay progress per user.
  */
 
 import express, { type Router } from 'express';
+import pool from '../../database/config.js';
 import { getApiForTask } from './apiTaskAssignments.js';
 import { getApiKeyWithFallback } from './aiProviderKeys.js';
 import {
@@ -15,6 +17,87 @@ import { AIProviderFactory } from '../services/AIProviderFactory.js';
 import type { ChatMessage } from '../services/AIProvider.js';
 
 const router: Router = express.Router();
+
+const EMPTY_FLOORS = { role: 'phd', completions: {} };
+const EMPTY_ROLEPLAY = {};
+
+function parseJsonField(value: unknown, fallback: unknown) {
+  if (value == null) return fallback;
+  if (typeof value === 'object') return value;
+  try {
+    return JSON.parse(String(value));
+  } catch {
+    return fallback;
+  }
+}
+
+/** GET /api/lab-floors/progress */
+router.get('/progress', async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const result = await pool.query(
+      `SELECT floors_json, roleplay_json, updated_at FROM lab_floors_progress WHERE user_id = $1`,
+      [userId]
+    );
+
+    if (!result.rows.length) {
+      return res.json({
+        floors: EMPTY_FLOORS,
+        roleplay: EMPTY_ROLEPLAY,
+        updatedAt: null,
+      });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      floors: parseJsonField(row.floors_json, EMPTY_FLOORS),
+      roleplay: parseJsonField(row.roleplay_json, EMPTY_ROLEPLAY),
+      updatedAt: row.updated_at || null,
+    });
+  } catch (error: any) {
+    // Table may not exist until migrate — fail soft for clients with local cache
+    if (error?.code === 'ER_NO_SUCH_TABLE') {
+      return res.json({ floors: EMPTY_FLOORS, roleplay: EMPTY_ROLEPLAY, updatedAt: null });
+    }
+    console.error('lab-floors progress get:', error);
+    res.status(500).json({ error: 'Failed to load Lab Floors progress' });
+  }
+});
+
+/** PUT /api/lab-floors/progress */
+router.put('/progress', async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const floors = req.body?.floors && typeof req.body.floors === 'object' ? req.body.floors : EMPTY_FLOORS;
+    const roleplay =
+      req.body?.roleplay && typeof req.body.roleplay === 'object' ? req.body.roleplay : EMPTY_ROLEPLAY;
+
+    await pool.query(
+      `INSERT INTO lab_floors_progress (user_id, floors_json, roleplay_json)
+       VALUES ($1, $2, $3)
+       ON DUPLICATE KEY UPDATE
+         floors_json = $2,
+         roleplay_json = $3,
+         updated_at = CURRENT_TIMESTAMP`,
+      [userId, JSON.stringify(floors), JSON.stringify(roleplay)]
+    );
+
+    res.json({ success: true, floors, roleplay });
+  } catch (error: any) {
+    if (error?.code === 'ER_NO_SUCH_TABLE') {
+      return res.status(503).json({
+        error: 'Lab Floors progress table missing. Run pnpm run db:migrate.',
+      });
+    }
+    console.error('lab-floors progress put:', error);
+    res.status(500).json({ error: 'Failed to save Lab Floors progress' });
+  }
+});
+
 
 type HistoryItem = { role: 'user' | 'character' | 'narrator'; content: string; characterId?: string };
 
