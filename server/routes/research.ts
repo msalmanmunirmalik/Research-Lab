@@ -12,6 +12,7 @@ import { createRequire } from 'module';
 import { authenticateToken } from '../middleware/auth.js';
 import pool from '../../database/config.js';
 import { ScholarlyService } from '../services/scholarly/ScholarlyService.js';
+import { ResearchIntelligenceService } from '../services/scholarly/researchIntelligence.js';
 import { PaperRepository } from '../services/scholarly/PaperRepository.js';
 import { PaperRagService } from '../services/scholarly/PaperRagService.js';
 import { CitationSupportService } from '../services/scholarly/CitationSupportService.js';
@@ -78,6 +79,43 @@ router.get('/search', async (req: Request, res: Response) => {
   } catch (e: any) {
     console.error('research search error:', e);
     res.status(500).json({ error: e.message || 'Search failed' });
+  }
+});
+
+/** GET /api/research/intelligence?q= — OpenAlex brief plus matching DRM grants */
+router.get('/intelligence', async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    const q = String(req.query.q || '').trim();
+    if (q.length < 2) return res.status(400).json({ error: 'q is required' });
+    const brief = await ResearchIntelligenceService.brief(q);
+    await audit(req.user.id, 'intelligence_brief', {
+      q,
+      available: brief.available,
+      topicId: brief.provenance.topicId,
+    });
+    res.json({ success: true, brief });
+  } catch (e: any) {
+    console.error('research intelligence error:', e instanceof Error ? e.message : 'failed');
+    res.json({
+      success: true,
+      brief: {
+        query: String(req.query.q || ''),
+        available: false,
+        notice: 'OpenAlex did not return a brief for this topic. Literature search and the rest of DRM still work.',
+        provenance: { source: 'openalex', retrievedAt: new Date().toISOString(), topicId: null },
+        topic: null,
+        relatedTopics: [],
+        trend: [],
+        researchers: [],
+        institutions: [],
+        funders: [],
+        grants: [],
+        datasets: [],
+        clinical: null,
+        recent: [],
+      },
+    });
   }
 });
 

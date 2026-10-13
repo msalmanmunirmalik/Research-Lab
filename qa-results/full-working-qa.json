@@ -1,0 +1,519 @@
+{
+  "startedAt": "2026-08-04T20:43:47.777Z",
+  "api": [
+    {
+      "name": "GET /api/health",
+      "ok": true,
+      "status": 200,
+      "database": "MySQL"
+    },
+    {
+      "name": "POST /api/auth/login invalid",
+      "ok": true,
+      "status": 401
+    },
+    {
+      "name": "POST /api/auth/login demo",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "GET /api/auth/profile",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "GET /api/labs",
+      "ok": true,
+      "status": 200,
+      "preview": "{\"labs\":[{\"id\":\"e59b0192-31f4-4c6c-86f8-12a6ae0427f2\",\"name\":\"Personal lab\",\"institution\":\"Independent\",\"department\":\"Immunology\",\"created_at\":\"2026-08-03T22:22:05.000Z\",\"description\":\"Immune signalin"
+    },
+    {
+      "name": "GET /api/labs/mine",
+      "ok": true,
+      "status": 200,
+      "preview": "{\"labs\":[{\"id\":\"e59b0192-31f4-4c6c-86f8-12a6ae0427f2\",\"name\":\"Personal lab\",\"institution\":\"Independent\",\"department\":\"Immunology\",\"created_at\":\"2026-08-03T22:22:05.000Z\",\"description\":\"Immune signalin"
+    },
+    {
+      "name": "GET /api/settings",
+      "ok": true,
+      "status": 200,
+      "preview": "{\"profile\":{\"id\":\"demo-user-0001\",\"email\":\"researcher@researchlab.com\",\"first_name\":\"Fatima\",\"last_name\":\"Martinez\",\"username\":\"researcher\",\"role\":\"researcher\",\"status\":\"active\",\"phone\":null,\"departme"
+    },
+    {
+      "name": "GET /api/recommendations/protocols",
+      "ok": true,
+      "status": 200,
+      "preview": "{\"recommendations\":[],\"count\":0,\"itemType\":\"protocol\"}"
+    },
+    {
+      "name": "GET /api/grants",
+      "ok": true,
+      "status": 200,
+      "preview": "{\"success\":true,\"grants\":[{\"id\":\"d9e3ef16-fd7e-4aeb-a720-a46e110f64de\",\"created_by\":null,\"source_id\":null,\"external_id\":\"RFA-RM-27-002\",\"title\":\"NIH Director's New Innovator Award (DP2 Clinical Trial "
+    },
+    {
+      "name": "GET /api/notifications",
+      "ok": true,
+      "status": 200,
+      "preview": "{\"notifications\":[],\"unreadCount\":0}"
+    },
+    {
+      "name": "GET /api/marketplace",
+      "ok": true,
+      "status": 200,
+      "preview": "{\"ok\":true,\"endpoints\":{\"suppliers\":\"/api/marketplace/suppliers\",\"serviceProviders\":\"/api/marketplace/service-providers\"}}"
+    },
+    {
+      "name": "GET /api/marketplace/suppliers",
+      "ok": true,
+      "status": 200,
+      "preview": "{\"suppliers\":[]}"
+    },
+    {
+      "name": "GET /api/negative-results/my/submissions",
+      "ok": true,
+      "status": 200,
+      "preview": "[]"
+    }
+  ],
+  "crud": [
+    {
+      "name": "notebook LIST",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "notebook CREATE",
+      "ok": true,
+      "status": 201,
+      "id": "7294823e-e808-43d4-b0ac-e7efa93e0ad5",
+      "preview": "{\"message\":\"Personal NoteBook entry created successfully\",\"entry\":{\"id\":\"7294823e-e808-43d4-b0ac-e7efa93e0ad5\",\"title\":\"QA entry 1785876227843\",\"content\":\"Working QA CRUD check\",\"entry_type\":\"idea\",\"s"
+    },
+    {
+      "name": "notebook READ",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "notebook UPDATE",
+      "ok": true,
+      "status": 200,
+      "preview": "{\"message\":\"Personal NoteBook entry updated successfully\",\"entry\":{\"id\":\"7294823e-e808-43d4-b0ac-e7efa93e0ad5\",\"title\":\"QA entry 1785876227843 updated\",\"content\":\"Updated by working QA\",\"entry_type\":\""
+    },
+    {
+      "name": "notebook DELETE",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "protocols LIST",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "protocols CREATE",
+      "ok": true,
+      "status": 201,
+      "id": "120ed2ae-70ee-43b9-9c0f-c56cd35620c5",
+      "preview": "{\"message\":\"Protocol created successfully\",\"protocol\":{\"id\":\"120ed2ae-70ee-43b9-9c0f-c56cd35620c5\",\"title\":\"QA Protocol 1785876227843\",\"description\":\"Working QA protocol\",\"category\":\"molecular_biology"
+    },
+    {
+      "name": "protocols READ",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "protocols UPDATE",
+      "ok": true,
+      "status": 200,
+      "preview": "{\"message\":\"Protocol updated successfully\",\"protocol\":{\"id\":\"120ed2ae-70ee-43b9-9c0f-c56cd35620c5\",\"title\":\"QA Protocol 1785876227843 updated\",\"description\":\"Updated\",\"category\":\"molecular_biology\",\"d"
+    },
+    {
+      "name": "protocols DELETE",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "experiments LIST",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "experiments CREATE",
+      "ok": true,
+      "status": 201,
+      "id": "e71f53d1-d060-42b0-b1e5-948ba569db7a",
+      "preview": "{\"id\":\"e71f53d1-d060-42b0-b1e5-948ba569db7a\",\"project_id\":null,\"name\":\"QA Experiment 1785876227843\",\"goal\":null,\"created_at\":\"2026-08-04T20:43:47.000Z\",\"title\":\"QA Experiment 1785876227843\",\"descripti"
+    },
+    {
+      "name": "experiments READ",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "experiments UPDATE",
+      "ok": true,
+      "status": 200,
+      "preview": "{\"id\":\"e71f53d1-d060-42b0-b1e5-948ba569db7a\",\"project_id\":null,\"name\":\"QA Experiment 1785876227843\",\"goal\":null,\"created_at\":\"2026-08-04T20:43:47.000Z\",\"title\":\"QA Experiment 1785876227843 updated\",\"d"
+    },
+    {
+      "name": "experiments DELETE",
+      "ok": true,
+      "status": 200
+    }
+  ],
+  "publicRoutes": [
+    {
+      "name": "/",
+      "ok": true,
+      "status": 200,
+      "errors": [],
+      "bodyLen": 2111
+    },
+    {
+      "name": "/login",
+      "ok": true,
+      "status": 200,
+      "errors": [],
+      "bodyLen": 271
+    },
+    {
+      "name": "/register",
+      "ok": true,
+      "status": 200,
+      "errors": [],
+      "bodyLen": 531
+    },
+    {
+      "name": "/privacy",
+      "ok": true,
+      "status": 200,
+      "errors": [],
+      "bodyLen": 2686
+    },
+    {
+      "name": "/cookies",
+      "ok": true,
+      "status": 200,
+      "errors": [],
+      "bodyLen": 1345
+    },
+    {
+      "name": "/cookie-preferences",
+      "ok": true,
+      "status": 200,
+      "errors": [
+        "Failed to fetch"
+      ],
+      "bodyLen": 421
+    },
+    {
+      "name": "/privacy-rights",
+      "ok": true,
+      "status": 200,
+      "errors": [],
+      "bodyLen": 406
+    },
+    {
+      "name": "/terms",
+      "ok": true,
+      "status": 200,
+      "errors": [],
+      "bodyLen": 1257
+    },
+    {
+      "name": "/support",
+      "ok": true,
+      "status": 200,
+      "errors": [],
+      "bodyLen": 917
+    }
+  ],
+  "protectedRoutes": [
+    {
+      "name": "/dashboard",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/dashboard",
+      "errors": [],
+      "bodyLen": 1093
+    },
+    {
+      "name": "/lab-notebook",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/lab-notebook",
+      "errors": [],
+      "bodyLen": 1221
+    },
+    {
+      "name": "/lab-workspace",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/lab-workspace",
+      "errors": [],
+      "bodyLen": 674
+    },
+    {
+      "name": "/experiment-tracker",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/experiment-tracker",
+      "errors": [],
+      "bodyLen": 530
+    },
+    {
+      "name": "/protocols",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/protocols",
+      "errors": [],
+      "bodyLen": 448
+    },
+    {
+      "name": "/data-results",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/data-results",
+      "errors": [],
+      "bodyLen": 472
+    },
+    {
+      "name": "/research-databank",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/research-databank",
+      "errors": [],
+      "bodyLen": 896
+    },
+    {
+      "name": "/marketplace",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/marketplace",
+      "errors": [],
+      "bodyLen": 486
+    },
+    {
+      "name": "/marketplace/supplier",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/marketplace/supplier",
+      "errors": [],
+      "bodyLen": 726
+    },
+    {
+      "name": "/marketplace/provider",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/marketplace/provider",
+      "errors": [],
+      "bodyLen": 785
+    },
+    {
+      "name": "/negative-results",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/negative-results",
+      "errors": [],
+      "bodyLen": 555
+    },
+    {
+      "name": "/project-management",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/project-management",
+      "errors": [],
+      "bodyLen": 512
+    },
+    {
+      "name": "/pi-review-dashboard",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/pi-review-dashboard",
+      "errors": [],
+      "bodyLen": 432
+    },
+    {
+      "name": "/data-analysis",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/data-analysis",
+      "errors": [],
+      "bodyLen": 1218
+    },
+    {
+      "name": "/data-analytics",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/data-analytics",
+      "errors": [],
+      "bodyLen": 1218
+    },
+    {
+      "name": "/collaboration-networking",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/collaboration-networking",
+      "errors": [],
+      "bodyLen": 2827
+    },
+    {
+      "name": "/events-opportunities",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/events-opportunities",
+      "errors": [],
+      "bodyLen": 660
+    },
+    {
+      "name": "/grants-fundings",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/grants-fundings",
+      "errors": [],
+      "bodyLen": 9209
+    },
+    {
+      "name": "/profile",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/profile",
+      "errors": [],
+      "bodyLen": 721
+    },
+    {
+      "name": "/settings",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/settings",
+      "errors": [],
+      "bodyLen": 492
+    },
+    {
+      "name": "/conference-news",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/conference-news",
+      "errors": [],
+      "bodyLen": 579
+    },
+    {
+      "name": "/notifications",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/notifications",
+      "errors": [],
+      "bodyLen": 329
+    },
+    {
+      "name": "/help-forum",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/help-forum",
+      "errors": [],
+      "bodyLen": 529
+    },
+    {
+      "name": "/current-trends",
+      "ok": true,
+      "status": 200,
+      "url": "http://127.0.0.1:5173/current-trends",
+      "errors": [],
+      "bodyLen": 986
+    }
+  ],
+  "redirects": [
+    {
+      "name": "/home → /dashboard",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/dashboard"
+    },
+    {
+      "name": "/professional-protocols → /protocols",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/protocols"
+    },
+    {
+      "name": "/research-tools → /dashboard",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/dashboard"
+    },
+    {
+      "name": "/research-assistant → /dashboard",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/dashboard"
+    },
+    {
+      "name": "/my-portfolio → /profile",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/profile"
+    },
+    {
+      "name": "/scientist-passport → /profile",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/profile"
+    },
+    {
+      "name": "/supplier-marketplace → /marketplace",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/marketplace?tab=suppliers"
+    }
+  ],
+  "forms": [
+    {
+      "name": "login form → dashboard",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/dashboard"
+    },
+    {
+      "name": "sidebar link: Personal notebook",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/lab-notebook"
+    },
+    {
+      "name": "sidebar link: Protocol library",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/protocols"
+    },
+    {
+      "name": "sidebar link: Lab workspace",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/lab-workspace"
+    },
+    {
+      "name": "sidebar link: Settings",
+      "ok": true,
+      "url": "http://127.0.0.1:5173/settings"
+    },
+    {
+      "name": "register form fields",
+      "ok": true,
+      "hasEmail": true,
+      "hasPassword": true
+    },
+    {
+      "name": "notebook entry UI",
+      "ok": true,
+      "newEntry": true,
+      "search": true
+    },
+    {
+      "name": "protocols write button",
+      "ok": true
+    },
+    {
+      "name": "experiments new button",
+      "ok": true
+    }
+  ],
+  "summary": {
+    "total": 77,
+    "passed": 77,
+    "failed": 0,
+    "verdict": "PASS",
+    "failedItems": []
+  },
+  "finishedAt": "2026-08-04T20:44:33.200Z"
+}

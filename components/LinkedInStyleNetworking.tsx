@@ -198,6 +198,7 @@ const LinkedInStyleNetworking: React.FC = () => {
   );
   const [actionBusyId, setActionBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [showCollaboratorMatch, setShowCollaboratorMatch] = useState(false);
 
   const myInstitution = (user as any)?.current_institution || (user as any)?.institution || '';
 
@@ -1078,12 +1079,39 @@ const LinkedInStyleNetworking: React.FC = () => {
         }}
       />
 
-      <ProjectCollaboratorMatchPanel
-        onSelectUser={(itemId) => {
-          const el = document.querySelector(`[data-user-id="${itemId}"]`);
-          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }}
-      />
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setShowCollaboratorMatch((v) => !v)}
+          className={`inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium rounded-md border transition-colors ${
+            showCollaboratorMatch
+              ? 'text-white bg-sky-700 border-sky-700 hover:bg-sky-800'
+              : 'text-sky-900 bg-white border-sky-200 hover:bg-sky-50'
+          }`}
+        >
+          <UsersIcon className="w-4 h-4" />
+          Match collaborators
+        </button>
+        <Link
+          to="/lab-workspace"
+          className="inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium text-slate-800 bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors"
+        >
+          <GlobeAltIcon className="w-4 h-4" />
+          Your labs
+          {myLabs.length > 0 ? (
+            <span className="text-[11px] font-semibold text-slate-500">({myLabs.length})</span>
+          ) : null}
+        </Link>
+      </div>
+
+      {showCollaboratorMatch ? (
+        <ProjectCollaboratorMatchPanel
+          onSelectUser={(itemId) => {
+            const el = document.querySelector(`[data-user-id="${itemId}"]`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
+        />
+      ) : null}
 
       {actionError ? (
         <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
@@ -1201,40 +1229,6 @@ const LinkedInStyleNetworking: React.FC = () => {
         </Card>
       )}
 
-      {myLabs.length > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <p className="text-sm font-medium text-slate-900">Your labs</p>
-              <p className="text-[13px] text-slate-600 mt-0.5">
-                {myLabs.filter((l) => l.isShowcased).length} live on Networking ·{' '}
-                {myLabs.filter((l) => !l.isShowcased).length} still private
-              </p>
-            </div>
-            <Link
-              to="/lab-workspace"
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800"
-            >
-              <GlobeAltIcon className="w-4 h-4" />
-              Manage showcase
-            </Link>
-          </div>
-          <ul className="mt-3 flex flex-wrap gap-2">
-            {myLabs.map((lab) => (
-              <li key={lab.id}>
-                <Link
-                  to={`/labs/${lab.id}`}
-                  className="text-[12px] px-2.5 py-1 rounded-md bg-slate-50 text-slate-700 border border-slate-100 hover:bg-slate-100 inline-block"
-                >
-                  {lab.name}
-                  <span className="text-slate-400"> · </span>
-                  {lab.isShowcased ? 'Live' : 'Private'}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
       <div className="flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">

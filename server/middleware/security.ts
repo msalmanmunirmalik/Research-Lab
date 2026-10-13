@@ -2,6 +2,29 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { Request, Response, NextFunction } from 'express';
 
+/** Local / loopback clients — never IP rate-limit during development. */
+function isLocalhostIp(ip?: string | null): boolean {
+  if (!ip) return false;
+  const normalized = String(ip).replace(/^::ffff:/i, '').toLowerCase();
+  return (
+    normalized === '127.0.0.1' ||
+    normalized === '::1' ||
+    normalized === 'localhost' ||
+    normalized === '0:0:0:0:0:0:0:1'
+  );
+}
+
+function shouldSkipRateLimit(req: Request): boolean {
+  if (process.env.DISABLE_RATE_LIMIT === '1' || process.env.DISABLE_RATE_LIMIT === 'true') {
+    return true;
+  }
+  // Non-production: skip entirely so Vite/dev reloads never hit 429
+  if (process.env.NODE_ENV !== 'production') {
+    return true;
+  }
+  return isLocalhostIp(req.ip) || isLocalhostIp(req.socket?.remoteAddress);
+}
+
 // Rate limiting configuration
 export const createRateLimit = (windowMs: number, max: number, message: string) => {
   return rateLimit({
@@ -10,6 +33,7 @@ export const createRateLimit = (windowMs: number, max: number, message: string) 
     message: { error: message },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => shouldSkipRateLimit(req),
     handler: (req: Request, res: Response) => {
       console.log(`🚨 Rate limit exceeded for IP: ${req.ip}`);
       res.status(429).json({ error: message });
@@ -22,7 +46,7 @@ const isHighFrequencyCollabPath = (path: string) =>
   /\/writing\/documents\/[^/]+\/(collab-state|presence|locks)\b/.test(path) ||
   /\/writing\/documents\/[^/]+\/locks\//.test(path);
 
-// General API rate limiting (higher ceiling; collab poll paths are skipped)
+// General API rate limiting (higher ceiling; collab poll paths + localhost are skipped)
 export const apiRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
   max:
@@ -32,7 +56,9 @@ export const apiRateLimit = rateLimit({
   message: { error: 'Too many requests from this IP, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => isHighFrequencyCollabPath(req.path || req.originalUrl || ''),
+  skip: (req) =>
+    shouldSkipRateLimit(req) ||
+    isHighFrequencyCollabPath(req.path || req.originalUrl || ''),
   handler: (req: Request, res: Response) => {
     console.log(`🚨 Rate limit exceeded for IP: ${req.ip}`);
     res.status(429).json({

@@ -8,7 +8,8 @@
  */
 
 export interface AIProviderConfig {
-  apiKey: string;
+  /** Optional when the provider already holds a key from construction. */
+  apiKey?: string;
   model?: string;
   temperature?: number;
   maxTokens?: number;

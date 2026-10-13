@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import WriteTogetherPanel, { CollabAccess } from '../components/WriteTogetherPanel';
 import WritingStudioOverlay, {
   type StudioOverlayKind,
 } from '../components/WritingStudioOverlay';
+import LiteraturePicker from '../components/LiteraturePicker';
 import StudioShell from '../components/writing-studio/StudioShell';
 import ManuscriptPreview from '../components/writing-studio/ManuscriptPreview';
 import StudioSidebar, {
   type StudioWorkspaceTab,
 } from '../components/writing-studio/StudioSidebar';
-import { PageHeader, PagePanel } from '../components/PageHeader';
+import { PageHeader, PagePanel, PageStat } from '../components/PageHeader';
 import {
   PlusIcon,
   TrashIcon,
@@ -217,7 +218,6 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
   const [bibliography, setBibliography] = useState('');
   const [doiQuery, setDoiQuery] = useState('');
   const [doiLoading, setDoiLoading] = useState(false);
-  const [searchHits, setSearchHits] = useState<Citation[]>([]);
   const [sourceNoteId, setSourceNoteId] = useState<string | null>(null);
   const [sourceNote, setSourceNote] = useState('');
   const [loading, setLoading] = useState(false);
@@ -225,6 +225,16 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [evidenceSource, setEvidenceSource] = useState<{ id: string; title: string } | null>(() => {
+    try {
+      const raw = sessionStorage.getItem('ws_evidence_source');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed?.id ? { id: String(parsed.id), title: String(parsed.title || '') } : null;
+    } catch {
+      return null;
+    }
+  });
   const [dirty, setDirty] = useState(false);
   const [manualCite, setManualCite] = useState({ title: '', authors: '', year: '', doi: '' });
   const [collabAccess, setCollabAccess] = useState<CollabAccess | null>(null);
@@ -568,7 +578,7 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state]);
 
-  // One-shot notices (?notice=slides|evidence)
+  // One-shot notices (?notice=slides|evidence). Persist evidence pack as a manuscript source.
   useEffect(() => {
     const notice = searchParams.get('notice');
     if (notice !== 'slides' && notice !== 'evidence') return;
@@ -578,16 +588,26 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
       );
     } else {
       const evidenceTitle = searchParams.get('title');
+      const evidenceId = searchParams.get('evidenceId');
+      if (evidenceId) {
+        const attached = { id: evidenceId, title: evidenceTitle || '' };
+        setEvidenceSource(attached);
+        try {
+          sessionStorage.setItem('ws_evidence_source', JSON.stringify(attached));
+        } catch {
+          /* ignore */
+        }
+      }
       setMessage(
         evidenceTitle
-          ? `Continue from evidence “${evidenceTitle}”. Open or create a draft, then cite sources from your library.`
-          : 'Continue from an evidence pack. Open or create a draft, then cite sources from your library.'
+          ? `Continue from evidence “${evidenceTitle}”. The pack stays attached for this session — open or create a draft to cite it.`
+          : 'Continue from an evidence pack. The pack stays attached for this session — open or create a draft to cite it.'
       );
     }
     const next = new URLSearchParams(searchParams);
     next.delete('notice');
-    next.delete('evidenceId');
     next.delete('title');
+    next.delete('evidenceId');
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
 
@@ -827,9 +847,13 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
         if (studioRoute.docType) setPickType(studioRoute.docType);
         break;
       case 'tool':
+        // Library is the desk home; only "Start from research" stays an overlay tool.
         setMode('list');
-        setOverlay(studioRoute.toolId);
+        setOverlay(studioRoute.toolId === 'generate' ? 'generate' : null);
         setDrawer(null);
+        if (studioRoute.toolId === 'library') {
+          goStudio(studioDeskPath(), { replace: true });
+        }
         break;
       case 'compose': {
         setMode('edit');
@@ -1066,7 +1090,6 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
       }
       if (!res.ok) throw new Error(data.error || 'Lookup failed');
       setDoiQuery('');
-      setSearchHits([]);
       const title = String(data.citation?.title || 'reference');
       setMessage(
         title.length > 120
@@ -1189,25 +1212,6 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
       setClaimSeed('');
     }
     setOverlay('library');
-  };
-
-  const searchLiterature = async () => {
-    if (!doiQuery.trim()) return;
-    setDoiLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(
-        `${apiBase}/writing/search?q=${encodeURIComponent(doiQuery.trim())}&limit=8`,
-        { headers: authHeaders() }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Search failed');
-      setSearchHits((data.results || []).map((r: any) => ({ ...r.citation, id: r.citation.doi || r.citation.title })));
-    } catch (e: unknown) {
-      setError((e as Error).message);
-    } finally {
-      setDoiLoading(false);
-    }
   };
 
   const saveSourceNote = async (citationId: string) => {
@@ -1870,131 +1874,171 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
     });
   }, [draft.sections, citations, library]);
 
-  // ——— List ———
+  // ——— List (desk home = Find sources / Intelligence) ———
   if (mode === 'list') {
+    const deskStats = docs.reduce(
+      (acc, d) => {
+        const pct = draftCompletion(d.content || emptyWritingDraft(d.templateId)).percent;
+        if (pct > 0 && pct < 100) acc.inProgress += 1;
+        if (pct >= 80) acc.nearlyReady += 1;
+        if (d.isShared) acc.shared += 1;
+        return acc;
+      },
+      { inProgress: 0, nearlyReady: 0, shared: 0 }
+    );
+
     return (
-      <StudioShell>
-        <div className="mx-auto max-w-5xl space-y-6 px-4 pb-16 pt-4 sm:px-6">
-          <PageHeader
-            title="Writing studio"
-            accent="teal"
-            icon={<DocumentTextIcon />}
-            subtitle="Draft manuscripts, cite as you write, check readiness, and export — grounded in your lab work."
-            actions={
-              <>
-                <button
-                  type="button"
-                  onClick={() => openTool('generate')}
-                  className="inline-flex items-center gap-2 rounded-md border border-teal-200 bg-white/90 px-3.5 py-2 text-[13px] font-medium text-teal-900 transition-colors hover:bg-teal-50"
-                >
-                  <LightBulbIcon className="h-4 w-4" />
-                  Start from research
-                </button>
-                <button
-                  type="button"
-                  onClick={() => goStudio(studioNewPath())}
-                  className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3.5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-slate-800"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  New manuscript
-                </button>
-              </>
-            }
-          />
+      <StudioShell className="ws-studio-desk">
+        <div className="ws-desk-home">
+          <div className="space-y-4">
+            <PageHeader
+              title="Writing studio"
+              accent="teal"
+              icon={<DocumentTextIcon />}
+              subtitle="Search literature, build an Intelligence brief, then open a manuscript to cite."
+              actions={
+                <>
+                  <button
+                    type="button"
+                    onClick={() => openTool('generate')}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium text-teal-900 bg-white/90 border border-teal-200 rounded-md hover:bg-teal-50 transition-colors"
+                  >
+                    <LightBulbIcon className="h-4 w-4" />
+                    Start from research
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => goStudio(studioNewPath())}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium text-white bg-teal-700 rounded-md hover:bg-teal-800 transition-colors"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                    New manuscript
+                  </button>
+                </>
+              }
+            />
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <PageStat label="Manuscripts" value={docs.length} accent="teal" />
+              <PageStat label="In progress" value={deskStats.inProgress} accent="amber" />
+              <PageStat label="Nearly ready" value={deskStats.nearlyReady} accent="emerald" />
+              <PageStat label="Shared" value={deskStats.shared} accent="sky" />
+            </div>
+          </div>
 
           {error ? <p className="ws-alert ws-alert-error">{error}</p> : null}
           {message ? <p className="ws-alert ws-alert-ok">{message}</p> : null}
+          {evidenceSource ? (
+            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-[13px] text-emerald-950">
+              <span className="inline-flex items-center rounded-md border border-emerald-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-emerald-800">
+                Evidence source
+              </span>
+              <span className="min-w-0 flex-1 truncate font-medium">
+                {evidenceSource.title || 'Linked evidence pack'}
+              </span>
+              <Link
+                to={`/data-results?highlight=${encodeURIComponent(evidenceSource.id)}`}
+                className="text-[12px] font-medium text-emerald-800 underline-offset-2 hover:underline"
+              >
+                Open pack
+              </Link>
+              <button
+                type="button"
+                className="text-[12px] text-emerald-800/70 hover:text-emerald-950"
+                onClick={() => {
+                  setEvidenceSource(null);
+                  try {
+                    sessionStorage.removeItem('ws_evidence_source');
+                  } catch {
+                    /* ignore */
+                  }
+                }}
+              >
+                Dismiss
+              </button>
+            </div>
+          ) : null}
+
+          <PagePanel accent="teal" title="Find sources" className="ws-desk-sources-panel">
+            <LiteraturePicker
+              layout="desk"
+              defaultTab="intelligence"
+              attachLabel="Save to library"
+              onAttached={() => {
+                setMessage('Saved to your library. Open a manuscript to cite it while writing.');
+              }}
+            />
+          </PagePanel>
 
           <PagePanel
             accent="teal"
             title="Your manuscripts"
             action={
-              <span className="text-[12px] font-medium text-slate-500">
-                {docs.length} draft{docs.length === 1 ? '' : 's'}
-              </span>
+              <span className="text-[12px] font-medium text-slate-500">{docs.length}</span>
             }
-            className="!p-0 overflow-hidden"
           >
             {loading ? (
-              <p className="px-5 py-8 text-[13px] text-slate-500">Loading drafts…</p>
+              <p className="text-[13px] text-slate-500">Loading drafts…</p>
             ) : docs.length === 0 ? (
-              <div className="px-5 py-12 text-center">
-                <p className="text-[15px] font-semibold text-slate-900">No manuscripts yet</p>
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-8 text-center">
+                <p className="text-[14px] font-medium text-slate-800">No drafts yet</p>
                 <p className="mt-1 text-[13px] text-slate-500">
-                  Start a blank draft or seed one from research.
+                  Create a manuscript when you are ready to write, or start from research evidence.
                 </p>
                 <button
                   type="button"
                   onClick={() => goStudio(studioNewPath())}
-                  className="mt-4 inline-flex items-center rounded-md bg-slate-900 px-3.5 py-2 text-[13px] font-medium text-white hover:bg-slate-800"
+                  className="mt-4 inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium text-white bg-teal-700 rounded-md hover:bg-teal-800 transition-colors"
                 >
+                  <PlusIcon className="h-4 w-4" />
                   New manuscript
                 </button>
               </div>
             ) : (
-              <ul className="divide-y divide-slate-100">
-                {docs.map((d, idx) => {
+              <ul className="ws-desk-manuscripts-list">
+                {docs.slice(0, 12).map((d) => {
                   const pct = draftCompletion(
                     d.content || emptyWritingDraft(d.templateId)
                   ).percent;
                   return (
-                    <li
-                      key={d.id}
-                      className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-teal-50/40 sm:px-5"
-                    >
+                    <li key={d.id} className="ws-desk-manuscript-row">
                       <button
                         type="button"
                         onClick={() => void openDoc(d.id)}
-                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                        className="min-w-0 flex-1 text-left"
                       >
-                        <span className="w-6 shrink-0 text-[11px] font-semibold tabular-nums text-slate-400">
-                          {String(idx + 1).padStart(2, '0')}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[15px] font-semibold text-slate-900">
-                            {d.title || 'Untitled draft'}
-                          </p>
-                          <p className="mt-0.5 text-[12px] text-slate-500">
-                            {DOC_TYPE_LABELS[d.docType] || d.docType}
-                            {d.isShared ? ` · Shared (${d.myRole || 'collaborator'})` : ''}
-                            {d.updatedAt
-                              ? ` · ${new Date(d.updatedAt).toLocaleDateString()}`
-                              : ''}
-                          </p>
-                        </div>
-                        <div className="ws-progress" title={`${pct}%`}>
-                          <span style={{ width: `${Math.min(100, pct)}%` }} />
-                        </div>
+                        <p className="truncate text-[14px] font-semibold text-slate-900">
+                          {d.title || 'Untitled draft'}
+                        </p>
+                        <p className="text-[11px] text-slate-500">
+                          {DOC_TYPE_LABELS[d.docType] || d.docType} · {pct}% complete
+                        </p>
                       </button>
-                      <div className="flex shrink-0 items-center gap-1.5">
+                      <button
+                        type="button"
+                        className="inline-flex items-center px-2.5 py-1 text-[12px] font-medium text-slate-700 bg-white border border-slate-200 rounded-md hover:bg-slate-50"
+                        onClick={() => void openDoc(d.id)}
+                      >
+                        Open
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100"
+                        aria-label="Preview"
+                        onClick={() => void openDoc(d.id, undefined, { panel: 'view' })}
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                      </button>
+                      {!d.isShared ? (
                         <button
                           type="button"
-                          onClick={() => void openDoc(d.id, undefined, { panel: 'view' })}
-                          className="inline-flex items-center gap-1.5 rounded-md border border-teal-200 bg-white px-2.5 py-1.5 text-[12px] font-semibold text-teal-900 transition-colors hover:bg-teal-50"
-                          aria-label={`View ${d.title || 'draft'}`}
+                          className="rounded-md p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                          aria-label="Delete"
+                          onClick={() => void deleteDoc(d.id)}
                         >
-                          <EyeIcon className="h-3.5 w-3.5" />
-                          View
+                          <TrashIcon className="h-4 w-4" />
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => void openDoc(d.id)}
-                          className="inline-flex items-center rounded-md bg-slate-900 px-2.5 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-slate-800"
-                          aria-label={`Open ${d.title || 'draft'}`}
-                        >
-                          Open
-                        </button>
-                        {!d.isShared ? (
-                          <button
-                            type="button"
-                            className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
-                            aria-label="Delete draft"
-                            onClick={() => void deleteDoc(d.id)}
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </button>
-                        ) : null}
-                      </div>
+                      ) : null}
                     </li>
                   );
                 })}
@@ -2129,6 +2173,26 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
     return 'border-[var(--ws-rule)] bg-[var(--ws-folio)] text-[var(--ws-ink-soft)]';
   };
 
+  const sectionSourceSeed = (() => {
+    const title = (activeSection?.title || '').replace(/^\d+(\.\d+)*\s+/, '').trim();
+    const content = getSectionContent(draft, activeSection?.id || sectionId)
+      .replace(/\s+/g, ' ')
+      .trim();
+    const excerpt = content.slice(0, 100);
+    if (title && !/^(abstract|references|acknowledg|title)$/i.test(title)) {
+      return excerpt ? `${title} ${excerpt.slice(0, 50)}`.trim() : title;
+    }
+    return excerpt.slice(0, 80);
+  })();
+
+  const sectionClaimSeed = (() => {
+    const content = getSectionContent(draft, activeSection?.id || sectionId)
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!content) return '';
+    return content.length > 280 ? `${content.slice(0, 280).trim()}…` : content;
+  })();
+
   const refsPanel = (
     <div className="ws-sources">
       <div className="flex items-center justify-between gap-2">
@@ -2143,7 +2207,7 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
           onClick={() => openFindSources(false)}
           className="text-[11px] font-semibold text-[var(--ws-cobalt)] hover:underline"
         >
-          Find papers
+          Expand
         </button>
       </div>
 
@@ -2167,78 +2231,58 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
         </div>
       ) : null}
 
-      <div className="flex gap-2">
-        <input
-          value={doiQuery}
-          onChange={(e) => setDoiQuery(e.target.value)}
-          placeholder="DOI, PubMed / doi.org link, or paper title…"
-          className="ws-sources-input"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') void addFromDoi();
-          }}
-        />
-        <button
-          type="button"
-          className="ws-btn ws-btn-ink shrink-0"
-          disabled={doiLoading}
-          onClick={() => void addFromDoi()}
-        >
-          {doiLoading ? '…' : 'Add'}
-        </button>
-      </div>
-      <p className="text-[10px] leading-snug text-[var(--ws-ink-soft)]">
-        Prefer a DOI (<span className="font-mono">10.…</span>) or doi.org / PubMed link. Plain
-        publisher URLs without a DOI are rejected so we don’t import the wrong paper.
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="ws-btn ws-btn-ghost"
-          disabled={doiLoading}
-          onClick={() => void searchLiterature()}
-        >
-          Search
-        </button>
-        <button
-          type="button"
-          className="ws-btn ws-btn-ghost"
-          onClick={() => openFindSources(true)}
-        >
-          Check claim
-        </button>
-        <button
-          type="button"
-          className="ws-btn ws-btn-ghost"
-          disabled={aiLoading}
-          onClick={() => void runAssist('citations')}
-        >
-          Suggest
-        </button>
-      </div>
+      <LiteraturePicker
+        key={`cite-picker-${activeSection?.id || sectionId}`}
+        layout="sidebar"
+        defaultTab="search"
+        initialQuery={sectionSourceSeed}
+        initialClaim=""
+        attachLabel="Add to draft"
+        citeLabel="Cite here"
+        onAttached={(paper) => {
+          void attachPickerPaper(paper);
+        }}
+        onCite={(paper) => {
+          void attachAndCitePaper(paper);
+        }}
+      />
 
-      {searchHits.length > 0 ? (
-        <ul className="mb-3 max-h-28 space-y-1 overflow-y-auto rounded-xl bg-[rgba(11,28,44,0.04)] p-2 text-[12px]">
-          {searchHits.slice(0, 8).map((h, i) => (
-            <li key={`${h.doi || h.title}-${i}`} className="flex gap-2">
-              <span className="min-w-0 flex-1 line-clamp-2 text-[var(--ws-ink-soft)]">
-                {h.title}
-              </span>
-              <button
-                type="button"
-                className="ws-source-link shrink-0"
-                onClick={() => void addFromDoi(h.doi || h.title)}
-              >
-                Add
-              </button>
-            </li>
-          ))}
-        </ul>
+      {sectionClaimSeed ? (
+        <button
+          type="button"
+          className="ws-btn ws-btn-ghost w-full justify-center text-[11px]"
+          onClick={() => {
+            setClaimSeed(sectionClaimSeed);
+            setOverlay('library');
+          }}
+        >
+          Claim → evidence from this section
+        </button>
       ) : null}
 
-      <details className="mb-3 text-[12px] text-[var(--ws-ink-soft)]">
+      <details className="text-[12px] text-[var(--ws-ink-soft)]">
         <summary className="cursor-pointer font-medium text-[var(--ws-ink)]">
-          Import BibTeX / manual
+          Quick add (DOI / BibTeX)
         </summary>
+        <div className="mt-2 flex gap-2">
+          <input
+            value={doiQuery}
+            onChange={(e) => setDoiQuery(e.target.value)}
+            placeholder="DOI or doi.org / PubMed link…"
+            className="ws-sources-input"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') void addFromDoi();
+            }}
+          />
+          <button
+            type="button"
+            className="ws-btn ws-btn-ink shrink-0"
+            disabled={doiLoading}
+            onClick={() => void addFromDoi()}
+          >
+            {doiLoading ? '…' : 'Add'}
+          </button>
+        </div>
         <textarea
           value={bibtex}
           onChange={(e) => setBibtex(e.target.value)}
@@ -2272,170 +2316,131 @@ const WritingStudioPage: React.FC<WritingStudioPageProps> = ({ embedded = false 
         </div>
       </details>
 
-      <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto text-[12px]">
-        {citations.map((c, idx) => {
-          const ikey = c.paperId || c.id;
-          const integ = citeIntegrity[ikey];
-          return (
-          <li key={c.id} className="ws-source-card">
-            <p className="font-medium text-[var(--ws-ink)] line-clamp-2">{c.title}</p>
-            <p className="text-[var(--ws-ink-soft)]">
-              {formatInText(c, draft.citationStyle, idx)}
-              {c.year ? ` · ${c.year}` : ''}
-            </p>
-            {integ ? (
-              <div className="mt-1.5 flex flex-wrap gap-1">
-                {integ.verifyVerdict === 'matched' ? (
-                  <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800">Verified</span>
+      <div className="border-t border-[var(--ws-rule)] pt-3">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--ws-ink-soft)]">
+          In this draft
+        </p>
+        <ul className="min-h-0 max-h-56 space-y-2 overflow-y-auto text-[12px]">
+          {citations.map((c, idx) => {
+            const ikey = c.paperId || c.id;
+            const integ = citeIntegrity[ikey];
+            return (
+              <li key={c.id} className="ws-source-card">
+                <p className="font-medium text-[var(--ws-ink)] line-clamp-2">{c.title}</p>
+                <p className="text-[var(--ws-ink-soft)]">
+                  {formatInText(c, draft.citationStyle, idx)}
+                  {c.year ? ` · ${c.year}` : ''}
+                </p>
+                {integ ? (
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {integ.verifyVerdict === 'matched' ? (
+                      <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800">
+                        Verified
+                      </span>
+                    ) : null}
+                    {integ.verifyVerdict === 'mismatch' ? (
+                      <span className="rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-800">
+                        Fabrication risk
+                      </span>
+                    ) : null}
+                    {integ.isRetracted ? (
+                      <span className="rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-800">
+                        Retracted
+                      </span>
+                    ) : null}
+                    {integ.hasConcern ? (
+                      <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900">
+                        Concern
+                      </span>
+                    ) : null}
+                    {integ.isOa ? (
+                      <span className="rounded bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-900">
+                        OA{integ.oaStatus ? ` · ${integ.oaStatus}` : ''}
+                      </span>
+                    ) : null}
+                  </div>
                 ) : null}
-                {integ.verifyVerdict === 'mismatch' ? (
-                  <span className="rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-800">Fabrication risk</span>
-                ) : null}
-                {integ.isRetracted ? (
-                  <span className="rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-800">Retracted</span>
-                ) : null}
-                {integ.hasConcern ? (
-                  <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900">Concern</span>
-                ) : null}
-                {integ.isOa ? (
-                  <span className="rounded bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-900">
-                    OA{integ.oaStatus ? ` · ${integ.oaStatus}` : ''}
-                  </span>
-                ) : null}
-              </div>
-            ) : null}
-            <div className="mt-1.5 flex flex-wrap gap-2.5">
-              <button
-                type="button"
-                className="ws-source-link"
-                onClick={() => citeIntoActiveSection(c)}
-              >
-                Cite here
-              </button>
-              {integ?.oaUrl ? (
-                <a
-                  href={integ.oaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ws-source-link"
-                >
-                  OA PDF
-                </a>
-              ) : null}
-              <button
-                type="button"
-                className="ws-source-link"
-                onClick={() => {
-                  setSourceNoteId(c.writingCitationId || c.id);
-                  setSourceNote(c.sourceText || c.abstract || '');
-                }}
-              >
-                Source notes
-              </button>
-              <label className="ws-source-link cursor-pointer">
-                PDF
-                <input
-                  type="file"
-                  accept=".pdf,application/pdf,text/plain"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) void uploadPdf(c.writingCitationId || c.paperId || c.id, f);
-                    e.target.value = '';
-                  }}
-                />
-              </label>
-              <button
-                type="button"
-                className="ws-source-link text-rose-700"
-                onClick={() => void removeCitationFromDraft(c)}
-              >
-                Remove
-              </button>
-            </div>
-            {sourceNoteId === c.id ||
-            sourceNoteId === c.writingCitationId ||
-            sourceNoteId === c.paperId ? (
-              <div className="mt-2 space-y-1">
-                <textarea
-                  value={sourceNote}
-                  onChange={(e) => setSourceNote(e.target.value)}
-                  rows={3}
-                  className="ws-form-input"
-                  placeholder="Paste key lines for grounded continue…"
-                />
-                <button
-                  type="button"
-                  className="ws-btn ws-btn-line"
-                  onClick={() =>
-                    void saveSourceNote(c.writingCitationId || c.paperId || c.id)
-                  }
-                >
-                  Save notes
-                </button>
-              </div>
-            ) : null}
-          </li>
-          );
-        })}
-        {citations.length === 0 ? (
-          <li className="ws-empty px-3 py-6 text-[12px] text-[var(--ws-ink-soft)]">
-            Add papers here, then Cite while writing.
-          </li>
-        ) : null}
-      </ul>
-
-      {library.filter(
-        (l) =>
-          !citations.some(
-            (c) =>
-              c.id === l.id ||
-              (c.paperId && l.paperId && c.paperId === l.paperId) ||
-              (c.doi && l.doi && c.doi === l.doi)
-          )
-      ).length > 0 ? (
-        <div className="mt-3 border-t border-[var(--ws-rule)] pt-3">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--ws-ink-soft)]">
-            From your library
-          </p>
-          <ul className="max-h-36 space-y-1.5 overflow-y-auto text-[11px]">
-            {library
-              .filter(
-                (l) =>
-                  !citations.some(
-                    (c) =>
-                      c.id === l.id ||
-                      (c.paperId && l.paperId && c.paperId === l.paperId) ||
-                      (c.doi && l.doi && c.doi === l.doi)
-                  )
-              )
-              .slice(0, 20)
-              .map((c) => (
-              <li key={c.paperId || c.id} className="flex items-start justify-between gap-2">
-                <span className="line-clamp-2 text-[var(--ws-ink-soft)]">{c.title}</span>
-                <span className="flex shrink-0 items-center gap-2">
+                <div className="mt-1.5 flex flex-wrap gap-2.5">
                   <button
                     type="button"
-                    className="ws-source-link font-semibold"
-                    onClick={() => void attachFromLibrary(c, true)}
-                    title="Add to this draft and insert citation at cursor"
+                    className="ws-source-link"
+                    onClick={() => citeIntoActiveSection(c)}
                   >
-                    Cite
+                    Cite here
                   </button>
+                  {integ?.oaUrl ? (
+                    <a
+                      href={integ.oaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ws-source-link"
+                    >
+                      OA PDF
+                    </a>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="ws-source-link"
+                    onClick={() => {
+                      setSourceNoteId(c.writingCitationId || c.id);
+                      setSourceNote(c.sourceText || c.abstract || '');
+                    }}
+                  >
+                    Source notes
+                  </button>
+                  <label className="ws-source-link cursor-pointer">
+                    PDF
+                    <input
+                      type="file"
+                      accept=".pdf,application/pdf,text/plain"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) void uploadPdf(c.writingCitationId || c.paperId || c.id, f);
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
                   <button
                     type="button"
                     className="ws-source-link text-rose-700"
-                    onClick={() => void removeCitationFromLibrary(c)}
-                    title="Remove from your library"
+                    onClick={() => void removeCitationFromDraft(c)}
                   >
                     Remove
                   </button>
-                </span>
+                </div>
+                {sourceNoteId === c.id ||
+                sourceNoteId === c.writingCitationId ||
+                sourceNoteId === c.paperId ? (
+                  <div className="mt-2 space-y-1">
+                    <textarea
+                      value={sourceNote}
+                      onChange={(e) => setSourceNote(e.target.value)}
+                      rows={3}
+                      className="ws-form-input"
+                      placeholder="Paste key lines for grounded continue…"
+                    />
+                    <button
+                      type="button"
+                      className="ws-btn ws-btn-line"
+                      onClick={() =>
+                        void saveSourceNote(c.writingCitationId || c.paperId || c.id)
+                      }
+                    >
+                      Save notes
+                    </button>
+                  </div>
+                ) : null}
               </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+            );
+          })}
+          {citations.length === 0 ? (
+            <li className="ws-empty px-3 py-6 text-[12px] text-[var(--ws-ink-soft)]">
+              Search or open My library above, then Cite here while writing.
+            </li>
+          ) : null}
+        </ul>
+      </div>
 
       {bibliography ? (
         <div className="mt-3 border-t border-[var(--ws-rule)] pt-3">

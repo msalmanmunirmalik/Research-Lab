@@ -100,10 +100,10 @@ const WellbeingPage: React.FC = () => {
             </p>
             <p className="text-[12px] text-slate-500">
               Related practice:{' '}
-              <Link to="/lab-floors" className="underline underline-offset-2 hover:text-slate-800">
-                Lab Floors
+              <Link to="/tools-trainings" className="underline underline-offset-2 hover:text-slate-800">
+                Trainings
               </Link>{' '}
-              (asking for help, workload conversations).
+              (lab orientation and skill courses).
             </p>
           </div>
         </div>

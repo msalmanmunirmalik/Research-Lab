@@ -1,10 +1,12 @@
 /**
  * Focused literature picker for Writing Studio — Ink Folio styled.
+ * Used on desk home, overlays, and the immersive Cite sidebar.
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { MagnifyingGlassIcon, PlusIcon, BookOpenIcon } from './icons';
 import { getAuthToken, resolveApiBaseUrl, formatApiNetworkError } from '../utils/apiBase';
+import ResearchIntelligencePanel from './evidence/ResearchIntelligencePanel';
 
 export type PickerPaper = {
   id?: string;
@@ -21,7 +23,18 @@ type Props = {
   enableClaimCheck?: boolean;
   initialQuery?: string;
   initialClaim?: string;
+  /** Initial tab when the picker mounts (desk home defaults to Intelligence). */
+  defaultTab?: 'search' | 'intelligence' | 'library' | 'claim';
+  /** Button label for adding a paper to the draft/library without inserting a cite. */
+  attachLabel?: string;
+  /** Button label for attach + insert citation at caret (sidebar / draft). */
+  citeLabel?: string;
+  /** desk = full-width page; overlay = centered modal; sidebar = Cite panel. */
+  layout?: 'overlay' | 'desk' | 'sidebar';
+  /** Save to library / draft sources (no caret insert). */
   onAttached?: (paper: PickerPaper) => void;
+  /** Save then insert citation at the editor caret. */
+  onCite?: (paper: PickerPaper) => void;
   onClose?: () => void;
 };
 
@@ -29,12 +42,17 @@ const LiteraturePicker: React.FC<Props> = ({
   enableClaimCheck = true,
   initialQuery = '',
   initialClaim = '',
+  defaultTab = 'search',
+  attachLabel = 'Use in manuscript',
+  citeLabel = 'Cite here',
+  layout = 'overlay',
   onAttached,
+  onCite,
   onClose,
 }) => {
   const apiBase = resolveApiBaseUrl();
   const token = typeof localStorage !== 'undefined' ? getAuthToken() : null;
-  const [tab, setTab] = useState<'search' | 'library' | 'claim'>('search');
+  const [tab, setTab] = useState<'search' | 'intelligence' | 'library' | 'claim'>(defaultTab);
   const [q, setQ] = useState(initialQuery);
   const [claim, setClaim] = useState(initialClaim);
   const [loading, setLoading] = useState(false);
@@ -72,6 +90,10 @@ const LiteraturePicker: React.FC<Props> = ({
   }, [loadLibrary]);
 
   useEffect(() => {
+    if (initialQuery.trim()) setQ(initialQuery);
+  }, [initialQuery]);
+
+  useEffect(() => {
     if (initialClaim.trim()) {
       setTab('claim');
       setClaim(initialClaim);
@@ -97,7 +119,7 @@ const LiteraturePicker: React.FC<Props> = ({
     }
   };
 
-  const saveAndAttach = async (paper: PickerPaper) => {
+  const saveAndAttach = async (paper: PickerPaper, mode: 'attach' | 'cite' = 'attach') => {
     setLoading(true);
     setError(null);
     try {
@@ -111,7 +133,13 @@ const LiteraturePicker: React.FC<Props> = ({
       const saved = data.saved?.[0]?.paper || paper;
       setMessage(`Saved: ${(saved.title || paper.title).slice(0, 80)}`);
       void loadLibrary();
-      onAttached?.(saved);
+      if (mode === 'cite' && onCite) {
+        onCite(saved);
+      } else if (onAttached) {
+        onAttached(saved);
+      } else if (onCite) {
+        onCite(saved);
+      }
     } catch (e: unknown) {
       setError(formatApiNetworkError(e) || (e as Error).message);
     } finally {
@@ -148,6 +176,45 @@ const LiteraturePicker: React.FC<Props> = ({
     }
   };
 
+  const actionButtons = (paper: PickerPaper) => {
+    const hasBoth = Boolean(onAttached && onCite);
+    return (
+      <div className="mt-2 flex flex-wrap justify-end gap-2">
+        {hasBoth ? (
+          <>
+            <button
+              type="button"
+              className="ws-btn ws-btn-line"
+              disabled={loading}
+              onClick={() => void saveAndAttach(paper, 'attach')}
+            >
+              <PlusIcon className="h-3.5 w-3.5" />
+              {attachLabel}
+            </button>
+            <button
+              type="button"
+              className="ws-btn ws-btn-cobalt"
+              disabled={loading}
+              onClick={() => void saveAndAttach(paper, 'cite')}
+            >
+              {citeLabel}
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            className="ws-btn ws-btn-cobalt"
+            disabled={loading}
+            onClick={() => void saveAndAttach(paper, onCite && !onAttached ? 'cite' : 'attach')}
+          >
+            <PlusIcon className="h-3.5 w-3.5" />
+            {onCite && !onAttached ? citeLabel : attachLabel}
+          </button>
+        )}
+      </div>
+    );
+  };
+
   const paperRow = (paper: PickerPaper, key: string) => (
     <li key={key} className="ws-folio-quiet px-3 py-3">
       <p className="text-[13px] font-semibold leading-snug text-[var(--ws-ink)]">{paper.title}</p>
@@ -161,26 +228,24 @@ const LiteraturePicker: React.FC<Props> = ({
       {paper.abstract ? (
         <p className="mt-2 line-clamp-2 text-[12px] text-[var(--ws-ink-soft)]">{paper.abstract}</p>
       ) : null}
-      <div className="mt-2 flex justify-end">
-        <button
-          type="button"
-          className="ws-btn ws-btn-cobalt"
-          disabled={loading}
-          onClick={() => void saveAndAttach(paper)}
-        >
-          <PlusIcon className="h-3.5 w-3.5" />
-          Use in manuscript
-        </button>
-      </div>
+      {actionButtons(paper)}
     </li>
   );
 
+  const rootClass =
+    layout === 'desk'
+      ? 'ws-picker ws-picker-desk space-y-4'
+      : layout === 'sidebar'
+        ? 'ws-picker ws-picker-sidebar space-y-3'
+        : 'ws-picker ws-picker-overlay mx-auto max-w-3xl space-y-4 px-4 py-5 sm:px-6';
+
   return (
-    <div className="mx-auto max-w-3xl space-y-4 px-4 py-5 sm:px-6">
+    <div className={rootClass}>
       <div className="flex flex-wrap items-center gap-2">
         {(
           [
             ['search', 'Search'],
+            ['intelligence', 'Intelligence'],
             ['library', 'My library'],
             ...(enableClaimCheck ? [['claim', 'Claim → evidence'] as const] : []),
           ] as Array<[string, string]>
@@ -235,17 +300,26 @@ const LiteraturePicker: React.FC<Props> = ({
               {loading ? '…' : 'Search'}
             </button>
           </div>
-          <ul className="space-y-2">
+          {layout === 'sidebar' && initialQuery.trim() ? (
+            <p className="text-[11px] text-[var(--ws-ink-soft)]">
+              Seeded from this section — edit the query or search as-is.
+            </p>
+          ) : null}
+          <ul className="ws-picker-list">
             {results.map((p, i) => paperRow(p, p.id || p.doi || `${p.title}-${i}`))}
           </ul>
           {!loading && results.length === 0 ? (
             <div className="ws-empty">
               <p className="text-[13px] text-[var(--ws-ink-soft)]">
-                Search scholarly sources, then attach papers to cite.
+                Search scholarly sources, then cite at the cursor or add to the draft.
               </p>
             </div>
           ) : null}
         </div>
+      )}
+
+      {tab === 'intelligence' && (
+        <ResearchIntelligencePanel key={q || 'intel'} initialQuery={q} tone="folio" />
       )}
 
       {tab === 'library' && (
@@ -254,7 +328,7 @@ const LiteraturePicker: React.FC<Props> = ({
             <BookOpenIcon className="h-3.5 w-3.5" />
             Papers already in your library
           </p>
-          <ul className="space-y-2">
+          <ul className="ws-picker-list">
             {library.map((item: any, i: number) => {
               const p = item.paper || item;
               const paperId = p.id || item.paperId;
@@ -309,15 +383,39 @@ const LiteraturePicker: React.FC<Props> = ({
                     >
                       Remove
                     </button>
-                    <button
-                      type="button"
-                      className="ws-btn ws-btn-cobalt"
-                      disabled={loading}
-                      onClick={() => void saveAndAttach(p)}
-                    >
-                      <PlusIcon className="h-3.5 w-3.5" />
-                      Use in manuscript
-                    </button>
+                    {onAttached && onCite ? (
+                      <>
+                        <button
+                          type="button"
+                          className="ws-btn ws-btn-line"
+                          disabled={loading}
+                          onClick={() => void saveAndAttach(p, 'attach')}
+                        >
+                          <PlusIcon className="h-3.5 w-3.5" />
+                          {attachLabel}
+                        </button>
+                        <button
+                          type="button"
+                          className="ws-btn ws-btn-cobalt"
+                          disabled={loading}
+                          onClick={() => void saveAndAttach(p, 'cite')}
+                        >
+                          {citeLabel}
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        className="ws-btn ws-btn-cobalt"
+                        disabled={loading}
+                        onClick={() =>
+                          void saveAndAttach(p, onCite && !onAttached ? 'cite' : 'attach')
+                        }
+                      >
+                        <PlusIcon className="h-3.5 w-3.5" />
+                        {onCite && !onAttached ? citeLabel : attachLabel}
+                      </button>
+                    )}
                   </div>
                 </li>
               );
@@ -343,7 +441,7 @@ const LiteraturePicker: React.FC<Props> = ({
           <textarea
             value={claim}
             onChange={(e) => setClaim(e.target.value)}
-            rows={4}
+            rows={layout === 'sidebar' ? 3 : 4}
             placeholder="e.g. Treatment X significantly reduced inflammation in murine models…"
             className="ws-sources-input"
           />
@@ -386,16 +484,7 @@ const LiteraturePicker: React.FC<Props> = ({
                       {r.evidencePreview || r.preview || r.excerpt}
                     </p>
                   ) : null}
-                  <div className="mt-2 flex justify-end">
-                    <button
-                      type="button"
-                      className="ws-btn ws-btn-cobalt"
-                      disabled={loading}
-                      onClick={() => void saveAndAttach(p)}
-                    >
-                      Cite this reference
-                    </button>
-                  </div>
+                  {actionButtons(p)}
                 </li>
               );
             })}

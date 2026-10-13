@@ -41,6 +41,21 @@ export const profileUpdateSchema = z.object({
   email: z.string().trim().email().max(255).optional()
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email('Valid email is required').max(255)
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().trim().min(20).max(200),
+  newPassword: passwordSchema
+});
+
+export const verifyEmailSchema = z.object({
+  token: z.string().trim().min(20).max(200)
+});
+
+export const resendVerificationSchema = z.object({}).strict();
+
 export function formatZodError(error: z.ZodError): string {
   return error.issues.map((issue) => issue.message).join('; ') || 'Invalid input';
 }

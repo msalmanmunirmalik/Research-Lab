@@ -40,6 +40,13 @@
   background-image: none;
 }
 
+/* Desk home sits on AppLayout wash like Data Results / Research evidence */
+.ws-studio.ws-studio-desk {
+  min-height: 0;
+  background: transparent;
+  background-image: none;
+}
+
 .ws-studio * {
   box-sizing: border-box;
 }
@@ -2003,4 +2010,216 @@
   border: 0;
   background: transparent;
   box-shadow: none;
+}
+
+/* ——— Writing Studio desk home ——— */
+.ws-home-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 720px) {
+  .ws-home-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.ws-home-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  text-align: left;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1rem 1.05rem;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.12s ease;
+  cursor: pointer;
+}
+
+.ws-home-card:hover {
+  border-color: rgba(15, 118, 110, 0.45);
+  background: #f0fdfa;
+  transform: translateY(-1px);
+}
+
+.ws-home-card.is-primary {
+  background: linear-gradient(145deg, #0f766e 0%, #115e59 100%);
+  border-color: transparent;
+  color: #fff;
+}
+
+.ws-home-card.is-primary:hover {
+  background: linear-gradient(145deg, #0d9488 0%, #0f766e 100%);
+  border-color: transparent;
+}
+
+.ws-home-card.is-primary .ws-home-card-blurb {
+  color: rgba(240, 253, 250, 0.9);
+}
+
+.ws-home-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.75rem;
+  background: #f0fdfa;
+  color: #0f766e;
+  flex-shrink: 0;
+}
+
+.ws-home-card.is-primary .ws-home-card-icon {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.ws-home-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.ws-home-card-title {
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: inherit;
+}
+
+.ws-home-card:not(.is-primary) .ws-home-card-title {
+  color: #0f172a;
+}
+
+.ws-home-card-blurb {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+/* ——— Desk home = Find sources (AppLayout already pads; keep page tight) ——— */
+.ws-desk-home {
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-sizing: border-box;
+}
+
+.ws-desk-sources-panel .ws-picker-desk {
+  margin-top: 0.15rem;
+}
+
+.ws-picker-desk {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
+
+/* Cite sidebar — compact LiteraturePicker */
+.ws-picker-sidebar {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
+
+.ws-picker-sidebar .ws-type-chip {
+  font-size: 0.68rem;
+  padding: 0.3rem 0.55rem;
+}
+
+.ws-picker-sidebar .ws-folio-quiet {
+  padding: 0.55rem 0.65rem;
+}
+
+.ws-picker-sidebar .ws-picker-list {
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.ws-picker-sidebar .ws-btn {
+  font-size: 0.68rem;
+  padding: 0.35rem 0.55rem;
+}
+
+.ws-sb-compact .ws-picker-sidebar .ws-intel-top,
+.ws-sb-compact .ws-picker-sidebar .ws-intel-grid {
+  grid-template-columns: 1fr;
+}
+
+.ws-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ws-intel-top {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 900px) {
+  .ws-intel-top {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+}
+
+.ws-intel-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .ws-intel-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .ws-intel-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.ws-intel-works {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ws-desk-manuscripts-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ws-desk-manuscript-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 0.25rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.95);
+}
+
+.ws-desk-manuscript-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.ws-desk-manuscript-row:first-child {
+  padding-top: 0.15rem;
 }

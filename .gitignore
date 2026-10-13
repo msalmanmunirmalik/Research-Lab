@@ -35,5 +35,7 @@ presentation-ai-reference
 .env.local
 .env.*.local
 .env.backup
+.env.backup.*
 .env.bak
 .env.clean
+backups/

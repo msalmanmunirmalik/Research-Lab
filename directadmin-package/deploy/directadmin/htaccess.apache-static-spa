@@ -1,0 +1,26 @@
+# Apache / LiteSpeed SPA + API reverse-proxy for DirectAdmin
+# Place this file in public_html as `.htaccess` ONLY if you host the SPA
+# as static files and run the Node API on a separate Node.js App / port.
+#
+# If you use the recommended single Node app (SERVE_FRONTEND=true + app.js),
+# you do NOT need this file — DirectAdmin proxies the whole site to Node.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Proxy API + health to the Node.js app (adjust port if DirectAdmin assigned another)
+  RewriteRule ^api/(.*)$ http://127.0.0.1:5002/api/$1 [P,L]
+  RewriteRule ^health$ http://127.0.0.1:5002/api/health [P,L]
+
+  # SPA fallback: existing files/dirs are served as-is
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Optional security headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

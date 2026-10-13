@@ -289,7 +289,14 @@ const WriteTogetherPanel: React.FC<Props> = ({
       const url = data.invitation?.url || null;
       setLastInviteUrl(url);
       const delivery = data.invitation?.delivery;
-      if (inviteMode === 'link' || !delivery?.inApp) {
+      if (inviteMode === 'email') {
+        setMessage(
+          delivery?.emailDelivered
+            ? 'Invitation email sent. A shareable link is also ready.'
+            : 'Invitation recorded. Email delivery is not configured. Copy the link to share it.'
+        );
+        if (url) void copyLink(url);
+      } else if (inviteMode === 'link' || !delivery?.inApp) {
         setMessage('Invite link ready — copy and send it to your co-author.');
         if (url) void copyLink(url);
       } else if (delivery?.inApp) {

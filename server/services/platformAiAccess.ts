@@ -22,8 +22,6 @@ export type PlatformQuota = {
   allowed: boolean;
 };
 
-let tableReady: Promise<void> | null = null;
-
 export function getPlatformGeminiKey(): string | null {
   const key = (process.env.GEMINI_API_KEY || '').trim();
   return key || null;
@@ -68,26 +66,6 @@ export function resolvePlatformProvider(): ResolvedAiAccess | null {
   return null;
 }
 
-async function ensureUsageTable(): Promise<void> {
-  if (!tableReady) {
-    tableReady = (async () => {
-      await pool.query(`
-        CREATE TABLE IF NOT EXISTS ai_platform_usage (
-          user_id VARCHAR(64) NOT NULL,
-          usage_date DATE NOT NULL,
-          message_count INT NOT NULL DEFAULT 0,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          PRIMARY KEY (user_id, usage_date)
-        )
-      `);
-    })().catch((err) => {
-      tableReady = null;
-      throw err;
-    });
-  }
-  await tableReady;
-}
-
 function todayUtcDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -98,7 +76,6 @@ export async function getPlatformQuota(userId: string): Promise<PlatformQuota> {
     return { limit, used: 0, remaining: limit, allowed: true };
   }
   try {
-    await ensureUsageTable();
     const result = await pool.query(
       `SELECT message_count FROM ai_platform_usage WHERE user_id = $1 AND usage_date = $2`,
       [userId, todayUtcDate()]
@@ -117,7 +94,6 @@ export async function getPlatformQuota(userId: string): Promise<PlatformQuota> {
 export async function consumePlatformQuota(userId: string): Promise<PlatformQuota> {
   const limit = getPlatformAiDailyLimit();
   try {
-    await ensureUsageTable();
     const day = todayUtcDate();
     await pool.query(
       `INSERT INTO ai_platform_usage (user_id, usage_date, message_count)

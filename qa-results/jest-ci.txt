@@ -1,0 +1,1645 @@
+
+> digital-research-manager@0.0.0 test:ci /Users/m.salmanmalik/Development Projects/researchlab
+> jest --ci --coverage --watchAll=false
+
+watchman warning:  opendir(/Users/m.salmanmalik/Library/Containers/com.apple.corerecents.recentsd/Data/Library/Recents) -> Operation not permitted. Marking this portion of the tree deleted
+To clear this warning, run:
+`watchman watch-del '/Users/m.salmanmalik' ; watchman watch-project '/Users/m.salmanmalik'`
+
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151001: [0mIf you have issues related to imports, you should consider setting `esModuleInterop` to `true` in your TypeScript configuration file (usually `tsconfig.json`). See https://blogs.msdn.microsoft.com/typescript/2018/01/31/announcing-typescript-2-7/#easier-ecmascript-module-interoperability for more information.
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151001: [0mIf you have issues related to imports, you should consider setting `esModuleInterop` to `true` in your TypeScript configuration file (usually `tsconfig.json`). See https://blogs.msdn.microsoft.com/typescript/2018/01/31/announcing-typescript-2-7/#easier-ecmascript-module-interoperability for more information.
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151001: [0mIf you have issues related to imports, you should consider setting `esModuleInterop` to `true` in your TypeScript configuration file (usually `tsconfig.json`). See https://blogs.msdn.microsoft.com/typescript/2018/01/31/announcing-typescript-2-7/#easier-ecmascript-module-interoperability for more information.
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151001: [0mIf you have issues related to imports, you should consider setting `esModuleInterop` to `true` in your TypeScript configuration file (usually `tsconfig.json`). See https://blogs.msdn.microsoft.com/typescript/2018/01/31/announcing-typescript-2-7/#easier-ecmascript-module-interoperability for more information.
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151001: [0mIf you have issues related to imports, you should consider setting `esModuleInterop` to `true` in your TypeScript configuration file (usually `tsconfig.json`). See https://blogs.msdn.microsoft.com/typescript/2018/01/31/announcing-typescript-2-7/#easier-ecmascript-module-interoperability for more information.
+FAIL tests/integration/grants.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../../database/config.js' from 'tests/integration/grants.test.ts'
+
+       6 | };
+       7 |
+    >  8 | jest.mock('../../database/config.js', () => ({
+         |      ^
+       9 |   default: mockPool
+      10 | }));
+      11 |
+
+      at Resolver._throwModNotFoundError (node_modules/.pnpm/jest-resolve@29.7.0/node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (tests/integration/grants.test.ts:8:6)
+
+FAIL tests/integration/compliance.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '../../database/config.js' from 'tests/integration/compliance.test.ts'
+
+      19 | };
+      20 |
+    > 21 | jest.mock('../../database/config.js', () => ({
+         |      ^
+      22 |   default: mockPool
+      23 | }));
+      24 |
+
+      at Resolver._throwModNotFoundError (node_modules/.pnpm/jest-resolve@29.7.0/node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (tests/integration/compliance.test.ts:21:6)
+
+PASS tests/integration/api.test.ts
+  API Integration Tests
+    Authentication Logic
+      ✓ should generate valid JWT token (8 ms)
+      ✓ should reject invalid JWT token (9 ms)
+      ✓ should handle missing token (2 ms)
+    Database Mock Integration
+      ✓ should mock database query successfully (3 ms)
+      ✓ should handle database query errors (2 ms)
+    Authentication Flow
+      ✓ should validate login credentials
+      ✓ should generate user session data (1 ms)
+    API Response Format
+      ✓ should format success response correctly
+      ✓ should format error response correctly (1 ms)
+    Data Validation
+      ✓ should validate email format (2 ms)
+      ✓ should validate password strength (1 ms)
+
+  console.warn
+    ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+      35 |
+      36 |   test('renders login form elements', () => {
+    > 37 |     render(
+         |           ^
+      38 |       <TestWrapper>
+      39 |         <MockLoginPage />
+      40 |       </TestWrapper>
+
+      at warn (node_modules/.pnpm/react-router@6.30.1_react@18.3.1/node_modules/react-router/lib/deprecations.ts:9:13)
+      at warnOnce (node_modules/.pnpm/react-router@6.30.1_react@18.3.1/node_modules/react-router/lib/deprecations.ts:14:3)
+      at Object.logDeprecation [as UNSAFE_logV6DeprecationWarnings] (node_modules/.pnpm/react-router@6.30.1_react@18.3.1/node_modules/react-router/lib/deprecations.ts:26:5)
+      at logV6DeprecationWarnings (node_modules/.pnpm/react-router-dom@6.30.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-router-dom/index.tsx:816:25)
+      at commitHookEffectListMount (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/.pnpm/react@18.3.1/node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/.pnpm/react@18.3.1/node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/.pnpm/@testing-library+react@14.3.1_@types+react@18.3.25_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at renderRoot (node_modules/.pnpm/@testing-library+react@14.3.1_@types+react@18.3.25_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@testing-library/react/dist/pure.js:180:26)
+      at render (node_modules/.pnpm/@testing-library+react@14.3.1_@types+react@18.3.25_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@testing-library/react/dist/pure.js:271:10)
+      at Object.<anonymous> (tests/unit/LoginPage.test.tsx:37:11)
+
+  console.warn
+    ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+      35 |
+      36 |   test('renders login form elements', () => {
+    > 37 |     render(
+         |           ^
+      38 |       <TestWrapper>
+      39 |         <MockLoginPage />
+      40 |       </TestWrapper>
+
+      at warn (node_modules/.pnpm/react-router@6.30.1_react@18.3.1/node_modules/react-router/lib/deprecations.ts:9:13)
+      at warnOnce (node_modules/.pnpm/react-router@6.30.1_react@18.3.1/node_modules/react-router/lib/deprecations.ts:14:3)
+      at Object.logDeprecation [as UNSAFE_logV6DeprecationWarnings] (node_modules/.pnpm/react-router@6.30.1_react@18.3.1/node_modules/react-router/lib/deprecations.ts:37:5)
+      at logV6DeprecationWarnings (node_modules/.pnpm/react-router-dom@6.30.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-router-dom/index.tsx:816:25)
+      at commitHookEffectListMount (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/.pnpm/react@18.3.1/node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/.pnpm/react@18.3.1/node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/.pnpm/@testing-library+react@14.3.1_@types+react@18.3.25_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at renderRoot (node_modules/.pnpm/@testing-library+react@14.3.1_@types+react@18.3.25_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@testing-library/react/dist/pure.js:180:26)
+      at render (node_modules/.pnpm/@testing-library+react@14.3.1_@types+react@18.3.25_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@testing-library/react/dist/pure.js:271:10)
+      at Object.<anonymous> (tests/unit/LoginPage.test.tsx:37:11)
+
+FAIL tests/unit/Button.test.tsx
+  ● Test suite failed to run
+
+    TypeError: The "original" argument must be of type function. Received an instance of Object
+
+      2 | import { render, screen, fireEvent } from '@testing-library/react';
+      3 | import { BrowserRouter } from 'react-router-dom';
+    > 4 | import Button from '../../components/ui/Button';
+        | ^
+      5 |
+      6 | // Test wrapper component
+      7 | const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+
+      at Object.<anonymous> (node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+      at Object.<anonymous> (node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+      at _babelPluginIstanbul (node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:30:39)
+      at ScriptTransformer._instrumentFile (node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:403:11)
+      at ScriptTransformer._buildTransformResult (node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:491:33)
+      at ScriptTransformer.transformSource (node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:554:17)
+      at ScriptTransformer._transformAndBuildScript (node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:674:40)
+      at ScriptTransformer.transform (node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:726:19)
+      at Object.<anonymous> (tests/unit/Button.test.tsx:4:1)
+
+PASS tests/unit/LoginPage.test.tsx
+  LoginPage
+    ✓ renders login form elements (180 ms)
+    ✓ handles form input (5 ms)
+
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ExportService.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/contexts/AuthContext.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/utils/roleAccess.ts
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/contexts/__tests__/AuthContext.test.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ProtocolCollaborationPanel.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/CollaborationService.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/SampleManagementForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/InventoryAlertsView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/TeamMessagingWidget.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/LabWorkspaceInstrumentBookingForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/LabWorkspaceProjectForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ThemeCustomizer.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ExperimentDetailView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/TaskBoardView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/TaskListView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/TaskCalendarView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ProtocolExecutionModeMobile.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/LabCreationWizard.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/AdvancedPresentationEditor.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/LinkedInStyleNetworking.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ResultsForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/LabWorkspaceMaintenanceForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ProtocolExecutionMode.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/InstrumentsView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/InstrumentRosterView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/TeamMembersView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/CookieBanner.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/TaskForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/DirectMessagingView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/InventoryForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/icons.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/TaskDetailPanel.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/MeetingForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/RecommendationsWidget.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/LabWorkspaceInventoryForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/InstrumentAlertsView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/InstrumentBookingCalendar.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/EquipmentBookingForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ProblemForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ProtectedRoute.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/EventsAndOpportunities.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/LabWorkspaceInstrumentForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ViewSwitcher.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/LabWorkspaceSidebar.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ProjectsView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/SocialNetworking.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/PriorityBadge.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ProfessionalProtocolForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/UnifiedReferenceSystem.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/AIPresentationModal.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/AssigneeAvatars.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/InventoryView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/InventoryTransactionForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/PlateEditor.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/DueDateIndicator.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/TaskCard.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ExperimentForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/LabWorkspaceTeamMemberForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/SideNav.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ui/Input.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/StatusBadge.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ui/Select.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ui/Card.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/FilterBar.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ui/Button.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/InstrumentRosterForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/IdeaForm.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/TeamMessagingPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/NotFoundPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ProtocolComparisonView.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/CookiePreferencesPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/components/ProtocolAIAssistant.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/MarketplacePage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/CookiePolicyPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/LabWorkspacePage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/AIApiKeysPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/ProfessionalProtocolsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/ProtocolsPageRefactored.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/DashboardPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/EventsOpportunitiesPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/LabNotebookPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/PaperLibraryPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/NegativeResultsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/LandingPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/AIPresentationsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/DataResultsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/HelpForumPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/SupplierMarketplacePage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/CurrentTrendsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/BioinformaticsToolsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/CollaborationNetworkingPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/ProfilePage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/GrantsFundingsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/PrivacyPolicyPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/ScienceForAllJournalPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/ProjectManagementPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/MolecularBiologyPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/TestPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/ConferenceNewsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/ServiceMarketplacePage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/SettingsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/DataAnalyticsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/UnauthorizedPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/TeamManagementPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/SimpleReferenceSystemPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/StatisticalAnalysisToolsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/CommunicationsHubPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/RegisterPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/__tests__/DashboardPage.test.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/ResearchToolsPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/LoginPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/ExperimentTrackerPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/PIReviewDashboardPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+Failed to collect coverage from /Users/m.salmanmalik/Development Projects/researchlab/pages/ResearchDataBankPage.tsx
+ERROR: The "original" argument must be of type function. Received an instance of Object
+STACK: TypeError [ERR_INVALID_ARG_TYPE]: The "original" argument must be of type function. Received an instance of Object
+    at promisify (node:internal/util:409:3)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/test-exclude@6.0.0/node_modules/test-exclude/index.js:5:14)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Object.<anonymous> (/Users/m.salmanmalik/Development Projects/researchlab/node_modules/.pnpm/babel-plugin-istanbul@6.1.1/node_modules/babel-plugin-istanbul/lib/index.js:18:43)
+    at Module._compile (node:internal/modules/cjs/loader:1364:14)
+----------|---------|----------|---------|---------|-------------------
+File      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------|---------|----------|---------|---------|-------------------
+All files |       0 |        0 |       0 |       0 |                   
+----------|---------|----------|---------|---------|-------------------
+Test Suites: 3 failed, 2 passed, 5 total
+Tests:       13 passed, 13 total
+Snapshots:   0 total
+Time:        5.532 s
+Ran all test suites.
+ ELIFECYCLE  Command failed with exit code 1.

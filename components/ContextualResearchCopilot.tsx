@@ -38,7 +38,7 @@ function pageLabel(pathname: string): { label: string; hint: string } {
     return { label: 'Protocols', hint: 'Find protocols in your library, or ask for help' };
   }
   if (pathname.startsWith('/data-results')) {
-    return { label: 'Research evidence', hint: 'Interpret packs, claims, and figures' };
+    return { label: 'Data & Results', hint: 'Interpret packs, claims, and figures' };
   }
   if (pathname.startsWith('/grants')) {
     return { label: 'Grants', hint: 'Match calls or draft proposal sections' };

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 class AdvancedStatisticalService {
     constructor() {
-        this.pythonServiceUrl = process.env.PYTHON_STATS_SERVICE_URL || 'http://localhost:8001';
+        this.pythonServiceUrl = process.env.PYTHON_STATS_SERVICE_URL || 'http://localhost:5003';
         this.timeout = 120000; // 2 minutes timeout for complex analysis
     }
 
@@ -145,17 +145,19 @@ class AdvancedStatisticalService {
                 columns: columns
             }, { timeout: this.timeout });
 
+            // Python returns { success, statistics: { count, mean, ... } }
+            const stats = response.data.statistics || response.data;
             return {
                 success: true,
                 statistics: {
-                    count: response.data.count,
-                    mean: response.data.mean,
-                    std: response.data.std,
-                    min: response.data.min,
-                    max: response.data.max,
-                    percentiles: response.data.percentiles,
-                    skewness: response.data.skewness,
-                    kurtosis: response.data.kurtosis
+                    count: stats.count,
+                    mean: stats.mean,
+                    std: stats.std,
+                    min: stats.min,
+                    max: stats.max,
+                    percentiles: stats.percentiles,
+                    skewness: stats.skewness,
+                    kurtosis: stats.kurtosis
                 }
             };
         } catch (error) {
@@ -169,7 +171,8 @@ class AdvancedStatisticalService {
             const response = await axios.post(`${this.pythonServiceUrl}/correlation-analysis`, {
                 data: data,
                 method: method,
-                columns: columns
+                columns: columns,
+                options: { method }
             }, { timeout: this.timeout });
 
             return {
@@ -177,7 +180,7 @@ class AdvancedStatisticalService {
                 correlation: {
                     matrix: response.data.correlation_matrix,
                     pValues: response.data.p_values,
-                    method: method
+                    method: response.data.method || method
                 }
             };
         } catch (error) {
@@ -248,14 +251,17 @@ class AdvancedStatisticalService {
                 options: options
             }, { timeout: this.timeout });
 
+            // Python returns { success, test_results: {...} }
+            const raw = response.data.test_results || response.data;
             return {
                 success: true,
                 testResults: {
-                    statistic: response.data.statistic,
-                    pValue: response.data.p_value,
-                    criticalValue: response.data.critical_value,
+                    statistic: raw.statistic ?? response.data.statistic,
+                    pValue: raw.p_value ?? raw.pValue ?? response.data.p_value,
+                    criticalValue: raw.critical_value ?? response.data.critical_value,
                     testType: testType,
-                    conclusion: response.data.conclusion
+                    conclusion: raw.conclusion ?? response.data.conclusion,
+                    details: raw
                 }
             };
         } catch (error) {

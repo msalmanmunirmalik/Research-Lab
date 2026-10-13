@@ -86,7 +86,7 @@ router.post('/generate-summary', async (req: any, res) => {
     }
 
     console.log(`🤖 Generating AI summary for: ${paper.title}`);
-    const summary = await paperFetchingService.generateAISummary(paper);
+    const summary = await (paperFetchingService as any).generateAISummary(paper);
     
     res.json({ summary });
   } catch (error: any) {
@@ -105,7 +105,7 @@ router.post('/extract-findings', async (req: any, res) => {
     }
 
     console.log(`🔬 Extracting key findings from: ${paper.title}`);
-    const findings = await paperFetchingService.extractKeyFindings(paper);
+    const findings = await (paperFetchingService as any).extractKeyFindings(paper);
     
     res.json({ findings });
   } catch (error: any) {

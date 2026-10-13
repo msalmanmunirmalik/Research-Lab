@@ -1,7 +1,67 @@
 import { Request, Response, Router } from 'express';
 import crypto from 'crypto';
 import pool from "../../database/config.js";
+import {
+  assertActiveLabMember,
+  assertCanWriteLifecycleRecord,
+  canReadLifecycleRecord,
+} from '../policies/labAccess.js';
 // Auth is applied by server/index.ts when mounting /api/experiments (shared authenticateToken)
+
+let experimentsIncludeName: boolean | null = null;
+
+async function experimentInsertIncludesName(): Promise<boolean> {
+  if (experimentsIncludeName !== null) return experimentsIncludeName;
+  const result = await pool.query(
+    `SELECT COUNT(*) AS column_count FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'experiments' AND COLUMN_NAME = 'name'`
+  );
+  const raw = result.rows[0]?.column_count ?? result.rows[0]?.COLUMN_COUNT ?? 0;
+  experimentsIncludeName = Number(raw) > 0;
+  return experimentsIncludeName;
+}
+
+type ExperimentProjectIdMode = 'missing' | 'optional' | 'required';
+let cachedExperimentProjectIdMode: ExperimentProjectIdMode | null = null;
+
+async function getExperimentProjectIdMode(): Promise<ExperimentProjectIdMode> {
+  if (cachedExperimentProjectIdMode !== null) return cachedExperimentProjectIdMode;
+  const result = await pool.query(
+    `SELECT IS_NULLABLE AS is_nullable FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'experiments' AND COLUMN_NAME = 'project_id'
+     LIMIT 1`
+  );
+  if (!result.rows[0]) {
+    cachedExperimentProjectIdMode = 'missing';
+    return cachedExperimentProjectIdMode;
+  }
+  const nullable =
+    String(result.rows[0].is_nullable ?? result.rows[0].IS_NULLABLE ?? 'YES').toUpperCase() ===
+    'YES';
+  cachedExperimentProjectIdMode = nullable ? 'optional' : 'required';
+  return cachedExperimentProjectIdMode;
+}
+
+async function ensureUserDefaultProjectId(userId: string): Promise<string> {
+  const existing = await pool.query(
+    `SELECT id FROM projects WHERE owner_id = $1 ORDER BY created_at ASC LIMIT 1`,
+    [userId]
+  );
+  const row = existing.rows[0];
+  if (row?.id) return String(row.id);
+  const projectId = crypto.randomUUID();
+  await pool.query(
+    `INSERT INTO projects (id, name, description, owner_id) VALUES ($1, $2, $3, $4)`,
+    [projectId, 'General experiments', 'Auto-created for the experiment tracker', userId]
+  );
+  return projectId;
+}
+
+const normalizeOptionalId = (value: unknown): string | null => {
+  if (value == null) return null;
+  const trimmed = String(value).trim();
+  return trimmed ? trimmed : null;
+};
 
 const toJsonText = (value: unknown) => {
   if (value == null) return null;
@@ -40,6 +100,33 @@ const mapExperimentRow = (row: any) => {
     notebookEntryId: row.notebook_entry_id || null,
   };
 };
+
+const mapRunRow = (row: any) => {
+  if (!row) return row;
+  return {
+    id: row.id,
+    experimentId: row.experiment_id,
+    userId: row.user_id,
+    userName: row.user_name || null,
+    recordedAt: row.recorded_at,
+    title: row.title || null,
+    modifications: row.modifications || '',
+    observations: row.observations || '',
+    outcomeSummary: row.outcome_summary || '',
+    status: row.status || 'completed',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+};
+
+async function loadExperimentForAccess(experimentId: string) {
+  const result = await pool.query(
+    `SELECT id, researcher_id, lab_id, collaborators, protocol_id, title, status
+     FROM experiments WHERE id = $1`,
+    [experimentId]
+  );
+  return result.rows[0] || null;
+}
 
 // Get all experiments for a user
 export const getExperiments = async (req: Request, res: Response) => {
@@ -109,30 +196,31 @@ export const getExperiment = async (req: Request, res: Response) => {
     const { id } = req.params;
     const userId = (req as any).user.id;
 
-    // MySQL-safe access check (collaborators stored as JSON text)
-    const experimentQuery = `
-      SELECT 
-        e.*,
-        u.username as researcher_name,
-        l.name as lab_name,
-        0 as progress_percentage
-      FROM experiments e
-      LEFT JOIN users u ON e.researcher_id = u.id
-      LEFT JOIN labs l ON e.lab_id = l.id
-      WHERE e.id = $1
-        AND (
-          e.researcher_id = $2
-          OR e.collaborators LIKE CONCAT('%', $3, '%')
-        )
-    `;
+    const experimentResult = await pool.query(
+      `SELECT e.*, u.username as researcher_name, l.name as lab_name, 0 as progress_percentage
+       FROM experiments e
+       LEFT JOIN users u ON e.researcher_id = u.id
+       LEFT JOIN labs l ON e.lab_id = l.id
+       WHERE e.id = $1`,
+      [id]
+    );
 
-    const experimentResult = await pool.query(experimentQuery, [id, userId, userId]);
-    
     if (experimentResult.rows.length === 0) {
       return res.status(404).json({ error: 'Experiment not found' });
     }
 
     const experiment = experimentResult.rows[0];
+    const experimentRead = canReadLifecycleRecord({
+      resource: 'experiment',
+      userId,
+      ownerId: experiment.researcher_id,
+      labId: experiment.lab_id,
+      activeMember: false,
+      collaborators: experiment.collaborators,
+    });
+    if (!experimentRead.allowed) {
+      return res.status(experimentRead.status).json({ error: 'Experiment not found' });
+    }
 
     const safeQuery = async (sql: string, params: unknown[]) => {
       try {
@@ -170,13 +258,22 @@ export const getExperiment = async (req: Request, res: Response) => {
        ORDER BY c.created_at ASC`,
       [id]
     );
+    const runsResult = await safeQuery(
+      `SELECT r.*, u.username as user_name
+       FROM experiment_runs r
+       LEFT JOIN users u ON r.user_id = u.id
+       WHERE r.experiment_id = $1
+       ORDER BY r.recorded_at DESC, r.created_at DESC`,
+      [id]
+    );
 
     res.json({
       ...mapExperimentRow(experiment),
       milestones: milestonesResult.rows,
       risks: risksResult.rows,
       progress_log: progressResult.rows,
-      comments: commentsResult.rows
+      comments: commentsResult.rows,
+      runs: (runsResult.rows || []).map(mapRunRow),
     });
   } catch (error) {
     console.error('Error fetching experiment:', error);
@@ -214,6 +311,23 @@ export const createExperiment = async (req: Request, res: Response) => {
       risks
     } = req.body;
 
+    const normalizedLabId = normalizeOptionalId(labId);
+    if (normalizedLabId) {
+      const membership = await assertActiveLabMember(pool, userId, normalizedLabId);
+      if (!membership.ok) {
+        return res.status(membership.status).json({ error: membership.error });
+      }
+    }
+
+    const projectMode = await getExperimentProjectIdMode();
+    const requestedProjectId = normalizeOptionalId(
+      req.body.projectId ?? req.body.project_id
+    );
+    let projectIdForInsert: string | null = requestedProjectId;
+    if (projectMode === 'required') {
+      projectIdForInsert = projectIdForInsert || (await ensureUserDefaultProjectId(userId));
+    }
+
     const client = await pool.connect();
     const experimentId = crypto.randomUUID();
     const linkedNotes = protocolId
@@ -229,40 +343,55 @@ export const createExperiment = async (req: Request, res: Response) => {
       await client.query('BEGIN');
 
       // MySQL: explicit id, no RETURNING; store arrays as JSON text
+      const includeName = await experimentInsertIncludesName();
+      const insertColumns = [
+        'id',
+        ...(projectMode !== 'missing' &&
+        (projectMode === 'required' || projectIdForInsert)
+          ? ['project_id']
+          : []),
+        'title',
+        ...(includeName ? ['name'] : []),
+        'description', 'hypothesis', 'objectives', 'methodology', 'expected_outcomes',
+        'priority', 'category', 'estimated_duration', 'due_date', 'lab_id', 'researcher_id',
+        'collaborators', 'equipment', 'materials', 'reagents', 'safety_requirements',
+        'budget', 'tags', 'notes', 'template_id', 'protocol_id', 'status',
+      ];
+      const insertValues = [
+        experimentId,
+        ...(projectMode !== 'missing' &&
+        (projectMode === 'required' || projectIdForInsert)
+          ? [projectIdForInsert]
+          : []),
+        title,
+        ...(includeName ? [title] : []),
+        description,
+        hypothesis,
+        toJsonText(objectives || []),
+        methodology,
+        toJsonText(expectedOutcomes || []),
+        priority || 'medium',
+        category || 'other',
+        estimatedDuration,
+        dueDate,
+        normalizedLabId,
+        userId,
+        toJsonText(collaborators || []),
+        toJsonText(equipment || []),
+        toJsonText(materials || []),
+        toJsonText(reagents || []),
+        toJsonText(safetyRequirements || []),
+        budget || 0,
+        toJsonText(linkedTags || []),
+        linkedNotes,
+        templateId || null,
+        protocolId || null,
+        'planning',
+      ];
+      const placeholders = insertValues.map((_, index) => `$${index + 1}`).join(', ');
       await client.query(
-        `INSERT INTO experiments (
-          id, title, name, description, hypothesis, objectives, methodology, expected_outcomes,
-          priority, category, estimated_duration, due_date, lab_id, researcher_id,
-          collaborators, equipment, materials, reagents, safety_requirements,
-          budget, tags, notes, template_id, protocol_id, status
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)`,
-        [
-          experimentId,
-          title,
-          title,
-          description,
-          hypothesis,
-          toJsonText(objectives || []),
-          methodology,
-          toJsonText(expectedOutcomes || []),
-          priority || 'medium',
-          category,
-          estimatedDuration,
-          dueDate,
-          labId,
-          userId,
-          toJsonText(collaborators || []),
-          toJsonText(equipment || []),
-          toJsonText(materials || []),
-          toJsonText(reagents || []),
-          toJsonText(safetyRequirements || []),
-          budget || 0,
-          toJsonText(linkedTags || []),
-          linkedNotes,
-          templateId || null,
-          protocolId || null,
-          'planning'
-        ]
+        `INSERT INTO experiments (${insertColumns.join(', ')}) VALUES (${placeholders})`,
+        insertValues
       );
 
       if (milestones && milestones.length > 0) {
@@ -328,14 +457,21 @@ export const updateExperiment = async (req: Request, res: Response) => {
     const userId = (req as any).user.id;
     const updateData = req.body;
 
-    // Check if user has permission to update this experiment
-    const checkQuery = `
-      SELECT researcher_id FROM experiments 
-      WHERE id = $1 AND researcher_id = $2
-    `;
-    const checkResult = await pool.query(checkQuery, [id, userId]);
-    
+    const checkResult = await pool.query(
+      `SELECT researcher_id, lab_id FROM experiments WHERE id = $1`,
+      [id]
+    );
     if (checkResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Experiment not found' });
+    }
+    const existing = checkResult.rows[0];
+    const canEdit = await assertCanWriteLifecycleRecord(pool, {
+      userId,
+      ownerId: existing.researcher_id,
+      labId: existing.lab_id,
+    });
+    if (!canEdit) {
+      // Match experiment read posture: do not confirm existence to non-writers.
       return res.status(404).json({ error: 'Experiment not found or no permission' });
     }
 
@@ -401,16 +537,21 @@ export const deleteExperiment = async (req: Request, res: Response) => {
     const { id } = req.params;
     const userId = (req as any).user.id;
 
-    // Check if user is the owner of the experiment
-    const checkQuery = 'SELECT researcher_id FROM experiments WHERE id = $1';
-    const checkResult = await pool.query(checkQuery, [id]);
-    
+    const checkResult = await pool.query(
+      'SELECT researcher_id, lab_id FROM experiments WHERE id = $1',
+      [id]
+    );
     if (checkResult.rows.length === 0) {
       return res.status(404).json({ error: 'Experiment not found' });
     }
-
-    if (checkResult.rows[0].researcher_id !== userId) {
-      return res.status(403).json({ error: 'Only the experiment owner can delete it' });
+    const existing = checkResult.rows[0];
+    const canDelete = await assertCanWriteLifecycleRecord(pool, {
+      userId,
+      ownerId: existing.researcher_id,
+      labId: existing.lab_id,
+    });
+    if (!canDelete) {
+      return res.status(403).json({ error: 'Insufficient permissions to delete this experiment' });
     }
 
     const deleteQuery = 'DELETE FROM experiments WHERE id = $1';
@@ -580,6 +721,246 @@ export const updateMilestoneStatus = async (req: Request, res: Response) => {
   }
 };
 
+// List bench runs for an experiment
+export const listExperimentRuns = async (req: Request, res: Response) => {
+  try {
+    const { experimentId } = req.params;
+    const userId = (req as any).user.id;
+    const experiment = await loadExperimentForAccess(experimentId);
+    if (!experiment) {
+      return res.status(404).json({ error: 'Experiment not found' });
+    }
+    const canRead = canReadLifecycleRecord({
+      resource: 'experiment',
+      userId,
+      ownerId: experiment.researcher_id,
+      labId: experiment.lab_id,
+      activeMember: false,
+      collaborators: experiment.collaborators,
+    });
+    if (!canRead.allowed) {
+      return res.status(canRead.status).json({ error: 'Experiment not found' });
+    }
+
+    try {
+      const result = await pool.query(
+        `SELECT r.*, u.username as user_name
+         FROM experiment_runs r
+         LEFT JOIN users u ON r.user_id = u.id
+         WHERE r.experiment_id = $1
+         ORDER BY r.recorded_at DESC, r.created_at DESC`,
+        [experimentId]
+      );
+      return res.json({ runs: result.rows.map(mapRunRow) });
+    } catch (err: any) {
+      if (err?.code === 'ER_NO_SUCH_TABLE') {
+        return res.json({ runs: [] });
+      }
+      throw err;
+    }
+  } catch (error) {
+    console.error('Error listing experiment runs:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Create a bench run
+export const createExperimentRun = async (req: Request, res: Response) => {
+  try {
+    const { experimentId } = req.params;
+    const userId = (req as any).user.id;
+    const {
+      recordedAt,
+      title,
+      modifications,
+      observations,
+      outcomeSummary,
+      status = 'completed',
+    } = req.body || {};
+
+    const experiment = await loadExperimentForAccess(experimentId);
+    if (!experiment) {
+      return res.status(404).json({ error: 'Experiment not found' });
+    }
+    const canWrite = await assertCanWriteLifecycleRecord(pool, {
+      userId,
+      ownerId: experiment.researcher_id,
+      labId: experiment.lab_id,
+    });
+    if (!canWrite) {
+      return res.status(404).json({ error: 'Experiment not found or no permission' });
+    }
+
+    const id = crypto.randomUUID();
+    const when = recordedAt ? new Date(recordedAt) : new Date();
+    if (Number.isNaN(when.getTime())) {
+      return res.status(400).json({ error: 'Invalid recordedAt' });
+    }
+
+    const allowedStatus = ['planned', 'completed', 'failed', 'needs_repeat'];
+    const runStatus = allowedStatus.includes(String(status)) ? String(status) : 'completed';
+
+    await pool.query(
+      `INSERT INTO experiment_runs (
+        id, experiment_id, user_id, recorded_at, title, modifications, observations, outcome_summary, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [
+        id,
+        experimentId,
+        userId,
+        when,
+        title || null,
+        modifications || '',
+        observations || '',
+        outcomeSummary || '',
+        runStatus,
+      ]
+    );
+
+    // Promote experiment to running if still planning
+    if (experiment.status === 'planning' || experiment.status === 'ready') {
+      await pool.query(
+        `UPDATE experiments SET status = 'running', start_date = COALESCE(start_date, CURRENT_TIMESTAMP), updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+        [experimentId]
+      );
+    }
+
+    const created = await pool.query(
+      `SELECT r.*, u.username as user_name
+       FROM experiment_runs r
+       LEFT JOIN users u ON r.user_id = u.id
+       WHERE r.id = $1`,
+      [id]
+    );
+    res.status(201).json(mapRunRow(created.rows[0]));
+  } catch (error: any) {
+    if (error?.code === 'ER_NO_SUCH_TABLE') {
+      return res.status(503).json({
+        error: 'experiment_runs table missing — run database migrations (pnpm db:migrate)',
+      });
+    }
+    console.error('Error creating experiment run:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Update a bench run
+export const updateExperimentRun = async (req: Request, res: Response) => {
+  try {
+    const { experimentId, runId } = req.params;
+    const userId = (req as any).user.id;
+    const experiment = await loadExperimentForAccess(experimentId);
+    if (!experiment) {
+      return res.status(404).json({ error: 'Experiment not found' });
+    }
+    const canWrite = await assertCanWriteLifecycleRecord(pool, {
+      userId,
+      ownerId: experiment.researcher_id,
+      labId: experiment.lab_id,
+    });
+    if (!canWrite) {
+      return res.status(404).json({ error: 'Experiment not found or no permission' });
+    }
+
+    const existing = await pool.query(
+      `SELECT * FROM experiment_runs WHERE id = $1 AND experiment_id = $2`,
+      [runId, experimentId]
+    );
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ error: 'Run not found' });
+    }
+
+    const body = req.body || {};
+    const fields: string[] = [];
+    const values: unknown[] = [];
+    let n = 1;
+    const set = (col: string, val: unknown) => {
+      fields.push(`${col} = $${n}`);
+      values.push(val);
+      n += 1;
+    };
+
+    if (body.recordedAt !== undefined) {
+      const when = new Date(body.recordedAt);
+      if (Number.isNaN(when.getTime())) {
+        return res.status(400).json({ error: 'Invalid recordedAt' });
+      }
+      set('recorded_at', when);
+    }
+    if (body.title !== undefined) set('title', body.title || null);
+    if (body.modifications !== undefined) set('modifications', body.modifications || '');
+    if (body.observations !== undefined) set('observations', body.observations || '');
+    if (body.outcomeSummary !== undefined) set('outcome_summary', body.outcomeSummary || '');
+    if (body.status !== undefined) {
+      const allowedStatus = ['planned', 'completed', 'failed', 'needs_repeat'];
+      if (!allowedStatus.includes(String(body.status))) {
+        return res.status(400).json({ error: 'Invalid status' });
+      }
+      set('status', body.status);
+    }
+
+    if (fields.length === 0) {
+      return res.json(mapRunRow(existing.rows[0]));
+    }
+
+    values.push(runId);
+    await pool.query(
+      `UPDATE experiment_runs SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${n}`,
+      values
+    );
+    const updated = await pool.query(
+      `SELECT r.*, u.username as user_name
+       FROM experiment_runs r
+       LEFT JOIN users u ON r.user_id = u.id
+       WHERE r.id = $1`,
+      [runId]
+    );
+    res.json(mapRunRow(updated.rows[0]));
+  } catch (error: any) {
+    if (error?.code === 'ER_NO_SUCH_TABLE') {
+      return res.status(503).json({ error: 'experiment_runs table missing — run database migrations' });
+    }
+    console.error('Error updating experiment run:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Delete a bench run
+export const deleteExperimentRun = async (req: Request, res: Response) => {
+  try {
+    const { experimentId, runId } = req.params;
+    const userId = (req as any).user.id;
+    const experiment = await loadExperimentForAccess(experimentId);
+    if (!experiment) {
+      return res.status(404).json({ error: 'Experiment not found' });
+    }
+    const canWrite = await assertCanWriteLifecycleRecord(pool, {
+      userId,
+      ownerId: experiment.researcher_id,
+      labId: experiment.lab_id,
+    });
+    if (!canWrite) {
+      return res.status(404).json({ error: 'Experiment not found or no permission' });
+    }
+
+    const result = await pool.query(
+      `DELETE FROM experiment_runs WHERE id = $1 AND experiment_id = $2`,
+      [runId, experimentId]
+    );
+    const affected = (result as any).rowCount ?? (result as any).affectedRows ?? 0;
+    if (!affected) {
+      return res.status(404).json({ error: 'Run not found' });
+    }
+    res.json({ success: true });
+  } catch (error: any) {
+    if (error?.code === 'ER_NO_SUCH_TABLE') {
+      return res.status(503).json({ error: 'experiment_runs table missing — run database migrations' });
+    }
+    console.error('Error deleting experiment run:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Add progress log entry
 export const addProgressLog = async (req: Request, res: Response) => {
   try {
@@ -648,12 +1029,16 @@ router.get('/', getExperiments);
 router.get('/analytics', getExperimentAnalytics);
 router.get('/templates', getTemplates);
 router.get('/:id', getExperiment);
+router.get('/:experimentId/runs', listExperimentRuns);
 router.post('/', createExperiment);
 router.post('/templates', createTemplate);
 router.post('/:experimentId/milestones', addMilestone);
 router.post('/:experimentId/progress', addProgressLog);
+router.post('/:experimentId/runs', createExperimentRun);
 router.put('/:id', updateExperiment);
 router.put('/milestones/:milestoneId', updateMilestoneStatus);
+router.put('/:experimentId/runs/:runId', updateExperimentRun);
 router.delete('/:id', deleteExperiment);
+router.delete('/:experimentId/runs/:runId', deleteExperimentRun);
 
 export default router;

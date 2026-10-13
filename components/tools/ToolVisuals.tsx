@@ -273,31 +273,70 @@ const exportSeriesCsv = (series: ChartSeries) => {
 export const ToolResultsPanel: React.FC<{ result: ToolResult }> = ({ result }) => {
   const entries = Object.entries(result.scalars).filter(([k]) => k !== 'hint');
   const [copied, setCopied] = React.useState<string | null>(null);
+  const primary = entries[0];
+  const rest = entries.slice(1);
 
   return (
     <div className="space-y-5">
-      {entries.length > 0 && (
-        <dl className="space-y-2">
-          {entries.map(([key, val]) => (
+      {result.scalars.hint && entries.length === 0 && !result.series && !result.bars ? (
+        <p className="text-sm text-slate-600">{result.scalars.hint}</p>
+      ) : null}
+
+      {primary ? (
+        <div className="rounded-xl border border-teal-100 bg-gradient-to-br from-teal-50/90 to-white px-4 py-3.5 shadow-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-teal-700/80">
+            {SCALAR_LABELS[primary[0]] || primary[0]}
+          </p>
+          <p
+            className={`mt-1 text-slate-900 ${
+              primary[1].length > 48 || COPYABLE.has(primary[0])
+                ? 'break-all font-mono text-sm'
+                : 'text-2xl font-semibold tracking-tight'
+            }`}
+          >
+            {primary[1]}
+            {COPYABLE.has(primary[0]) ? (
+              <button
+                type="button"
+                className="ml-3 align-middle text-xs font-semibold text-teal-700 hover:underline"
+                onClick={() => {
+                  void copyText(primary[1]).then((ok) => {
+                    if (ok) {
+                      setCopied(primary[0]);
+                      window.setTimeout(() => setCopied(null), 1200);
+                    }
+                  });
+                }}
+              >
+                {copied === primary[0] ? 'Copied' : 'Copy'}
+              </button>
+            ) : null}
+          </p>
+        </div>
+      ) : null}
+
+      {rest.length > 0 ? (
+        <dl className="divide-y divide-slate-100 border-t border-slate-100">
+          {rest.map(([key, val]) => (
             <div
               key={key}
-              className="flex flex-col gap-0.5 border-b border-slate-100 pb-2 last:border-0 sm:flex-row sm:justify-between sm:gap-4"
+              className="flex flex-col gap-0.5 py-2.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
             >
-              <dt className="shrink-0 text-xs font-medium text-slate-500">
+              <dt className="shrink-0 text-sm text-slate-500">
                 {SCALAR_LABELS[key] || key}
               </dt>
               <dd
                 className={`text-sm text-slate-900 ${
                   val.length > 40 || COPYABLE.has(key)
                     ? 'break-all font-mono text-xs'
-                    : 'font-medium text-right'
+                    : 'font-medium sm:text-right'
                 }`}
               >
                 <span>{val}</span>
-                {COPYABLE.has(key) && (
+                {COPYABLE.has(key) ? (
                   <button
                     type="button"
-                    className="ml-2 text-[10px] font-sans font-medium uppercase tracking-wide text-slate-400 hover:text-slate-700"
+                    className="ml-2 text-xs font-semibold text-teal-700 hover:underline"
                     onClick={() => {
                       void copyText(val).then((ok) => {
                         if (ok) {
@@ -309,22 +348,22 @@ export const ToolResultsPanel: React.FC<{ result: ToolResult }> = ({ result }) =
                   >
                     {copied === key ? 'Copied' : 'Copy'}
                   </button>
-                )}
+                ) : null}
               </dd>
             </div>
           ))}
         </dl>
-      )}
+      ) : null}
 
-      {result.bars && result.bars.length > 0 && <ResultBars bars={result.bars} />}
+      {result.bars && result.bars.length > 0 ? <ResultBars bars={result.bars} /> : null}
 
       {result.series?.map((s) => (
-        <div key={s.id} className="rounded-lg border border-slate-100 bg-white p-2">
+        <div key={s.id} className="border-t border-slate-100 pt-3">
           <div className="mb-1 flex justify-end">
             <button
               type="button"
               onClick={() => exportSeriesCsv(s)}
-              className="text-[10px] font-medium uppercase tracking-wide text-slate-400 hover:text-slate-700"
+              className="text-xs font-medium text-slate-500 hover:text-slate-800"
             >
               Export CSV
             </button>
@@ -333,21 +372,17 @@ export const ToolResultsPanel: React.FC<{ result: ToolResult }> = ({ result }) =
         </div>
       ))}
 
-      {result.sequenceMap && (
+      {result.sequenceMap ? (
         <SequenceMap seq={result.sequenceMap.seq} highlights={result.sequenceMap.highlights} />
-      )}
+      ) : null}
 
-      {result.tips && result.tips.length > 0 && (
-        <ul className="space-y-1 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+      {result.tips && result.tips.length > 0 ? (
+        <ul className="space-y-1 text-sm text-slate-600">
           {result.tips.map((t) => (
-            <li key={t}>· {t}</li>
+            <li key={t}>{t}</li>
           ))}
         </ul>
-      )}
-
-      {result.scalars.hint && entries.length === 0 && !result.series && !result.bars && (
-        <p className="text-sm text-slate-500">{result.scalars.hint}</p>
-      )}
+      ) : null}
     </div>
   );
 };

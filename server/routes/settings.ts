@@ -8,6 +8,7 @@ import crypto from 'crypto';
 import pool from '../../database/config.js';
 import { authenticateToken } from '../middleware/auth.js';
 import bcrypt from 'bcrypt';
+import { replacePassword } from '../services/accountRecovery.js';
 
 const router: Router = express.Router();
 
@@ -229,14 +230,7 @@ router.put('/change-password', authenticateToken, async (req: any, res) => {
       return res.status(401).json({ error: 'Current password is incorrect' });
     }
     
-    // Hash new password
-    const newPasswordHash = await bcrypt.hash(new_password, 10);
-    
-    // Update password
-    await pool.query(
-      'UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-      [newPasswordHash, userId]
-    );
+    await replacePassword(userId, new_password);
     
     res.json({ 
       success: true,

@@ -229,7 +229,7 @@ const PackReviewView: React.FC<Props> = ({
             <div className="absolute inset-0 opacity-30 print:hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-400/40 via-transparent to-transparent" />
             <div className="relative px-6 sm:px-10 py-10 sm:py-12">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-200/90 print:text-slate-500">
-                Research evidence pack
+                Data & Results pack
               </p>
               {onUpdateEntry ? (
                 <input

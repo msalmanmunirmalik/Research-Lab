@@ -11,6 +11,7 @@ import { TaskAnalysis } from '../TaskAnalysisEngine.js';
 import { UserContext } from '../UserContextRetriever.js';
 import { getApiForTask } from '../../routes/apiTaskAssignments.js';
 import { getUserApiKey } from '../../routes/aiProviderKeys.js';
+import { openAlexProvider } from '../scholarly/openalex.js';
 
 export interface PaperFindingInput {
   query: string;
@@ -49,10 +50,8 @@ export class PaperFindingAgent extends BaseAgent implements Agent {
   
   validateInput(input: any): boolean {
     if (!input || typeof input !== 'object') return false;
-    if (!input.query || typeof input.query !== 'string' || input.query.trim().length === 0) {
-      return false;
-    }
-    return true;
+    const query = String(input.query || input.topic || '').trim();
+    return query.length > 0;
   }
   
   async execute(
@@ -66,6 +65,42 @@ export class PaperFindingAgent extends BaseAgent implements Agent {
           success: false,
           content: null,
           error: 'Invalid input: query is required and must be a non-empty string'
+        };
+      }
+
+      const openAlexQuery = String(input.query || input.topic || '').trim();
+      const yearRange = input.yearRange || (input as { filters?: { yearRange?: { start?: number; end?: number } } }).filters?.yearRange;
+      const openAlexPapers = await openAlexProvider
+        .search({
+          query: openAlexQuery,
+          limit: input.maxResults || 10,
+          yearFrom: yearRange?.start,
+          yearTo: yearRange?.end,
+          sort: 'relevance',
+        })
+        .catch(() => []);
+      if (openAlexPapers.length) {
+        return {
+          success: true,
+          content: {
+            query: openAlexQuery,
+            source: 'openalex',
+            papers: openAlexPapers.map((paper) => ({
+              id: paper.openalexId || paper.doi || paper.title,
+              title: paper.title,
+              authors: paper.authors.map((author) => author.name),
+              abstract: paper.abstract || '',
+              journal: paper.journalName || undefined,
+              year: paper.publicationYear || undefined,
+              doi: paper.doi || undefined,
+              url: paper.doi ? `https://doi.org/${paper.doi}` : paper.sourceUrl || undefined,
+              relevanceScore: 1,
+              keyFindings: [],
+              citations: paper.citationCount || 0,
+            })),
+            totalFound: openAlexPapers.length,
+          },
+          metadata: { provider: 'openalex', query: openAlexQuery },
         };
       }
       

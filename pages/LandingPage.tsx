@@ -34,7 +34,7 @@ const capabilities = [
   {
     title: 'Research education',
     description:
-      'Lab Floors scenarios, AI roleplay, and trainings for people starting in research.',
+      'Trainings and skill courses for people starting in research.',
   },
 ] as const;
 

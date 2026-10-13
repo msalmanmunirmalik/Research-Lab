@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 import mysql, { type PoolConnection, type ResultSetHeader } from 'mysql2/promise';
+import { resolveMysqlDatabaseName } from './databaseName.js';
 
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -21,7 +22,7 @@ const buildMysqlConfig = () => {
   return {
     host: process.env.MYSQL_HOST || '127.0.0.1',
     port: Number(process.env.MYSQL_PORT || 3306),
-    database: process.env.MYSQL_DB || 'digital_research_manager',
+    database: resolveMysqlDatabaseName(),
     user: process.env.MYSQL_USER || process.env.USER || 'root',
     password: process.env.MYSQL_PASSWORD || '',
     socketPath: process.env.MYSQL_SOCKET || undefined,
@@ -233,9 +234,9 @@ const end = async () => {
 };
 
 pool.on('connection', (connection) => {
-  connection.query(
-    "SET SESSION sql_mode = CONCAT(@@sql_mode, ',PIPES_AS_CONCAT')",
-    () => undefined
+  // mysql2 Connection#query overloads treat a function as QueryValues unless typed as callback
+  void (connection as any).query(
+    "SET SESSION sql_mode = CONCAT(@@sql_mode, ',PIPES_AS_CONCAT')"
   );
   if (process.env.DB_LOG_CONNECT === '1') {
     console.log('✅ Connected to MySQL database');

@@ -1,0 +1,69 @@
+
+Running 31 tests using 4 workers
+
+  ✓   2 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:7:3 › Authentication › displays login form (3.9s)
+  ✓   4 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:22:3 › Authentication › logs in with demo credentials (3.8s)
+  ✓   3 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:14:3 › Authentication › rejects invalid credentials (4.1s)
+  ✓   1 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:26:3 › Authentication › logs out successfully (4.2s)
+  ✓   7 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:53:3 › API Smoke › health endpoint responds (99ms)
+  ✓   8 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:58:3 › API Smoke › demo login returns token (97ms)
+  ✓   6 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:45:3 › Navigation › opens protocol library from sidebar (3.0s)
+  ✓   5 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:40:3 › Navigation › opens Personal NoteBook from sidebar (3.2s)
+  ✓  10 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:116:3 › Experiment Tracker Module › shows experiment filters in Experiments tab (6.7s)
+  ✘   9 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:110:3 › Experiment Tracker Module › displays dashboard overview (6.9s)
+  ✓  11 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:124:3 › Experiment Tracker Module › activates templates tab (5.3s)
+  ✓  12 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:132:3 › Experiment Tracker Module › shows analytics view (5.2s)
+  ✓  13 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:12:3 › Personal NoteBook Module › shows Personal NoteBook overview (2.0s)
+  ✓  14 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:11:3 › Professional Protocols Module › renders protocol library overview (2.2s)
+  ✓  15 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:25:3 › Personal NoteBook Module › shows entry type selections (2.2s)
+  ✓  16 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:19:3 › Professional Protocols Module › filters protocols using search (2.5s)
+  ✓  17 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:26:3 › Professional Protocols Module › shows empty or results state without crashing (1.9s)
+  ✓  18 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:26:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should display recommendations widget on protocols page (3.6s)
+  ✓  19 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:67:5 › Recommendations and Notebook Summaries E2E › Service Recommendations › should display recommendations widget on service marketplace (3.9s)
+  ✓  20 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:17:3 › Personal NoteBook Module › supports entry search interaction (4.0s)
+  ✓  24 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:144:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should generate notebook summary (526ms)
+  ✓  22 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:35:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should load protocol recommendations (3.8s)
+  ✓  23 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:76:5 › Recommendations and Notebook Summaries E2E › Dashboard Recommendations › should display recommendation widgets on dashboard (2.8s)
+  ✓  21 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:106:5 › Recommendations and Notebook Summaries E2E › Notebook Summary Generation › should generate weekly summary when button is clicked (7.1s)
+  ✓  27 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:120:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should return protocol recommendations (40ms)
+  ✓  28 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:128:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should return paper recommendations (58ms)
+  ✓  29 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:136:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should return service recommendations (136ms)
+  ✓  26 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:85:5 › Recommendations and Notebook Summaries E2E › Notebook Summary Generation › should display summary generation buttons on lab notebook page (2.1s)
+  ✓  25 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:45:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should allow clicking on recommended protocol (4.1s)
+  ✓  31 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:58:5 › Recommendations and Notebook Summaries E2E › Paper Recommendations › should display recommendations widget on research data bank page (2.3s)
+  ✓  30 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:94:5 › Recommendations and Notebook Summaries E2E › Notebook Summary Generation › should generate daily summary when button is clicked (5.1s)
+
+
+  1) [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:110:3 › Experiment Tracker Module › displays dashboard overview 
+
+    Error: expect.toBeVisible: Error: strict mode violation: getByText('Running') resolved to 2 elements:
+        1) <p class="text-[12px] font-medium text-slate-500">Running</p> aka getByText('Running', { exact: true })
+        2) <span class="px-2 py-0.5 rounded-md text-[11px] font-medium bg-yellow-100 text-yellow-800">running</span> aka getByText('running', { exact: true })
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('Running')[22m
+
+
+      111 |     await expect(page.getByText(/Plan and track experiment lifecycle/i)).toBeVisible();
+      112 |     await expect(page.getByText('Total experiments')).toBeVisible();
+    > 113 |     await expect(page.getByText('Running')).toBeVisible();
+          |                                             ^
+      114 |   });
+      115 |
+      116 |   test('shows experiment filters in Experiments tab', async ({ page }) => {
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/experiment-tracker.pw.spec.ts:113:45
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/experiment-tracker.pw-Expe-da288-displays-dashboard-overview-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/experiment-tracker.pw-Expe-da288-displays-dashboard-overview-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/experiment-tracker.pw-Expe-da288-displays-dashboard-overview-chromium/error-context.md
+
+  1 failed
+    [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:110:3 › Experiment Tracker Module › displays dashboard overview 
+  30 passed (33.8s)

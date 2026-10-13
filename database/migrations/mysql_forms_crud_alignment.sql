@@ -175,6 +175,7 @@ CREATE TABLE IF NOT EXISTS service_listings (
   average_rating DECIMAL(3,2) DEFAULT 0,
   total_ratings INT DEFAULT 0,
   total_projects_completed INT DEFAULT 0,
+  inquiries_count INT NOT NULL DEFAULT 0,
   tags TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

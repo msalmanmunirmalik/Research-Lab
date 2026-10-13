@@ -1,0 +1,10 @@
+-- Patch users table for auth/profile fields
+SET FOREIGN_KEY_CHECKS = 0;
+
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS first_name VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS last_name VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS email_verified TINYINT(1) DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS last_login DATETIME;
+
+SET FOREIGN_KEY_CHECKS = 1;

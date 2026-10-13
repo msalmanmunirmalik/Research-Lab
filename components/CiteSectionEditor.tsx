@@ -13,7 +13,14 @@ import React, {
   useState,
 } from 'react';
 import Button from './ui/Button';
-import { SparklesIcon, BookOpenIcon, XMarkIcon, AdjustmentsHorizontalIcon, ChevronDownIcon } from './icons';
+import {
+  SparklesIcon,
+  BookOpenIcon,
+  XMarkIcon,
+  AdjustmentsHorizontalIcon,
+  ChevronDownIcon,
+  MagnifyingGlassIcon,
+} from './icons';
 import { CitationRecord } from '../utils/citationFormat';
 import { countWords, CitationStyle, CITATION_STYLES } from '../utils/writingTemplates';
 import {
@@ -41,7 +48,18 @@ import {
   type WritingEditorPrefs,
   type EditorTextAlign,
 } from '../utils/writingEditorPrefs';
+import { getAuthToken, resolveApiBaseUrl, formatApiNetworkError } from '../utils/apiBase';
 import CitationAiPanel from './CitationAiPanel';
+
+type LitSearchPaper = {
+  id?: string;
+  title: string;
+  authors?: Array<{ name: string }>;
+  publicationYear?: number | null;
+  journalName?: string | null;
+  doi?: string | null;
+  abstract?: string | null;
+};
 
 export type CiteSectionEditorHandle = {
   /** Insert citation(s) at the last caret position in the writing surface. */
@@ -300,6 +318,11 @@ const CiteSectionEditor = forwardRef<CiteSectionEditorHandle, CiteSectionEditorP
     const [filter, setFilter] = useState('');
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [locator, setLocator] = useState('');
+    const [litQuery, setLitQuery] = useState('');
+    const [litResults, setLitResults] = useState<LitSearchPaper[]>([]);
+    const [litLoading, setLitLoading] = useState(false);
+    const [litError, setLitError] = useState<string | null>(null);
+    const [litCitingId, setLitCitingId] = useState<string | null>(null);
     const [headingMenuOpen, setHeadingMenuOpen] = useState(false);
     const [focused, setFocused] = useState(false);
     const [prefsOpen, setPrefsOpen] = useState(false);
@@ -640,10 +663,73 @@ const CiteSectionEditor = forwardRef<CiteSectionEditorHandle, CiteSectionEditorP
       );
     };
 
+    const resetPickerState = () => {
+      setFilter('');
+      setSelectedIds([]);
+      setLocator('');
+      setLitQuery('');
+      setLitResults([]);
+      setLitError(null);
+      setLitLoading(false);
+      setLitCitingId(null);
+    };
+
     const openPicker = () => {
       captureSelection();
       setPickerOpen(true);
-      setCursorHint('Search and select papers, then Insert citation');
+      setCursorHint('Search literature or select draft papers, then Insert citation');
+    };
+
+    const runLitSearch = async () => {
+      const q = litQuery.trim();
+      if (!q) return;
+      setLitLoading(true);
+      setLitError(null);
+      try {
+        const apiBase = resolveApiBaseUrl();
+        const token = typeof localStorage !== 'undefined' ? getAuthToken() : null;
+        const res = await fetch(
+          `${apiBase}/research/search?q=${encodeURIComponent(q)}&limit=12`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          }
+        );
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Search failed');
+        setLitResults(data.papers || data.results || []);
+      } catch (e: unknown) {
+        setLitError(formatApiNetworkError(e) || (e as Error).message);
+        setLitResults([]);
+      } finally {
+        setLitLoading(false);
+      }
+    };
+
+    const citeLitPaper = async (paper: LitSearchPaper) => {
+      if (!onCiteSuggestedPaper || !paper.title) return;
+      const key = paper.id || paper.doi || paper.title;
+      setLitCitingId(key);
+      setLitError(null);
+      try {
+        await onCiteSuggestedPaper({
+          id: paper.id || paper.doi || `tmp-${Date.now()}`,
+          title: paper.title,
+          authors: paper.authors,
+          publicationYear: paper.publicationYear,
+          journalName: paper.journalName,
+          doi: paper.doi,
+          abstract: paper.abstract,
+        });
+        setPickerOpen(false);
+        resetPickerState();
+      } catch (e: unknown) {
+        setLitError(formatApiNetworkError(e) || (e as Error).message || 'Could not cite paper');
+      } finally {
+        setLitCitingId(null);
+      }
     };
 
     const insertSelected = () => {
@@ -653,9 +739,7 @@ const CiteSectionEditor = forwardRef<CiteSectionEditorHandle, CiteSectionEditorP
         selectedIds.length === 1 ? locator : undefined
       );
       setPickerOpen(false);
-      setFilter('');
-      setSelectedIds([]);
-      setLocator('');
+      resetPickerState();
     };
 
     const insertOne = (c: CitationRecord) => {
@@ -663,9 +747,7 @@ const CiteSectionEditor = forwardRef<CiteSectionEditorHandle, CiteSectionEditorP
       if (!id) return;
       insertTokenAtSelection([id], locator);
       setPickerOpen(false);
-      setFilter('');
-      setSelectedIds([]);
-      setLocator('');
+      resetPickerState();
     };
 
     useEffect(() => {
@@ -676,7 +758,10 @@ const CiteSectionEditor = forwardRef<CiteSectionEditorHandle, CiteSectionEditorP
           e.preventDefault();
           openPicker();
         }
-        if (e.key === 'Escape') setPickerOpen(false);
+        if (e.key === 'Escape') {
+          setPickerOpen(false);
+          resetPickerState();
+        }
       };
       window.addEventListener('keydown', onKey);
       return () => window.removeEventListener('keydown', onKey);
@@ -740,7 +825,10 @@ const CiteSectionEditor = forwardRef<CiteSectionEditorHandle, CiteSectionEditorP
                   ? 'ws-btn ws-btn-ghost p-1.5!'
                   : 'rounded-lg p-1 text-slate-400 hover:bg-slate-50'
               }
-              onClick={() => setPickerOpen(false)}
+              onClick={() => {
+                setPickerOpen(false);
+                resetPickerState();
+              }}
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
@@ -753,16 +841,91 @@ const CiteSectionEditor = forwardRef<CiteSectionEditorHandle, CiteSectionEditorP
                 : 'border-b border-slate-100 px-4 py-3'
             }
           >
+            <p
+              className={
+                isStudio
+                  ? 'mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--ws-ink-soft)]'
+                  : 'mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500'
+              }
+            >
+              Find sources
+            </p>
+            <div className="flex gap-2">
+              <div className="relative min-w-0 flex-1">
+                <MagnifyingGlassIcon
+                  className={
+                    isStudio
+                      ? 'pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ws-ink-soft)]'
+                      : 'pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400'
+                  }
+                />
+                <input
+                  value={litQuery}
+                  onChange={(e) => setLitQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      void runLitSearch();
+                    }
+                  }}
+                  placeholder="Search literature by topic, title, author, DOI…"
+                  className={
+                    isStudio
+                      ? 'ws-sources-input !pl-9'
+                      : 'w-full rounded-xl border border-slate-200 py-2.5 pl-9 pr-3 text-[14px] focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-100'
+                  }
+                  autoFocus
+                />
+              </div>
+              {isStudio ? (
+                <button
+                  type="button"
+                  className="ws-btn ws-btn-cobalt shrink-0"
+                  disabled={litLoading || !litQuery.trim()}
+                  onClick={() => void runLitSearch()}
+                >
+                  {litLoading ? 'Searching…' : 'Search'}
+                </button>
+              ) : (
+                <Button
+                  variant="primary"
+                  disabled={litLoading || !litQuery.trim()}
+                  onClick={() => void runLitSearch()}
+                >
+                  {litLoading ? 'Searching…' : 'Search'}
+                </Button>
+              )}
+            </div>
+            {litError ? (
+              <p
+                className={
+                  isStudio
+                    ? 'mt-2 text-[12px] text-red-700'
+                    : 'mt-2 text-[12px] text-red-600'
+                }
+              >
+                {litError}
+              </p>
+            ) : null}
+
+            <p
+              className={
+                isStudio
+                  ? 'mb-1.5 mt-3 text-[11px] font-semibold uppercase tracking-wide text-[var(--ws-ink-soft)]'
+                  : 'mb-1.5 mt-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500'
+              }
+            >
+              In this draft
+            </p>
             <input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder="Search by title, author, DOI, journal…"
+              placeholder="Filter draft papers by title, author, DOI, journal…"
               className={
                 isStudio
                   ? 'ws-sources-input'
                   : 'w-full rounded-xl border border-slate-200 px-3 py-2.5 text-[14px] focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-100'
               }
-              autoFocus
             />
             <input
               value={locator}
@@ -787,99 +950,211 @@ const CiteSectionEditor = forwardRef<CiteSectionEditorHandle, CiteSectionEditorP
             ) : null}
           </div>
 
-          <ul className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
-            {filtered.map((c) => {
-              const id = stableId(c);
-              const on = id && selectedIds.includes(id);
-              const previewLabel = id
-                ? formatCiteClusterDisplay([id], byId, citationStyle, {
-                    ...numberIndexById,
-                    [id]: numberIndexById[id] ?? orderedIds.length,
-                  })
-                : '';
-              return (
-                <li key={id || c.title}>
-                  <button
-                    type="button"
+          <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+            {(litLoading || litResults.length > 0 || (litQuery.trim() && !litLoading && !litError)) ? (
+              <div className="mb-2">
+                <p
+                  className={
+                    isStudio
+                      ? 'px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--ws-ink-soft)]'
+                      : 'px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500'
+                  }
+                >
+                  Literature results
+                </p>
+                {litLoading ? (
+                  <p
                     className={
                       isStudio
-                        ? `flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-[rgba(29,78,216,0.06)] ${
-                            on ? 'bg-[rgba(29,78,216,0.08)] ring-1 ring-[var(--ws-cobalt)]/30' : ''
-                          }`
-                        : `flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-teal-50 ${
-                            on ? 'bg-teal-50 ring-1 ring-teal-200' : ''
-                          }`
+                        ? 'px-4 py-4 text-center text-[13px] text-[var(--ws-ink-soft)]'
+                        : 'px-4 py-4 text-center text-[13px] text-slate-400'
                     }
-                    onClick={() => toggleSelect(c)}
-                    onDoubleClick={() => insertOne(c)}
                   >
-                    <span
+                    Searching literature…
+                  </p>
+                ) : litResults.length === 0 ? (
+                  <p
+                    className={
+                      isStudio
+                        ? 'px-4 py-4 text-center text-[13px] text-[var(--ws-ink-soft)]'
+                        : 'px-4 py-4 text-center text-[13px] text-slate-400'
+                    }
+                  >
+                    No literature matches. Try another query.
+                  </p>
+                ) : (
+                  <ul>
+                    {litResults.map((paper) => {
+                      const key = paper.id || paper.doi || paper.title;
+                      const citing = litCitingId === key;
+                      const authors = (paper.authors || [])
+                        .map((a) => a.name)
+                        .filter(Boolean)
+                        .slice(0, 3)
+                        .join(', ');
+                      return (
+                        <li key={key}>
+                          <div
+                            className={
+                              isStudio
+                                ? 'flex w-full items-start gap-3 rounded-xl px-3 py-2.5'
+                                : 'flex w-full items-start gap-3 rounded-xl px-3 py-2.5'
+                            }
+                          >
+                            <span className="min-w-0 flex-1">
+                              <span
+                                className={
+                                  isStudio
+                                    ? 'line-clamp-2 text-[13px] font-medium text-[var(--ws-ink)]'
+                                    : 'line-clamp-2 text-[13px] font-medium text-slate-900'
+                                }
+                              >
+                                {paper.title}
+                              </span>
+                              <span
+                                className={
+                                  isStudio
+                                    ? 'mt-0.5 block text-[12px] text-[var(--ws-ink-soft)]'
+                                    : 'mt-0.5 block text-[12px] text-slate-500'
+                                }
+                              >
+                                {authors || 'No authors listed'}
+                                {paper.publicationYear ? ` (${paper.publicationYear})` : ''}
+                                {paper.journalName ? ` · ${paper.journalName}` : ''}
+                              </span>
+                            </span>
+                            {onCiteSuggestedPaper ? (
+                              isStudio ? (
+                                <button
+                                  type="button"
+                                  className="ws-btn ws-btn-cobalt shrink-0 !px-2.5 !py-1.5 text-[12px]"
+                                  disabled={citing || litLoading}
+                                  onClick={() => void citeLitPaper(paper)}
+                                >
+                                  {citing ? 'Citing…' : 'Cite'}
+                                </button>
+                              ) : (
+                                <Button
+                                  variant="primary"
+                                  disabled={citing || litLoading}
+                                  onClick={() => void citeLitPaper(paper)}
+                                >
+                                  {citing ? 'Citing…' : 'Cite'}
+                                </Button>
+                              )
+                            ) : null}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            ) : null}
+
+            <p
+              className={
+                isStudio
+                  ? 'px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--ws-ink-soft)]'
+                  : 'px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500'
+              }
+            >
+              Draft papers
+            </p>
+            <ul>
+              {filtered.map((c) => {
+                const id = stableId(c);
+                const on = id && selectedIds.includes(id);
+                const previewLabel = id
+                  ? formatCiteClusterDisplay([id], byId, citationStyle, {
+                      ...numberIndexById,
+                      [id]: numberIndexById[id] ?? orderedIds.length,
+                    })
+                  : '';
+                return (
+                  <li key={id || c.title}>
+                    <button
+                      type="button"
                       className={
                         isStudio
-                          ? `mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[11px] ${
-                              on
-                                ? 'border-[var(--ws-cobalt)] bg-[var(--ws-cobalt)] text-white'
-                                : 'border-[var(--ws-rule-strong)] text-transparent'
+                          ? `flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-[rgba(29,78,216,0.06)] ${
+                              on ? 'bg-[rgba(29,78,216,0.08)] ring-1 ring-[var(--ws-cobalt)]/30' : ''
                             }`
-                          : `mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[11px] ${
-                              on
-                                ? 'border-teal-600 bg-teal-600 text-white'
-                                : 'border-slate-300 text-transparent'
+                          : `flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-teal-50 ${
+                              on ? 'bg-teal-50 ring-1 ring-teal-200' : ''
                             }`
                       }
+                      onClick={() => toggleSelect(c)}
+                      onDoubleClick={() => insertOne(c)}
                     >
-                      ✓
-                    </span>
-                    <span className="min-w-0 flex-1">
                       <span
                         className={
                           isStudio
-                            ? 'line-clamp-2 text-[13px] font-medium text-[var(--ws-ink)]'
-                            : 'line-clamp-2 text-[13px] font-medium text-slate-900'
+                            ? `mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[11px] ${
+                                on
+                                  ? 'border-[var(--ws-cobalt)] bg-[var(--ws-cobalt)] text-white'
+                                  : 'border-[var(--ws-rule-strong)] text-transparent'
+                              }`
+                            : `mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[11px] ${
+                                on
+                                  ? 'border-teal-600 bg-teal-600 text-white'
+                                  : 'border-slate-300 text-transparent'
+                              }`
                         }
                       >
-                        {c.title}
+                        ✓
                       </span>
-                      <span
-                        className={
-                          isStudio
-                            ? 'mt-0.5 block text-[12px] text-[var(--ws-ink-soft)]'
-                            : 'mt-0.5 block text-[12px] text-slate-500'
-                        }
-                      >
-                        {(c.authors || []).filter(Boolean).slice(0, 3).join(', ') ||
-                          'No authors listed'}
-                        {c.year ? ` (${c.year})` : ''}
-                        {c.journal ? ` · ${c.journal}` : ''}
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className={
+                            isStudio
+                              ? 'line-clamp-2 text-[13px] font-medium text-[var(--ws-ink)]'
+                              : 'line-clamp-2 text-[13px] font-medium text-slate-900'
+                          }
+                        >
+                          {c.title}
+                        </span>
+                        <span
+                          className={
+                            isStudio
+                              ? 'mt-0.5 block text-[12px] text-[var(--ws-ink-soft)]'
+                              : 'mt-0.5 block text-[12px] text-slate-500'
+                          }
+                        >
+                          {(c.authors || []).filter(Boolean).slice(0, 3).join(', ') ||
+                            'No authors listed'}
+                          {c.year ? ` (${c.year})` : ''}
+                          {c.journal ? ` · ${c.journal}` : ''}
+                        </span>
+                        <span
+                          className={
+                            isStudio
+                              ? 'mt-1 inline-block rounded bg-[rgba(11,28,44,0.06)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--ws-ink-soft)]'
+                              : 'mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-600'
+                          }
+                        >
+                          will show as {previewLabel}
+                        </span>
                       </span>
-                      <span
-                        className={
-                          isStudio
-                            ? 'mt-1 inline-block rounded bg-[rgba(11,28,44,0.06)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--ws-ink-soft)]'
-                            : 'mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-600'
-                        }
-                      >
-                        will show as {previewLabel}
-                      </span>
-                    </span>
-                  </button>
+                    </button>
+                  </li>
+                );
+              })}
+              {filtered.length === 0 ? (
+                <li
+                  className={
+                    isStudio
+                      ? 'px-4 py-8 text-center text-[13px] text-[var(--ws-ink-soft)]'
+                      : 'px-4 py-8 text-center text-[13px] text-slate-400'
+                  }
+                >
+                  {citations.length === 0
+                    ? 'No papers in this draft yet — search Find sources above, or add DOIs in Sources.'
+                    : 'No draft matches. Try another filter.'}
                 </li>
-              );
-            })}
-            {filtered.length === 0 ? (
-              <li
-                className={
-                  isStudio
-                    ? 'px-4 py-8 text-center text-[13px] text-[var(--ws-ink-soft)]'
-                    : 'px-4 py-8 text-center text-[13px] text-slate-400'
-                }
-              >
-                {citations.length === 0
-                  ? 'No papers in this draft yet — add DOIs in Sources first.'
-                  : 'No matches. Try another search.'}
-              </li>
-            ) : null}
-          </ul>
+              ) : null}
+            </ul>
+          </div>
 
           <div
             className={
@@ -897,6 +1172,7 @@ const CiteSectionEditor = forwardRef<CiteSectionEditorHandle, CiteSectionEditorP
               }
               onClick={() => {
                 setPickerOpen(false);
+                resetPickerState();
                 onOpenRefs?.();
               }}
             >
@@ -908,7 +1184,10 @@ const CiteSectionEditor = forwardRef<CiteSectionEditorHandle, CiteSectionEditorP
                   <button
                     type="button"
                     className="ws-btn ws-btn-ghost"
-                    onClick={() => setPickerOpen(false)}
+                    onClick={() => {
+                      setPickerOpen(false);
+                      resetPickerState();
+                    }}
                   >
                     Cancel
                   </button>
@@ -924,7 +1203,13 @@ const CiteSectionEditor = forwardRef<CiteSectionEditorHandle, CiteSectionEditorP
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => setPickerOpen(false)}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setPickerOpen(false);
+                      resetPickerState();
+                    }}
+                  >
                     Cancel
                   </Button>
                   <Button

@@ -68,6 +68,12 @@ export type ProtocolDetailModel = {
   difficulty_level?: string;
   estimated_duration?: number;
   privacy_level?: string;
+  source?: 'drm' | 'protocols.io' | 'adapted' | 'springer_protocols';
+  sourceUrl?: string;
+  doi?: string;
+  license?: string;
+  attribution?: string;
+  saved?: boolean;
 };
 
 type SimilarProtocol = {
@@ -89,6 +95,15 @@ type Props = {
   onTrackExperiment?: () => void;
   onCompare?: (protocolId: string) => void;
   onOptimized?: (result: unknown) => void;
+  onSaveExternal?: () => void;
+  onAdaptExternal?: () => void;
+  onSaveMetadata?: () => void;
+  onFindOpenAlternative?: () => void;
+  onFindLiterature?: () => void;
+  onLinkMethod?: () => void;
+  onOpenAlternative?: (item: { id: string; title: string; sourceLabel: string; kind: 'drm' | 'protocols.io' }) => void;
+  methodAlternatives?: Array<{ id: string; title: string; sourceLabel: string; kind: 'drm' | 'protocols.io' }>;
+  literatureNote?: string | null;
 };
 
 type SectionKey =
@@ -177,13 +192,27 @@ const ProtocolDetailView: React.FC<Props> = ({
   onTrackExperiment,
   onCompare,
   onOptimized,
+  onSaveExternal,
+  onAdaptExternal,
+  onSaveMetadata,
+  onFindOpenAlternative,
+  onFindLiterature,
+  onLinkMethod,
+  onOpenAlternative,
+  methodAlternatives = [],
+  literatureNote,
 }) => {
   const [copied, setCopied] = useState<'link' | 'id' | null>(null);
   const [activeSection, setActiveSection] = useState<SectionKey>('overview');
   const [showOptimize, setShowOptimize] = useState(false);
 
   const refCode = useMemo(() => protocolRefCode(protocol.id), [protocol.id]);
-  const shareUrl = useMemo(() => protocolShareUrl(protocol.id), [protocol.id]);
+  const shareUrl = useMemo(
+    () => ((protocol.source === 'protocols.io' || protocol.source === 'springer_protocols') && protocol.sourceUrl
+      ? protocol.sourceUrl
+      : protocolShareUrl(protocol.id)),
+    [protocol.id, protocol.source, protocol.sourceUrl]
+  );
   const embedUrl = useMemo(() => youtubeEmbedUrl(protocol.video_url), [protocol.video_url]);
   const contentSections = useMemo(
     () => parseContentSections(protocol.content),
@@ -314,6 +343,24 @@ const ProtocolDetailView: React.FC<Props> = ({
               <p className="mt-1.5 text-[13px] text-teal-50/85 line-clamp-2">
                 {protocol.description || objective || 'Structured laboratory method'}
               </p>
+              {protocol.attribution ? (
+                <p className="mt-3 rounded-lg bg-white/10 px-3 py-2 text-[12px] leading-relaxed text-white">
+                  {protocol.source === 'protocols.io'
+                    ? 'protocols.io · CC-BY. '
+                    : protocol.source === 'springer_protocols'
+                      ? 'SpringerProtocols metadata. '
+                      : 'Adapted DRM protocol. '}
+                  {protocol.attribution}
+                  {protocol.sourceUrl ? (
+                    <>
+                      {' '}
+                      <a className="underline" href={protocol.sourceUrl} target="_blank" rel="noreferrer">
+                        Original
+                      </a>
+                    </>
+                  ) : null}
+                </p>
+              ) : null}
               <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-teal-100/90">
                 {protocol.author ? <span>By {protocol.author}</span> : null}
                 <span className="inline-flex items-center gap-1">
@@ -750,6 +797,27 @@ const ProtocolDetailView: React.FC<Props> = ({
           </div>
         </div>
 
+        {literatureNote || methodAlternatives.length ? (
+          <div className="px-4 sm:px-6 py-3 border-t border-slate-200 bg-slate-50 text-[13px] text-slate-700">
+            {literatureNote ? <p>{literatureNote}</p> : null}
+            {methodAlternatives.length ? (
+              <div className="mt-2 space-y-1">
+                <p className="font-medium text-slate-900">Open alternatives</p>
+                {methodAlternatives.map((item) => (
+                  <button
+                    key={`${item.kind}-${item.id}`}
+                    type="button"
+                    className="block text-left text-teal-800 underline"
+                    onClick={() => onOpenAlternative?.(item)}
+                  >
+                    {item.sourceLabel}: {item.title}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
         {/* Footer actions */}
         <div className="shrink-0 border-t border-slate-200 bg-white/95 backdrop-blur px-4 sm:px-6 py-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -798,16 +866,51 @@ const ProtocolDetailView: React.FC<Props> = ({
                   Delete
                 </Button>
               ) : null}
-              {onCollaborate ? (
+              {onCollaborate && protocol.source !== 'protocols.io' && protocol.source !== 'springer_protocols' ? (
                 <Button variant="outline" onClick={onCollaborate}>
                   <UserGroupIcon className="w-4 h-4 mr-1.5" />
                   Collaborate
                 </Button>
               ) : null}
+              {onSaveExternal ? (
+                <Button variant="outline" onClick={onSaveExternal}>
+                  {protocol.saved ? 'Saved' : 'Save to library'}
+                </Button>
+              ) : null}
+              {onAdaptExternal ? (
+                <Button variant="outline" onClick={onAdaptExternal}>
+                  Adapt for my lab
+                </Button>
+              ) : null}
+              {protocol.source === 'springer_protocols' && protocol.sourceUrl ? (
+                <Button variant="outline" onClick={() => window.open(protocol.sourceUrl, '_blank', 'noopener,noreferrer')}>
+                  Open source
+                </Button>
+              ) : null}
+              {onSaveMetadata ? (
+                <Button variant="outline" onClick={onSaveMetadata}>
+                  Save metadata
+                </Button>
+              ) : null}
+              {onFindOpenAlternative ? (
+                <Button variant="outline" onClick={onFindOpenAlternative}>
+                  Find open alternative
+                </Button>
+              ) : null}
+              {onFindLiterature ? (
+                <Button variant="outline" onClick={onFindLiterature}>
+                  Find related literature
+                </Button>
+              ) : null}
+              {onLinkMethod ? (
+                <Button variant="outline" onClick={onLinkMethod}>
+                  Link to experiment
+                </Button>
+              ) : null}
               {onTrackExperiment ? (
                 <Button variant="outline" onClick={onTrackExperiment}>
                   <BeakerIcon className="w-4 h-4 mr-1.5" />
-                  Track experiment
+                  {protocol.source === 'protocols.io' ? 'Use in experiment' : 'Track experiment'}
                 </Button>
               ) : null}
               <Button variant="outline" onClick={() => setShowOptimize(true)}>
@@ -830,6 +933,15 @@ const ProtocolDetailView: React.FC<Props> = ({
 
       {showOptimize && (
         <ProtocolAIAssistant
+          contentOrigin={
+            protocol.source === 'protocols.io'
+              ? 'original'
+              : protocol.source === 'springer_protocols'
+                ? 'springer'
+                : protocol.source === 'adapted'
+                  ? 'adaptation'
+                  : 'drm'
+          }
           protocol={{
             id: protocol.id,
             title: protocol.title,

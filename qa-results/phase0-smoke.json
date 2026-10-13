@@ -1,0 +1,59 @@
+{
+  "startedAt": "2026-08-04T20:11:31.284Z",
+  "checks": [
+    {
+      "name": "frontend",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "health",
+      "ok": true,
+      "status": 200,
+      "database": "MySQL"
+    },
+    {
+      "name": "bad_login",
+      "ok": true,
+      "status": 401
+    },
+    {
+      "name": "demo_login",
+      "ok": true,
+      "status": 200,
+      "hasToken": true,
+      "role": "researcher"
+    },
+    {
+      "name": "auth_me",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "notebook_list",
+      "ok": false,
+      "status": 404,
+      "bodyPreview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</tit"
+    },
+    {
+      "name": "protocols_list",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "admin_self_register_blocked",
+      "ok": true,
+      "status": 400,
+      "role": null,
+      "error": "Invalid input: expected string, received undefined"
+    },
+    {
+      "name": "weak_password_rejected",
+      "ok": true,
+      "status": 400
+    }
+  ],
+  "passed": 8,
+  "failed": 1,
+  "verdict": "FAIL"
+}

@@ -1,0 +1,44 @@
+-- Safety systems tables (MySQL)
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS approval_requests (
+  id VARCHAR(64) PRIMARY KEY,
+  requester_id VARCHAR(64),
+  status VARCHAR(100) DEFAULT 'pending',
+  details TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id VARCHAR(64) PRIMARY KEY,
+  user_id VARCHAR(64),
+  action VARCHAR(255),
+  entity_type VARCHAR(255),
+  entity_id VARCHAR(64),
+  details TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS action_snapshots (
+  id VARCHAR(64) PRIMARY KEY,
+  user_id VARCHAR(64),
+  action VARCHAR(255),
+  snapshot_data TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS rollback_requests (
+  id VARCHAR(64) PRIMARY KEY,
+  requester_id VARCHAR(64),
+  status VARCHAR(100) DEFAULT 'pending',
+  reason TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+SET FOREIGN_KEY_CHECKS = 1;

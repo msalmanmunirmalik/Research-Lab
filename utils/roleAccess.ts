@@ -1,4 +1,4 @@
-// Role-based access control system
+// UI hints only. Notebooks, protocols, experiments, and evidence are authorized on the server.
 export interface RolePermissions {
   canManageUsers: boolean;
   canManageLabs: boolean;
@@ -22,6 +22,7 @@ export interface RolePermissions {
 export const ROLE_HIERARCHY = {
   'student': 1,
   'researcher': 2,
+  'co_supervisor': 3,
   'principal_researcher': 3,
   'admin': 4
 } as const;
@@ -108,7 +109,10 @@ export const ROUTE_ACCESS = {
   '/writing-studio': { minRole: 'student' },
   '/data-sharing': { minRole: 'student' },
   '/conferences': { minRole: 'student' },
+  '/data-analysis': { minRole: 'student' },
   '/data-analytics': { minRole: 'student' },
+  '/lab-workspace': { minRole: 'student' },
+  '/project-management': { minRole: 'student' },
 } as const;
 
 // Check if user can access a specific route

@@ -9,6 +9,7 @@ import { EventEmitter } from 'events';
 import pool from '../../../database/config.js';
 import { createNotification } from '../notifications/notificationService.js';
 import { WritingDraftContent } from '../../../utils/writingTemplates.js';
+import { sendEmail } from '../../integrations/email.js';
 
 export type CollabRole = 'owner' | 'editor' | 'viewer';
 export type AccessScope = 'entire' | 'sections';
@@ -76,20 +77,24 @@ export async function queueInviteEmail(opts: {
   sectionIds: string[];
   url: string;
   message?: string | null;
-}): Promise<{ sent: boolean; logged: boolean }> {
-  const lines = [
-    `${opts.inviterName} invited you to Write Together on “${opts.documentTitle}”.`,
-    `Role: ${opts.role}`,
+}): Promise<{ sent: boolean; logged: boolean; delivered: boolean }> {
+  const access =
     opts.accessScope === 'entire'
-      ? 'Access: entire manuscript'
-      : `Access: sections — ${opts.sectionIds.join(', ') || '(none)'}`,
-    opts.message ? `Note: ${opts.message}` : '',
-    `Join: ${opts.url}`,
-  ].filter(Boolean);
-
-  console.log(`Write Together invite → ${opts.toEmail}\n${lines.join('\n')}`);
-  // SMTP is not wired; callers must share the invite link / rely on in-app notification.
-  return { sent: false, logged: true };
+      ? 'entire manuscript'
+      : `sections — ${opts.sectionIds.join(', ') || '(none)'}`;
+  const result = await sendEmail({
+    to: opts.toEmail,
+    template: 'writing_invite',
+    vars: {
+      inviterName: opts.inviterName,
+      documentTitle: opts.documentTitle,
+      role: opts.role,
+      access,
+      note: opts.message || '',
+      joinUrl: opts.url,
+    },
+  });
+  return { sent: result.delivered, logged: !result.delivered, delivered: result.delivered };
 }
 
 export class WritingCollabService {
@@ -351,13 +356,14 @@ export class WritingCollabService {
       });
     }
 
+    let emailDelivered = false;
     if (opts.email) {
       const doc = await this.getDocumentRow(opts.documentId);
       const inviter = await pool.query(
         `SELECT first_name, last_name, username, email FROM users WHERE id = $1`,
         [opts.invitedBy]
       );
-      await queueInviteEmail({
+      const mailed = await queueInviteEmail({
         toEmail: opts.email,
         inviterName: displayNameFromUser(inviter.rows?.[0] || {}),
         documentTitle: doc?.title || 'Untitled manuscript',
@@ -367,6 +373,7 @@ export class WritingCollabService {
         url: inviteUrl(token),
         message: opts.message,
       });
+      emailDelivered = mailed.delivered;
 
       // If email matches a platform user, also notify in-app
       const byEmail = await pool.query(`SELECT id FROM users WHERE email = $1 LIMIT 1`, [
@@ -393,6 +400,7 @@ export class WritingCollabService {
       delivery: {
         inApp: Boolean(opts.invitedUserId),
         emailQueued: Boolean(opts.email),
+        emailDelivered,
         shareLink: true,
       },
     };

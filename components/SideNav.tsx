@@ -15,12 +15,8 @@ import {
   DocumentTextIcon,
   WrenchScrewdriverIcon,
   AcademicCapIcon,
-  CalendarIcon,
-  FireIcon,
-  ChatBubbleLeftRightIcon,
   BarChartIcon,
   FlaskConicalIcon,
-  SparklesIcon,
   HeartIcon,
 } from './icons';
 
@@ -43,7 +39,7 @@ interface NavSection {
   items: NavItem[];
 }
 
-/** RILOS seven-pillar IA — see docs/RILOS_ALIGNMENT_PLAN.md */
+/** Primary signed-in IA — see docs/RILOS_ALIGNMENT_PLAN.md */
 const navSections: NavSection[] = [
   {
     items: [
@@ -52,6 +48,46 @@ const navSections: NavSection[] = [
         to: '/dashboard',
         icon: PresentationChartLineIcon,
         description: 'Notes, reminders, and research pulse',
+      },
+    ],
+  },
+  {
+    label: 'Records',
+    items: [
+      {
+        name: 'Experiments',
+        to: '/experiment-tracker',
+        icon: FlaskConicalIcon,
+        description: 'Design studies, link methods, capture findings',
+      },
+      {
+        name: 'Data & Results',
+        to: '/data-results',
+        icon: ChartBarIcon,
+        description: 'Curated results with provenance and interpretation',
+      },
+      {
+        name: 'Notebook',
+        to: '/lab-notebook',
+        icon: BookOpenIcon,
+        description: 'Personal notes — ideas, problems, and import',
+      },
+    ],
+  },
+  {
+    label: 'Lab workspace',
+    items: [
+      {
+        name: 'Workspace',
+        to: '/lab-workspace',
+        icon: Squares2X2Icon,
+        description: 'Tasks, projects, resources, team, and messaging',
+      },
+      {
+        name: 'Trainings',
+        to: '/tools-trainings',
+        icon: AcademicCapIcon,
+        description: 'Lab orientation, safety, techniques, and skill courses',
       },
       {
         name: 'Wellbeing',
@@ -65,67 +101,16 @@ const navSections: NavSection[] = [
     label: 'Intelligence',
     items: [
       {
-        name: 'Grants & funding',
-        to: '/grants-fundings',
-        icon: BriefcaseIcon,
-        description: 'Discover grants, funding calls, and matches',
+        name: 'Data analysis',
+        to: '/data-analysis',
+        icon: BarChartIcon,
+        description: 'Statistical analysis and visualization',
       },
       {
         name: 'Literature',
         to: '/writing-studio/tools/library',
         icon: BookOpenIcon,
         description: 'Evidence and reference library in Writing Studio',
-      },
-    ],
-  },
-  {
-    label: 'Lab',
-    items: [
-      {
-        name: 'Lab workspace',
-        to: '/lab-workspace',
-        icon: Squares2X2Icon,
-        description: 'Tasks, projects, resources, team, and messaging',
-      },
-      {
-        name: 'Experiments',
-        to: '/experiment-tracker',
-        icon: FlaskConicalIcon,
-        description: 'Plan and track experiments from hypothesis to completion',
-      },
-    ],
-  },
-  {
-    label: 'Records',
-    items: [
-      {
-        name: 'Protocols',
-        to: '/protocols',
-        icon: BeakerIcon,
-        description: 'Reusable methods, SOPs, and step execution',
-      },
-      {
-        name: 'Notebook',
-        to: '/lab-notebook',
-        icon: BookOpenIcon,
-        description: 'Document experiments, ideas, and lab notes',
-      },
-      {
-        name: 'Evidence',
-        to: '/data-results',
-        icon: ChartBarIcon,
-        description: 'Curated results with provenance and interpretation',
-      },
-    ],
-  },
-  {
-    label: 'Analyze & write',
-    items: [
-      {
-        name: 'Analysis',
-        to: '/data-analysis',
-        icon: BarChartIcon,
-        description: 'Statistical analysis and visualization',
       },
       {
         name: 'Writing studio',
@@ -140,6 +125,18 @@ const navSections: NavSection[] = [
         icon: WrenchScrewdriverIcon,
         description: 'Calculators and designers for lab work',
       },
+      {
+        name: 'Databank',
+        to: '/research-databank',
+        icon: DatabaseIcon,
+        description: 'Cross-org ethical dataset exchange',
+      },
+      {
+        name: 'Grants & funding',
+        to: '/grants-fundings',
+        icon: BriefcaseIcon,
+        description: 'Discover grants, funding calls, and matches',
+      },
     ],
   },
   {
@@ -152,51 +149,10 @@ const navSections: NavSection[] = [
         description: 'Connect with researchers and labs',
       },
       {
-        name: 'Data bank',
-        to: '/research-databank',
-        icon: DatabaseIcon,
-        description: 'Cross-org ethical dataset exchange',
-      },
-      {
         name: 'Marketplace',
         to: '/marketplace',
         icon: PackageIcon,
         description: 'Supplies, expertise, and tenders directory',
-      },
-      {
-        name: 'Negative results',
-        to: '/negative-results',
-        icon: FireIcon,
-        description: 'Share failed experiments and earn transparency credit',
-      },
-      {
-        name: 'Events',
-        to: '/events-opportunities',
-        icon: CalendarIcon,
-        description: 'Conferences, exchanges, and summer schools',
-      },
-      {
-        name: 'Help forum',
-        to: '/help-forum',
-        icon: ChatBubbleLeftRightIcon,
-        description: 'Ask peers for protocol help and lab advice',
-      },
-    ],
-  },
-  {
-    label: 'Learn',
-    items: [
-      {
-        name: 'Lab Floors',
-        to: '/lab-floors',
-        icon: SparklesIcon,
-        description: 'Practice starting in research through scenarios and roleplay',
-      },
-      {
-        name: 'Trainings',
-        to: '/tools-trainings',
-        icon: AcademicCapIcon,
-        description: 'Lab orientation, safety, techniques, and skill courses',
       },
     ],
   },

@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import pool from "../../database/config.js";
 import { assertAuthEnvironment, getRequiredJwtSecret } from '../utils/authEnvironment.js';
+import { isTokenRevoked } from '../utils/tokenRevocation.js';
 
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -80,10 +81,11 @@ export const authenticateToken = async (
       return next();
     }
 
-    const payload = jwt.verify(token, JWT_SECRET) as { userId: string };
+    const payload = jwt.verify(token, JWT_SECRET) as { userId: string; iat?: number };
     const result = await pool.query(
-      `SELECT id, email, username, first_name, last_name, role, status 
-       FROM users 
+      `SELECT id, email, username, first_name, last_name, role, status,
+              UNIX_TIMESTAMP(tokens_invalid_before) AS tokens_invalid_before_unix
+       FROM users
        WHERE id = $1`,
       [payload.userId]
     );
@@ -96,6 +98,10 @@ export const authenticateToken = async (
 
     if (user.status && user.status !== 'active') {
       return res.status(403).json({ error: 'Account is not active' });
+    }
+
+    if (isTokenRevoked(payload.iat, user.tokens_invalid_before_unix)) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
     }
 
     req.user = {

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-  FEATURED_TOOL_IDS,
   KIND_LABEL,
   LAB_TOOLS,
   TOOL_CATEGORIES,
@@ -12,7 +11,10 @@ import {
   getToolById,
 } from '../utils/toolCatalog';
 import { ToolResultsPanel } from '../components/tools/ToolVisuals';
-import { MagnifyingGlassIcon } from '../components/icons';
+import { PageHeader } from '../components/PageHeader';
+import { MagnifyingGlassIcon, WrenchScrewdriverIcon } from '../components/icons';
+import '../styles/toolsTrainings.css';
+import '../styles/researchTools.css';
 
 const KIND_FILTER: { id: ToolKind | 'all'; label: string }[] = [
   { id: 'all', label: 'All kinds' },
@@ -55,7 +57,7 @@ const ResearchToolsPage: React.FC = () => {
     }
     if (tabParam === 'bioinformatics' || tabParam === 'sequence') return 'sequence-browser';
     if (tabParam === 'molecular') return 'primer-designer';
-    return 'primer-designer';
+    return 'dilution';
   });
   const [values, setValues] = useState<Record<string, string>>({});
 
@@ -102,8 +104,6 @@ const ResearchToolsPage: React.FC = () => {
 
   const result = useMemo(() => active.compute(values), [active, values]);
 
-  const featured = FEATURED_TOOL_IDS.map((id) => getToolById(id)).filter(Boolean) as ToolDef[];
-
   const selectTool = (id: string, keepWorkflow = false) => {
     setActiveId(id);
     if (!keepWorkflow) setActiveWorkflow(null);
@@ -112,6 +112,10 @@ const ResearchToolsPage: React.FC = () => {
   };
 
   const startWorkflow = (id: string) => {
+    if (!id) {
+      setActiveWorkflow(null);
+      return;
+    }
     const kit = WORKFLOW_KITS.find((w) => w.id === id);
     if (!kit) return;
     setActiveWorkflow(id);
@@ -127,109 +131,44 @@ const ResearchToolsPage: React.FC = () => {
   };
 
   const workflowStepIndex = workflow ? workflow.toolIds.indexOf(activeId) : -1;
+  const categoryLabel =
+    TOOL_CATEGORIES.find((c) => c.id === active.category)?.label || active.category;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
-            Bench toolkit
-          </p>
-          <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Tools library</h1>
-              <p className="mt-1 max-w-2xl text-sm text-slate-600">
-                Calculators, designers, and simulators with live charts - organized around how
-                experiments actually get planned at the bench.
-              </p>
-            </div>
-            <div className="relative w-full sm:max-w-xs">
-              <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search tools…"
-                className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm focus:border-slate-400 focus:outline-none"
-              />
-            </div>
+    <div className="tt-page space-y-5">
+      <PageHeader
+        title="Research tools"
+        subtitle="Calculators and designers for solutions, sequences, and cell work. Results update as you type."
+        accent="teal"
+        icon={<WrenchScrewdriverIcon />}
+        actions={
+          <div className="rt-search">
+            <MagnifyingGlassIcon />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search tools…"
+              className="tt-input"
+              aria-label="Search tools"
+            />
           </div>
+        }
+      />
 
-          <div className="mt-5">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-              Experiment kits
-            </p>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {WORKFLOW_KITS.map((w) => (
-                <button
-                  key={w.id}
-                  type="button"
-                  onClick={() => startWorkflow(w.id)}
-                  className={`shrink-0 rounded-lg border px-3 py-2 text-left transition-colors ${
-                    activeWorkflow === w.id
-                      ? 'border-slate-900 bg-slate-900 text-white'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="text-sm font-medium">{w.name}</div>
-                  <div
-                    className={`mt-0.5 max-w-[14rem] text-[11px] ${
-                      activeWorkflow === w.id ? 'text-slate-300' : 'text-slate-500'
-                    }`}
-                  >
-                    {w.summary}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-              Jump to tool
-            </p>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {featured.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => selectTool(t.id)}
-                  className={`shrink-0 rounded-lg border px-3 py-2 text-left transition-colors ${
-                    activeId === t.id && !activeWorkflow
-                      ? 'border-slate-900 bg-slate-900 text-white'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="text-[10px] font-medium uppercase tracking-wide opacity-70">
-                    {KIND_LABEL[t.kind]}
-                  </div>
-                  <div className="text-sm font-medium">{t.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="mx-auto grid max-w-7xl gap-4 px-4 py-6 lg:grid-cols-[260px_minmax(0,1fr)_minmax(280px,340px)] sm:px-6 lg:px-8">
-        <aside className="space-y-3">
+      <div className="rt-layout">
+        <aside className="rt-aside">
           {workflow ? (
-            <div className="rounded-xl border border-slate-200 bg-white p-3">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                    Kit in progress
-                  </p>
-                  <p className="text-sm font-semibold text-slate-900">{workflow.name}</p>
+            <div className="tt-panel">
+              <div className="rt-kit-top">
+                <div className="min-w-0">
+                  <p className="tt-kicker">Kit</p>
+                  <p className="truncate text-sm font-semibold">{workflow.name}</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveWorkflow(null)}
-                  className="text-[10px] font-medium uppercase tracking-wide text-slate-400 hover:text-slate-700"
-                >
-                  Exit
+                <button type="button" onClick={() => setActiveWorkflow(null)} className="tt-link">
+                  Exit kit
                 </button>
               </div>
-              <ol className="mt-3 space-y-1">
+              <ol className="rt-kit-steps">
                 {workflow.toolIds.map((id, i) => {
                   const t = getToolById(id);
                   if (!t) return null;
@@ -238,24 +177,16 @@ const ResearchToolsPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => selectTool(id, true)}
-                        className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs ${
-                          activeId === id
-                            ? 'bg-slate-900 text-white'
-                            : 'text-slate-600 hover:bg-slate-50'
-                        }`}
+                        className={`rt-kit-step ${activeId === id ? 'is-active' : ''}`}
                       >
                         <span
-                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${
-                            activeId === id
-                              ? 'bg-white text-slate-900'
-                              : i < workflowStepIndex
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-slate-100 text-slate-500'
+                          className={`rt-kit-num ${
+                            activeId !== id && i < workflowStepIndex ? 'is-done' : ''
                           }`}
                         >
                           {i + 1}
                         </span>
-                        {t.name}
+                        <span className="truncate">{t.name}</span>
                       </button>
                     </li>
                   );
@@ -263,106 +194,100 @@ const ResearchToolsPage: React.FC = () => {
               </ol>
             </div>
           ) : (
-            <>
-              <div className="flex flex-wrap gap-1">
-                {TOOL_CATEGORIES.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => setCategory(c.id)}
-                    className={`rounded-md px-2 py-1 text-xs font-medium ${
-                      category === c.id
-                        ? 'bg-slate-900 text-white'
-                        : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {KIND_FILTER.map((k) => (
-                  <button
-                    key={k.id}
-                    type="button"
-                    onClick={() => setKind(k.id)}
-                    className={`rounded-md px-2 py-1 text-xs font-medium ${
-                      kind === k.id
-                        ? 'bg-slate-700 text-white'
-                        : 'border border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
-                    }`}
-                  >
-                    {k.label}
-                  </button>
-                ))}
-              </div>
-            </>
+            <div className="tt-panel rt-filters">
+              <label>
+                <span className="rt-field-label">Kit</span>
+                <select
+                  value=""
+                  onChange={(e) => startWorkflow(e.target.value)}
+                  className="tt-input"
+                >
+                  <option value="">None — browse all tools</option>
+                  {WORKFLOW_KITS.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span className="rt-field-label">Category</span>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as ToolCategoryId | 'all')}
+                  className="tt-input"
+                >
+                  {TOOL_CATEGORIES.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span className="rt-field-label">Kind</span>
+                <select
+                  value={kind}
+                  onChange={(e) => setKind(e.target.value as ToolKind | 'all')}
+                  className="tt-input"
+                >
+                  {KIND_FILTER.map((k) => (
+                    <option key={k.id} value={k.id}>
+                      {k.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
           )}
 
-          <nav className="max-h-[70vh] space-y-0.5 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1">
-            {filtered.length === 0 && (
-              <p className="px-3 py-8 text-center text-xs text-slate-500">No matching tools</p>
-            )}
+          <nav className="rt-tool-list" aria-label="Tools">
+            {filtered.length === 0 ? (
+              <p className="rt-empty">No matching tools</p>
+            ) : null}
             {filtered.map((t) => (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => selectTool(t.id, Boolean(workflow))}
-                className={`w-full rounded-lg px-3 py-2.5 text-left ${
-                  activeId === t.id ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-                }`}
+                className={`rt-tool-item ${activeId === t.id ? 'is-active' : ''}`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium">{t.name}</span>
-                  <span className="shrink-0 text-[10px] uppercase tracking-wide text-slate-400">
-                    {KIND_LABEL[t.kind]}
-                  </span>
+                <div className="rt-tool-item-head">
+                  <strong>{t.name}</strong>
+                  <span>{KIND_LABEL[t.kind]}</span>
                 </div>
-                <div className="mt-0.5 line-clamp-2 text-[11px] text-slate-500">{t.summary}</div>
+                <p>{t.summary}</p>
               </button>
             ))}
           </nav>
         </aside>
 
-        <section className="rounded-xl border border-slate-200 bg-white">
-          <div className="border-b border-slate-200 px-5 py-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
-                  {KIND_LABEL[active.kind]}
-                </span>
-                <span className="text-[10px] uppercase tracking-wide text-slate-400">
-                  {TOOL_CATEGORIES.find((c) => c.id === active.category)?.label}
-                </span>
-              </div>
-              {active.sample && (
-                <button
-                  type="button"
-                  onClick={loadSample}
-                  className="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                >
-                  Load example
-                </button>
-              )}
+        <section className="tt-panel">
+          <div className="rt-workspace-head">
+            <div className="min-w-0">
+              <p className="tt-kicker">
+                {KIND_LABEL[active.kind]} · {categoryLabel}
+              </p>
+              <h2>{active.name}</h2>
+              <p className="rt-summary">{active.summary}</p>
+              {active.formula ? <p className="rt-formula">{active.formula}</p> : null}
             </div>
-            <h2 className="mt-2 text-lg font-semibold text-slate-900">{active.name}</h2>
-            <p className="mt-1 text-sm text-slate-500">{active.summary}</p>
-            {active.formula && (
-              <p className="mt-2 font-mono text-xs text-slate-600">{active.formula}</p>
-            )}
+            {active.sample ? (
+              <button type="button" onClick={loadSample} className="tt-btn tt-btn-ghost">
+                Load example
+              </button>
+            ) : null}
           </div>
 
-          <div className="grid gap-3 p-5 sm:grid-cols-2">
+          <div className="rt-fields">
             {active.fields.map((field) => (
               <label
                 key={field.id}
-                className={`block ${field.kind === 'text' ? 'sm:col-span-2' : ''}`}
+                className={field.kind === 'text' ? 'rt-span-2' : undefined}
               >
-                <span className="text-sm text-slate-700">
+                <span className="rt-label">
                   {field.label}
-                  {field.unit ? (
-                    <span className="ml-1 text-xs text-slate-400">({field.unit})</span>
-                  ) : null}
+                  {field.unit ? <span className="rt-unit">({field.unit})</span> : null}
                 </span>
                 {field.kind === 'text' ? (
                   <textarea
@@ -372,7 +297,7 @@ const ResearchToolsPage: React.FC = () => {
                     }
                     rows={5}
                     placeholder={field.placeholder}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm focus:border-slate-400 focus:outline-none"
+                    className="tt-input"
                   />
                 ) : field.kind === 'select' ? (
                   <select
@@ -380,7 +305,7 @@ const ResearchToolsPage: React.FC = () => {
                     onChange={(e) =>
                       setValues((prev) => ({ ...prev, [field.id]: e.target.value }))
                     }
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-slate-400 focus:outline-none"
+                    className="tt-input"
                   >
                     {field.options?.map((o) => (
                       <option key={o.value} value={o.value}>
@@ -397,40 +322,33 @@ const ResearchToolsPage: React.FC = () => {
                       setValues((prev) => ({ ...prev, [field.id]: e.target.value }))
                     }
                     placeholder={field.placeholder}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-slate-400 focus:outline-none"
+                    className="tt-input"
                   />
                 )}
-                {field.hint && <span className="mt-1 block text-xs text-slate-400">{field.hint}</span>}
+                {field.hint ? <span className="rt-hint">{field.hint}</span> : null}
               </label>
             ))}
           </div>
 
-          {workflow && workflowStepIndex >= 0 && workflowStepIndex < workflow.toolIds.length - 1 && (
-            <div className="border-t border-slate-200 px-5 py-3">
+          <div>
+            <p className="tt-kicker rt-result-kicker">Result</p>
+            <ToolResultsPanel result={result} />
+          </div>
+
+          {workflow &&
+          workflowStepIndex >= 0 &&
+          workflowStepIndex < workflow.toolIds.length - 1 ? (
+            <div className="rt-footer-actions">
               <button
                 type="button"
                 onClick={() => selectTool(workflow.toolIds[workflowStepIndex + 1], true)}
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+                className="tt-btn tt-btn-primary"
               >
-                Next in kit → {getToolById(workflow.toolIds[workflowStepIndex + 1])?.name}
+                Next: {getToolById(workflow.toolIds[workflowStepIndex + 1])?.name}
               </button>
             </div>
-          )}
+          ) : null}
         </section>
-
-        <aside className="rounded-xl border border-slate-200 bg-white">
-          <div className="border-b border-slate-200 px-4 py-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Live output
-            </h3>
-            <p className="mt-0.5 text-xs text-slate-400">
-              Charts, scores, and copyable sequences update as you type
-            </p>
-          </div>
-          <div className="max-h-[70vh] overflow-y-auto p-4">
-            <ToolResultsPanel result={result} />
-          </div>
-        </aside>
       </div>
     </div>
   );

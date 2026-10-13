@@ -18,7 +18,7 @@ function setIf(params: URLSearchParams, key: string, value?: string | null) {
 
 /** Open experiment tracker prefilled from a protocol (or title/DOI). */
 export function experimentFromProtocolUrl(ids: ChainIds & { methodDoi?: string; methodUrl?: string }): string {
-  const params = new URLSearchParams();
+  const params = new URLSearchParams({ startRun: '1' });
   setIf(params, 'protocolId', ids.protocolId);
   setIf(params, 'title', ids.title);
   setIf(params, 'methodDoi', ids.methodDoi);
@@ -45,6 +45,21 @@ export function evidenceFromRecordUrl(ids: ChainIds): string {
   setIf(params, 'title', ids.title);
   setIf(params, 'summary', ids.summary);
   return `/data-results?${params.toString()}`;
+}
+
+/**
+ * Full-page result workspace.
+ * Prefer experiment-scoped route when experimentId is known.
+ */
+export function resultWorkspaceUrl(ids: {
+  resultId: string;
+  experimentId?: string | null;
+}): string {
+  const resultId = encodeURIComponent(ids.resultId);
+  if (ids.experimentId) {
+    return `/experiments/${encodeURIComponent(ids.experimentId)}/results/${resultId}`;
+  }
+  return `/data-results/${resultId}`;
 }
 
 /** Open Writing Studio desk with a notice that evidence can be cited. */

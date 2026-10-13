@@ -1,0 +1,19 @@
+
+Running 14 tests using 4 workers
+
+  ✓   1 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:7:3 › Authentication › displays login form (2.1s)
+  ✓   2 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:22:3 › Authentication › logs in with demo credentials (2.5s)
+  ✓   4 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:26:3 › Authentication › logs out successfully (2.7s)
+  ✓   7 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:53:3 › API Smoke › health endpoint responds (78ms)
+  ✓   8 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:58:3 › API Smoke › demo login returns token (36ms)
+  ✓   3 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:14:3 › Authentication › rejects invalid credentials (3.5s)
+  ✓   5 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:40:3 › Navigation › opens Personal NoteBook from sidebar (1.8s)
+  ✓   6 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:45:3 › Navigation › opens protocol library from sidebar (1.8s)
+  ✓   9 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:11:3 › Personal NoteBook Module › shows Personal NoteBook overview (2.0s)
+  ✓  10 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:16:3 › Personal NoteBook Module › supports entry search interaction (1.7s)
+  ✓  11 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:21:3 › Personal NoteBook Module › shows entry type selections (2.0s)
+  ✓  12 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:11:3 › Professional Protocols Module › renders protocol library overview (2.1s)
+  ✓  13 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:21:3 › Professional Protocols Module › filters protocols using search (2.0s)
+  ✓  14 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:27:3 › Professional Protocols Module › shows empty or results state without crashing (1.6s)
+
+  14 passed (9.5s)

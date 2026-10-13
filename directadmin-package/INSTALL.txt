@@ -1,0 +1,9 @@
+DirectAdmin quick install
+========================
+1. Extract this zip into your Node.js Application root.
+2. Copy env.directadmin.example → .env and edit secrets + MySQL.
+3. pnpm install --prod   (or: npm install --omit=dev)
+4. In DirectAdmin Node.js App: startup file = app.js, mode = Production.
+5. Restart the app. Open https://YOUR-DOMAIN/api/health
+
+Built with VITE_API_URL=/api

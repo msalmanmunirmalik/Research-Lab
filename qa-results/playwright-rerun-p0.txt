@@ -1,0 +1,210 @@
+
+Running 14 tests using 4 workers
+
+  ✓   4 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:7:3 › Authentication › displays login form (2.7s)
+  ✓   1 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:22:3 › Authentication › logs in with demo credentials (3.0s)
+  ✓   3 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:14:3 › Authentication › rejects invalid credentials (3.1s)
+  ✓   7 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:53:3 › API Smoke › health endpoint responds (80ms)
+  ✓   2 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:26:3 › Authentication › logs out successfully (3.3s)
+  ✓   8 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:58:3 › API Smoke › demo login returns token (26ms)
+  ✓   5 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:40:3 › Navigation › opens Personal NoteBook from sidebar (1.6s)
+  ✓   6 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:45:3 › Navigation › opens protocol library from sidebar (1.7s)
+  ✘  10 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:9:3 › Personal NoteBook Module › shows Personal NoteBook overview (7.3s)
+  ✘  11 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:21:3 › Personal NoteBook Module › shows entry type selections (6.7s)
+  ✘  12 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:11:3 › Professional Protocols Module › renders protocol library overview (7.1s)
+  ✘   9 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:16:3 › Personal NoteBook Module › supports entry search interaction (30.2s)
+  ✘  13 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:19:3 › Professional Protocols Module › filters protocols using search (31.1s)
+  ✘  14 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:26:3 › Professional Protocols Module › opens protocol detail modal (31.1s)
+
+
+  1) [chromium] › tests/e2e/lab-notebook.pw.spec.ts:9:3 › Personal NoteBook Module › shows Personal NoteBook overview 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByTestId('lab-notebook-heading')
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('lab-notebook-heading')[22m
+
+
+       8 |
+       9 |   test('shows Personal NoteBook overview', async ({ page }) => {
+    > 10 |     await expect(page.getByTestId('lab-notebook-heading')).toBeVisible();
+         |                                                            ^
+      11 |     await expect(page.getByText('Start Entries')).toBeVisible();
+      12 |     await expect(page.getByText('Personal NoteBook Entries')).toBeVisible();
+      13 |     await expect(page.getByRole('heading', { name: 'Sample Experiment' })).toBeVisible();
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/lab-notebook.pw.spec.ts:10:60
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/lab-notebook.pw-Personal-N-e0ea1--Personal-NoteBook-overview-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/lab-notebook.pw-Personal-N-e0ea1--Personal-NoteBook-overview-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/lab-notebook.pw-Personal-N-e0ea1--Personal-NoteBook-overview-chromium/error-context.md
+
+  2) [chromium] › tests/e2e/lab-notebook.pw.spec.ts:16:3 › Personal NoteBook Module › supports entry search interaction 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByPlaceholder('Search entries...')[22m
+
+
+      15 |
+      16 |   test('supports entry search interaction', async ({ page }) => {
+    > 17 |     await page.getByPlaceholder('Search entries...').fill('Sample');
+         |                                                      ^
+      18 |     await expect(page.getByRole('heading', { name: 'Sample Experiment' })).toBeVisible();
+      19 |   });
+      20 |
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/lab-notebook.pw.spec.ts:17:54
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/lab-notebook.pw-Personal-N-20a6a-ts-entry-search-interaction-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/lab-notebook.pw-Personal-N-20a6a-ts-entry-search-interaction-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/lab-notebook.pw-Personal-N-20a6a-ts-entry-search-interaction-chromium/error-context.md
+
+  3) [chromium] › tests/e2e/lab-notebook.pw.spec.ts:21:3 › Personal NoteBook Module › shows entry type selections 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByRole('heading', { name: 'Experiment', exact: true })
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: 'Experiment', exact: true })[22m
+
+
+      20 |
+      21 |   test('shows entry type selections', async ({ page }) => {
+    > 22 |     await expect(page.getByRole('heading', { name: 'Experiment', exact: true })).toBeVisible();
+         |                                                                                  ^
+      23 |     await expect(page.getByRole('heading', { name: 'Idea', exact: true })).toBeVisible();
+      24 |     await expect(page.getByRole('heading', { name: 'Sample Management', exact: true })).toBeVisible();
+      25 |   });
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/lab-notebook.pw.spec.ts:22:82
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/lab-notebook.pw-Personal-N-8b6f8-shows-entry-type-selections-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/lab-notebook.pw-Personal-N-8b6f8-shows-entry-type-selections-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/lab-notebook.pw-Personal-N-8b6f8-shows-entry-type-selections-chromium/error-context.md
+
+  4) [chromium] › tests/e2e/professional-protocols.pw.spec.ts:11:3 › Professional Protocols Module › renders protocol library overview 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByRole('button', { name: 'Create Protocol' })
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('button', { name: 'Create Protocol' })[22m
+
+
+      11 |   test('renders protocol library overview', async ({ page }) => {
+      12 |     await expect(page.getByRole('heading', { name: 'Protocol Library' })).toBeVisible();
+    > 13 |     await expect(page.getByRole('button', { name: 'Create Protocol' })).toBeVisible();
+         |                                                                         ^
+      14 |     await expect(page.getByRole('heading', {
+      15 |       name: 'Western Blotting: Protein Detection & Quantification'
+      16 |     })).toBeVisible();
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/professional-protocols.pw.spec.ts:13:73
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--81aa1-s-protocol-library-overview-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--81aa1-s-protocol-library-overview-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/professional-protocols.pw--81aa1-s-protocol-library-overview-chromium/error-context.md
+
+  5) [chromium] › tests/e2e/professional-protocols.pw.spec.ts:19:3 › Professional Protocols Module › filters protocols using search 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByPlaceholder('Search protocols...')[22m
+
+
+      18 |
+      19 |   test('filters protocols using search', async ({ page }) => {
+    > 20 |     await page.getByPlaceholder('Search protocols...').fill('Western');
+         |                                                        ^
+      21 |     await expect(page.getByRole('heading', {
+      22 |       name: 'Western Blotting: Protein Detection & Quantification'
+      23 |     })).toBeVisible();
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/professional-protocols.pw.spec.ts:20:56
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--d91c8-ters-protocols-using-search-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--d91c8-ters-protocols-using-search-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/professional-protocols.pw--d91c8-ters-protocols-using-search-chromium/error-context.md
+
+  6) [chromium] › tests/e2e/professional-protocols.pw.spec.ts:26:3 › Professional Protocols Module › opens protocol detail modal 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByRole('button', { name: 'View Protocol' }).first()[22m
+
+
+      25 |
+      26 |   test('opens protocol detail modal', async ({ page }) => {
+    > 27 |     await page.getByRole('button', { name: 'View Protocol' }).first().click();
+         |                                                                       ^
+      28 |     await expect(page.getByRole('heading', { name: 'Objective' })).toBeVisible();
+      29 |     await expect(page.getByRole('heading', { name: 'Materials & Equipment' })).toBeVisible();
+      30 |     await expect(page.getByRole('heading', { name: 'Protocol Info' })).toBeVisible();
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/professional-protocols.pw.spec.ts:27:71
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--7834c-opens-protocol-detail-modal-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--7834c-opens-protocol-detail-modal-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/professional-protocols.pw--7834c-opens-protocol-detail-modal-chromium/error-context.md
+
+  6 failed
+    [chromium] › tests/e2e/lab-notebook.pw.spec.ts:9:3 › Personal NoteBook Module › shows Personal NoteBook overview 
+    [chromium] › tests/e2e/lab-notebook.pw.spec.ts:16:3 › Personal NoteBook Module › supports entry search interaction 
+    [chromium] › tests/e2e/lab-notebook.pw.spec.ts:21:3 › Personal NoteBook Module › shows entry type selections 
+    [chromium] › tests/e2e/professional-protocols.pw.spec.ts:11:3 › Professional Protocols Module › renders protocol library overview 
+    [chromium] › tests/e2e/professional-protocols.pw.spec.ts:19:3 › Professional Protocols Module › filters protocols using search 
+    [chromium] › tests/e2e/professional-protocols.pw.spec.ts:26:3 › Professional Protocols Module › opens protocol detail modal 
+  8 passed (45.4s)

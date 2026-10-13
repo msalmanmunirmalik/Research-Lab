@@ -8,7 +8,7 @@ Product branding: **RILOS** — see `docs/RILOS_ALIGNMENT_PLAN.md`.
 |---------|------|
 | Vite frontend | 5173 |
 | Express API | 5002 |
-| Stats (optional) | 5003 |
+| Stats (optional) | 5003 (legacy) / advanced stats often `:8001` via `PYTHON_STATS_SERVICE_URL` |
 | MySQL (XAMPP) | 3306 |
 
 Do **not** run Homebrew MySQL alongside XAMPP.
@@ -26,6 +26,22 @@ pnpm run dev:app
 Open http://localhost:5173 — browser calls `/api/*` which Vite proxies to Express on 5002.
 
 Health check: `pnpm run wait:api` or `curl http://127.0.0.1:5002/api/health`
+
+Beachhead API smoke (after `pnpm run dev:app`):
+
+```bash
+pnpm run smoke:beachhead
+# optional authenticated chain:
+SMOKE_EMAIL=… SMOKE_PASSWORD=… SMOKE_LAB_ID=… pnpm run smoke:beachhead
+```
+
+Analysis (`/data-analysis`) calls `/api/advanced-stats/*`. For the Python backend:
+
+```bash
+pnpm run dev:stats   # or set PYTHON_STATS_SERVICE_URL (see env.example)
+```
+
+Without it, Analysis still runs with an in-browser fallback.
 
 ## Env
 

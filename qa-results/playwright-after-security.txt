@@ -1,0 +1,13 @@
+
+Running 8 tests using 4 workers
+
+  ✓  4 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:7:3 › Authentication › displays login form (5.1s)
+  ✓  2 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:22:3 › Authentication › logs in with demo credentials (5.1s)
+  ✓  1 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:14:3 › Authentication › rejects invalid credentials (7.1s)
+  ✓  3 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:26:3 › Authentication › logs out successfully (7.2s)
+  ✓  5 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:40:3 › Navigation › opens Personal NoteBook from sidebar (2.0s)
+  ✓  7 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:53:3 › API Smoke › health endpoint responds (38ms)
+  ✓  8 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:58:3 › API Smoke › demo login returns token (40ms)
+  ✓  6 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:45:3 › Navigation › opens protocol library from sidebar (2.1s)
+
+  8 passed (13.9s)

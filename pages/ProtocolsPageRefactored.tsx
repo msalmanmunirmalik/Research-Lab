@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ProtocolExecutionMode from '../components/ProtocolExecutionMode';
 import ProtocolExecutionModeMobile from '../components/ProtocolExecutionModeMobile';
@@ -72,6 +72,14 @@ interface Protocol {
   difficulty_level?: string;
   estimated_duration?: number;
   privacy_level?: string;
+  source?: 'drm' | 'protocols.io' | 'adapted' | 'springer_protocols';
+  externalId?: string;
+  sourceUrl?: string;
+  doi?: string;
+  license?: string;
+  attribution?: string;
+  retrievedAt?: string;
+  saved?: boolean;
 }
 
 interface ProtocolStep {
@@ -85,10 +93,39 @@ interface ProtocolStep {
   tips?: string[];
 }
 
-const ProtocolsPageRefactored: React.FC = () => {
+type ProtocolsPageProps = {
+  /** Render inside Experiments hub (Methods tab) */
+  embedded?: boolean;
+};
+
+const ProtocolsPageRefactored: React.FC<ProtocolsPageProps> = ({ embedded = false }) => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { protocolId: routeProtocolId } = useParams<{ protocolId?: string }>();
+  const activeProtocolId = embedded ? searchParams.get('protocolId') : routeProtocolId;
+
+  const setProtocolRoute = useCallback(
+    (id: string | null) => {
+      if (embedded) {
+        setSearchParams(
+          (prev) => {
+            const next = new URLSearchParams(prev);
+            next.set('tab', 'protocols');
+            if (id) next.set('protocolId', id);
+            else next.delete('protocolId');
+            return next;
+          },
+          { replace: true }
+        );
+      } else if (id) {
+        navigate(`/protocols/${id}`, { replace: true });
+      } else {
+        navigate('/protocols', { replace: true });
+      }
+    },
+    [embedded, navigate, setSearchParams]
+  );
   const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -108,30 +145,36 @@ const ProtocolsPageRefactored: React.FC = () => {
   const [protocolFormMode, setProtocolFormMode] = useState<'create' | 'edit'>('create');
   const [editingProtocolId, setEditingProtocolId] = useState<string | null>(null);
   const [protocolFormInitial, setProtocolFormInitial] = useState<Partial<ProtocolFormValues> | undefined>();
+  const [externalNotice, setExternalNotice] = useState<string | null>(null);
+  const [methodAlternatives, setMethodAlternatives] = useState<Array<{ id: string; title: string; sourceLabel: string; kind: 'drm' | 'protocols.io' }>>([]);
+  const [literatureNote, setLiteratureNote] = useState<string | null>(null);
 
-  const openHighlightedProtocol = useCallback((protocol: Protocol) => {
-    setSelectedProtocol(protocol);
-    setShowDetails(true);
-    navigate(`/protocols/${protocol.id}`, { replace: true });
-  }, [navigate]);
+  const openHighlightedProtocol = useCallback(
+    (protocol: Protocol) => {
+      setSelectedProtocol(protocol);
+      setShowDetails(true);
+      setProtocolRoute(protocol.id);
+    },
+    [setProtocolRoute]
+  );
 
   const closeProtocolDetails = useCallback(() => {
     setShowDetails(false);
-    navigate('/protocols', { replace: true });
-  }, [navigate]);
+    setProtocolRoute(null);
+  }, [setProtocolRoute]);
 
   const { focusedId } = useEntityDeepLink(protocols, openHighlightedProtocol);
 
   useEffect(() => {
-    if (!routeProtocolId || protocols.length === 0) return;
+    if (!activeProtocolId || protocols.length === 0) return;
     if (showExecutionMode || showCollaboration || showComparison || showProtocolForm) return;
-    const match = protocols.find((p) => p.id === routeProtocolId);
+    const match = protocols.find((p) => p.id === activeProtocolId);
     if (match) {
       setSelectedProtocol(match);
       setShowDetails(true);
     }
   }, [
-    routeProtocolId,
+    activeProtocolId,
     protocols,
     showExecutionMode,
     showCollaboration,
@@ -140,7 +183,8 @@ const ProtocolsPageRefactored: React.FC = () => {
   ]);
 
   useEffect(() => {
-    fetchProtocols();
+    const linked = new URLSearchParams(window.location.search).get('q');
+    if (!linked || linked.trim().length < 2) fetchProtocols();
     checkMobile();
     window.addEventListener('resize', () => setIsMobile(window.innerWidth < 768));
   }, []);
@@ -193,6 +237,12 @@ const ProtocolsPageRefactored: React.FC = () => {
           troubleshooting: p.troubleshooting || [],
           references: p.references || [],
           tags: Array.isArray(tags) ? tags : [],
+          source: p.source_name === 'protocols.io' ? 'adapted' : 'drm',
+          sourceUrl: p.source_url || undefined,
+          doi: p.source_doi || undefined,
+          license: p.source_license || undefined,
+          attribution: p.source_attribution || undefined,
+          externalId: p.adapted_from_external_id || undefined,
           objective: p.objective || p.description || '',
           background: p.background || '',
           expected_results: p.expected_results || '',
@@ -239,8 +289,193 @@ const ProtocolsPageRefactored: React.FC = () => {
 
   const canManageProtocol = (protocol: Protocol | null) => {
     if (!protocol || !user) return false;
+    if (protocol.source === 'protocols.io' || protocol.source === 'springer_protocols') return false;
     if (user.role === 'admin') return true;
     return protocol.author_id === user.id;
+  };
+
+  const toExternalCard = (item: any): Protocol => ({
+    id: `pio-${item.externalId}`,
+    title: item.title,
+    description: item.description || '',
+    category: 'protocols.io',
+    version: item.version || '',
+    author: (item.authors || []).join(', '),
+    usage_count: 0,
+    success_rate: 0,
+    rating: 0,
+    total_ratings: 0,
+    objective: item.description || '',
+    background: '',
+    materials: item.materials || [],
+    equipment: item.equipment || [],
+    safety_notes: item.safetyNotes || [],
+    procedure: item.steps || [],
+    expected_results: '',
+    troubleshooting: [],
+    references: item.doi ? [item.doi] : [],
+    tags: ['protocols.io', item.license || 'CC-BY'],
+    source: 'protocols.io',
+    externalId: item.externalId,
+    sourceUrl: item.sourceUrl,
+    doi: item.doi,
+    license: item.license || 'CC-BY',
+    retrievedAt: item.retrievedAt,
+    saved: Boolean(item.saved),
+    attribution: item.sourceUrl
+      ? `Public protocol on protocols.io by ${(item.authors || []).join(', ') || 'the original authors'}. ${item.sourceUrl}. License ${item.license || 'CC-BY'}.`
+      : `Public protocol on protocols.io. License ${item.license || 'CC-BY'}.`,
+  });
+
+  const toSpringerCard = (item: any): Protocol => ({
+    id: `springer-${item.doi || item.externalId}`,
+    title: item.title,
+    description: item.abstract || '',
+    category: item.series || 'SpringerProtocols',
+    version: '',
+    author: (item.authors || []).join(', '),
+    usage_count: 0,
+    success_rate: 0,
+    rating: 0,
+    total_ratings: 0,
+    objective: item.abstract || '',
+    background: '',
+    materials: [],
+    equipment: [],
+    safety_notes: [],
+    procedure: [],
+    expected_results: '',
+    troubleshooting: [],
+    references: item.doi ? [item.doi] : [],
+    tags: ['SpringerProtocols', 'metadata'],
+    source: 'springer_protocols',
+    externalId: item.externalId,
+    sourceUrl: item.sourceUrl,
+    doi: item.doi,
+    retrievedAt: item.retrievedAt,
+    attribution: `SpringerProtocols metadata${item.series ? ` from ${item.series}` : ''}${item.publisher ? `, ${item.publisher}` : ''}. ${item.doi ? `DOI ${item.doi}. ` : ''}The full protocol stays on the publisher site.`,
+  });
+
+  const openSpringer = async (protocol: Protocol) => {
+    setMethodAlternatives([]);
+    setLiteratureNote(null);
+    if (!protocol.doi) {
+      setSelectedProtocol(protocol);
+      setShowDetails(true);
+      return;
+    }
+    try {
+      const authToken = token || localStorage.getItem('authToken');
+      const response = await axios.get(apiUrl('/protocols/external/springer/record'), {
+        headers: { Authorization: `Bearer ${authToken}` },
+        params: { doi: protocol.doi },
+      });
+      const item = response.data.protocol;
+      setSelectedProtocol(item ? toSpringerCard(item) : protocol);
+      setShowDetails(true);
+      if (!item && response.data.notice) setExternalNotice(response.data.notice);
+    } catch {
+      setSelectedProtocol(protocol);
+      setShowDetails(true);
+    }
+  };
+
+  const saveSpringerMetadata = async (protocol: Protocol) => {
+    if (!protocol.doi) {
+      setExternalNotice('This record has no DOI, so it cannot be saved as a citation.');
+      return;
+    }
+    const authToken = token || localStorage.getItem('authToken');
+    await axios.post(
+      apiUrl('/protocols/external/springer/save'),
+      { doi: protocol.doi },
+      { headers: { Authorization: `Bearer ${authToken}` } }
+    );
+    setExternalNotice('Saved the citation to your research library. The full protocol is not stored in DRM.');
+  };
+
+  const findOpenAlternative = async (protocol: Protocol) => {
+    const authToken = token || localStorage.getItem('authToken');
+    const response = await axios.get(apiUrl('/protocols/external/springer/alternatives'), {
+      headers: { Authorization: `Bearer ${authToken}` },
+      params: { q: protocol.title },
+    });
+    const drm = (response.data.drm || []).map((item: any) => ({
+      id: String(item.id),
+      title: String(item.title),
+      sourceLabel: 'DRM',
+      kind: 'drm' as const,
+    }));
+    const open = (response.data.protocolsIo || []).map((item: any) => ({
+      id: String(item.externalId),
+      title: String(item.title),
+      sourceLabel: 'protocols.io',
+      kind: 'protocols.io' as const,
+    }));
+    setMethodAlternatives([...drm, ...open]);
+    if (!drm.length && !open.length) setExternalNotice('No open DRM or protocols.io alternative matched this title.');
+  };
+
+  const findRelatedLiterature = async (protocol: Protocol) => {
+    const authToken = token || localStorage.getItem('authToken');
+    const response = await axios.get(apiUrl('/research/intelligence'), {
+      headers: { Authorization: `Bearer ${authToken}` },
+      params: { q: protocol.title },
+    });
+    const topic = response.data.brief?.topic?.name;
+    setLiteratureNote(
+      topic
+        ? `Related literature is grouped under “${topic}”.`
+        : 'Research Intelligence has no topic match for this title yet.'
+    );
+  };
+
+  const openExternalDetail = async (protocol: Protocol) => {
+    if (!protocol.externalId) return;
+    setExternalNotice(null);
+    try {
+      const authToken = token || localStorage.getItem('authToken');
+      const response = await axios.get(apiUrl(`/protocols/external/${encodeURIComponent(protocol.externalId)}`), {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const item = response.data.protocol;
+      if (!item) {
+        setExternalNotice(response.data.notice || 'That public protocol could not be loaded.');
+        return;
+      }
+      const detailed = toExternalCard({ ...item, saved: protocol.saved });
+      setSelectedProtocol(detailed);
+      setShowDetails(true);
+    } catch (error: any) {
+      setExternalNotice(error?.response?.data?.notice || 'That public protocol could not be loaded.');
+    }
+  };
+
+  const saveExternal = async (protocol: Protocol) => {
+    if (!protocol.externalId) return;
+    const authToken = token || localStorage.getItem('authToken');
+    const response = await axios.post(
+      apiUrl(`/protocols/external/${encodeURIComponent(protocol.externalId)}/save`),
+      {},
+      { headers: { Authorization: `Bearer ${authToken}` } }
+    );
+    setSelectedProtocol({ ...protocol, saved: true });
+    setProtocols((current) =>
+      current.map((item) => (item.externalId === protocol.externalId ? { ...item, saved: true } : item))
+    );
+    setExternalNotice(response.data.created ? 'Saved to your library. DRM did not author this protocol.' : 'Already in your library.');
+  };
+
+  const adaptExternal = async (protocol: Protocol) => {
+    if (!protocol.externalId) return null;
+    const authToken = token || localStorage.getItem('authToken');
+    const response = await axios.post(
+      apiUrl(`/protocols/external/${encodeURIComponent(protocol.externalId)}/adapt`),
+      {},
+      { headers: { Authorization: `Bearer ${authToken}` } }
+    );
+    await fetchProtocols();
+    return String(response.data.protocolId || '');
   };
 
   const handleSaveProtocol = async (
@@ -313,7 +548,7 @@ const ProtocolsPageRefactored: React.FC = () => {
           total_ratings: base.total_ratings || 0,
           version: form.version || '1.0',
         });
-        navigate(`/protocols/${id}`, { replace: true });
+        setProtocolRoute(id);
         setShowDetails(true);
       }
     } catch (error: any) {
@@ -339,7 +574,7 @@ const ProtocolsPageRefactored: React.FC = () => {
       });
       setShowDetails(false);
       setSelectedProtocol(null);
-      navigate('/protocols', { replace: true });
+      setProtocolRoute(null);
       await fetchProtocols();
     } catch (error: any) {
       console.error('Error deleting protocol:', error);
@@ -349,59 +584,94 @@ const ProtocolsPageRefactored: React.FC = () => {
 
   const handleCreateProtocol = handleSaveProtocol;
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
+  const handleSearch = async (override?: string) => {
+    const term = (typeof override === 'string' ? override : searchQuery).trim();
+    if (!term) {
+      setExternalNotice(null);
       fetchProtocols();
       return;
     }
 
     setIsSearching(true);
+    setExternalNotice(null);
     try {
       const authToken = token || localStorage.getItem('authToken');
-      const searchResponse = await axios.post(
-        apiUrl('/protocol-search/semantic'),
-        {
-          query: searchQuery,
-          limit: 20,
-          filters: filterCategory ? { category: filterCategory } : {}
-        },
-        { headers: { Authorization: `Bearer ${authToken}` } }
-      );
-
-      if (searchResponse.data.results && searchResponse.data.results.length > 0) {
-        setProtocols(searchResponse.data.results);
-        return;
-      }
-
-      const listResponse = await axios.get(apiUrl('/protocols'), {
-        headers: { Authorization: `Bearer ${authToken}` }
+      const headers = { Authorization: `Bearer ${authToken}` };
+      const [listResponse, externalResponse, springerResponse] = await Promise.all([
+        axios.get(apiUrl('/protocols'), { headers, params: { search: term } }),
+        axios.get(apiUrl('/protocols/external/search'), {
+          headers,
+          params: { q: term },
+        }).catch(() => ({ data: { protocols: [], notice: 'protocols.io did not return results. DRM protocols are unchanged.' } })),
+        axios.get(apiUrl('/protocols/external/springer/search'), {
+          headers,
+          params: { q: term },
+        }).catch(() => ({ data: { protocols: [], notice: 'SpringerProtocols did not return metadata. DRM and protocols.io results are unchanged.' } })),
+      ]);
+      const parseMaybeJson = (value: unknown, fallback: unknown) => {
+        if (value == null || value === '') return fallback;
+        if (typeof value !== 'string') return value;
+        try {
+          return JSON.parse(value);
+        } catch {
+          return fallback;
+        }
+      };
+      const internal = (listResponse.data.protocols || []).map((p: any) => {
+        const parsedContent = parseMaybeJson(p.content, null);
+        const materials = parseMaybeJson(p.materials, []);
+        const tags = parseMaybeJson(p.tags, []);
+        return {
+          ...p,
+          author: p.creator_name || p.author || 'Unknown',
+          procedure: Array.isArray(parsedContent) ? parsedContent : [],
+          materials: Array.isArray(materials) ? materials : [],
+          equipment: [],
+          safety_notes: p.safety_notes
+            ? (Array.isArray(p.safety_notes) ? p.safety_notes : [p.safety_notes])
+            : [],
+          troubleshooting: [],
+          references: [],
+          tags: Array.isArray(tags) ? tags : [],
+          source: p.source_name === 'protocols.io' ? 'adapted' : 'drm',
+          sourceUrl: p.source_url,
+          doi: p.source_doi,
+          attribution: p.source_attribution,
+          usage_count: p.usage_count || 0,
+          success_rate: p.success_rate || 0,
+          rating: p.rating || 0,
+          total_ratings: p.total_ratings || 0,
+          objective: p.description || '',
+          background: '',
+          expected_results: '',
+        };
       });
-      const query = searchQuery.toLowerCase();
-      const all = (listResponse.data.protocols || []) as Protocol[];
-      setProtocols(
-        all.filter(
-          (p) =>
-            p.title?.toLowerCase().includes(query) ||
-            p.description?.toLowerCase().includes(query) ||
-            p.category?.toLowerCase().includes(query) ||
-            (Array.isArray(p.tags) && p.tags.some((tag) => String(tag).toLowerCase().includes(query)))
-        )
+      const external = (externalResponse.data.protocols || []).map(toExternalCard);
+      const knownDois = new Set(
+        [...internal, ...external]
+          .map((item: Protocol) => String(item.doi || '').toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//, ''))
+          .filter(Boolean)
       );
+      const springer = (springerResponse.data.protocols || [])
+        .map(toSpringerCard)
+        .filter((item: Protocol) => !item.doi || !knownDois.has(item.doi.toLowerCase()));
+      setProtocols([...internal, ...external, ...springer]);
+      const notices = [externalResponse.data.notice, springerResponse.data.notice].filter(Boolean);
+      if (notices.length) setExternalNotice(notices.join(' '));
     } catch (error: any) {
       console.error('Error searching protocols:', error);
-      const query = searchQuery.toLowerCase();
-      setProtocols((current) =>
-        current.filter(
-          (p) =>
-            p.title?.toLowerCase().includes(query) ||
-            p.description?.toLowerCase().includes(query) ||
-            p.category?.toLowerCase().includes(query)
-        )
-      );
+      setExternalNotice('Search could not be completed.');
     } finally {
       setIsSearching(false);
     }
   };
+
+  useEffect(() => {
+    const linked = new URLSearchParams(window.location.search).get('q');
+    if (!linked || linked.trim().length < 2) return;
+    setSearchQuery(linked);
+    void handleSearch(linked);
+  }, []);
 
   const fetchSimilarProtocols = async (protocolId: string) => {
     try {
@@ -429,34 +699,62 @@ const ProtocolsPageRefactored: React.FC = () => {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto">
-        {/* Recommended Protocols */}
-        <div className="mb-6">
-          <RecommendationsWidget
-            itemType="protocols"
-            title="Recommended Protocols for You"
-            limit={5}
-            showFeedback={true}
-            onItemClick={(itemId) => {
-              const protocol = protocols.find(p => p.id === itemId);
-              if (protocol) openHighlightedProtocol(protocol);
-            }}
-            className="mb-6"
-          />
-        </div>
-        {/* Header */}
-        <div className="mb-8 space-y-4">
-          <PageHeader
-            title="Protocol library"
-            accent="teal"
-            icon={<BeakerIcon />}
-            subtitle="Reusable methods and SOPs — write, search, compare, and execute"
-            actions={
-              <>
+      <div className={embedded ? '' : 'max-w-7xl mx-auto'}>
+        {!embedded && (
+          <div className="mb-6">
+            <RecommendationsWidget
+              itemType="protocols"
+              title="Recommended Protocols for You"
+              limit={5}
+              showFeedback={true}
+              onItemClick={(itemId) => {
+                const protocol = protocols.find(p => p.id === itemId);
+                if (protocol) openHighlightedProtocol(protocol);
+              }}
+              className="mb-6"
+            />
+          </div>
+        )}
+        <div className={`space-y-4 ${embedded ? 'mb-4' : 'mb-8'}`}>
+          {!embedded && (
+            <PageHeader
+              title="Protocol library"
+              accent="teal"
+              icon={<BeakerIcon />}
+              subtitle="Reusable methods and SOPs — write, search, compare, and execute"
+              actions={
+                <>
+                  <button
+                    type="button"
+                    onClick={openImportProtocol}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium text-teal-900 bg-white/90 border border-teal-200 rounded-md hover:bg-teal-50 transition-colors"
+                  >
+                    <DocumentArrowUpIcon className="w-4 h-4" />
+                    Import
+                  </button>
+                  <button
+                    type="button"
+                    onClick={openWriteProtocol}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium text-white bg-teal-700 rounded-md hover:bg-teal-800 transition-colors"
+                  >
+                    <PlusIcon className="w-4 h-4" />
+                    Write protocol
+                  </button>
+                </>
+              }
+            />
+          )}
+
+          {embedded && (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[13px] text-slate-600">
+                Reusable SOPs — pick one and start an experiment run.
+              </p>
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={openImportProtocol}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium text-teal-900 bg-white/90 border border-teal-200 rounded-md hover:bg-teal-50 transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-[12px] font-medium text-slate-700 border border-slate-200 rounded-md hover:bg-slate-50"
                 >
                   <DocumentArrowUpIcon className="w-4 h-4" />
                   Import
@@ -464,14 +762,14 @@ const ProtocolsPageRefactored: React.FC = () => {
                 <button
                   type="button"
                   onClick={openWriteProtocol}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium text-white bg-teal-700 rounded-md hover:bg-teal-800 transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-[12px] font-medium text-white bg-teal-700 rounded-md hover:bg-teal-800"
                 >
                   <PlusIcon className="w-4 h-4" />
                   Write protocol
                 </button>
-              </>
-            }
-          />
+              </div>
+            </div>
+          )}
 
           <PagePanel accent="teal">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -480,14 +778,14 @@ const ProtocolsPageRefactored: React.FC = () => {
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  onKeyPress={(e) => e.key === 'Enter' && void handleSearch()}
                   placeholder="Search protocols by name, category, or keyword"
                   className="pl-10 pr-4 py-2.5 text-[14px]"
                 />
               </div>
               <button
                 type="button"
-                onClick={handleSearch}
+                onClick={() => void handleSearch()}
                 disabled={isSearching}
                 className="inline-flex items-center justify-center px-3.5 py-2.5 text-[13px] font-medium text-white bg-teal-700 rounded-md hover:bg-teal-800 transition-colors disabled:opacity-60"
               >
@@ -495,8 +793,13 @@ const ProtocolsPageRefactored: React.FC = () => {
               </button>
             </div>
             <p className="text-[12px] text-slate-500 mt-3">
-              Try: “PCR amplification”, “protein purification”, or “cell culture protocol”
+              Search covers DRM, protocols.io, and SpringerProtocols metadata. Try PCR, ELISA, or flow cytometry.
             </p>
+            {externalNotice ? (
+              <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-900">
+                {externalNotice}
+              </p>
+            ) : null}
           </PagePanel>
         </div>
 
@@ -565,11 +868,17 @@ const ProtocolsPageRefactored: React.FC = () => {
                     data-entity-id={protocol.id}
                     role="button"
                     tabIndex={0}
-                    onClick={() => openHighlightedProtocol(protocol)}
+                    onClick={() => {
+                      if (protocol.source === 'springer_protocols') void openSpringer(protocol);
+                      else if (protocol.source === 'protocols.io') void openExternalDetail(protocol);
+                      else openHighlightedProtocol(protocol);
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        openHighlightedProtocol(protocol);
+                        if (protocol.source === 'springer_protocols') void openSpringer(protocol);
+                        else if (protocol.source === 'protocols.io') void openExternalDetail(protocol);
+                        else openHighlightedProtocol(protocol);
                       }
                     }}
                     className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-br from-white via-white to-teal-50/30 shadow-sm cursor-pointer transition-all hover:shadow-md hover:border-teal-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
@@ -589,6 +898,15 @@ const ProtocolsPageRefactored: React.FC = () => {
                           <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
                             <span className="inline-flex items-center rounded-md bg-teal-50 text-teal-800 border border-teal-100 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide">
                               {protocolRefCode(protocol.id)}
+                            </span>
+                            <span className="text-[10px] font-medium text-slate-600">
+                              {protocol.source === 'protocols.io'
+                                ? 'protocols.io'
+                                : protocol.source === 'springer_protocols'
+                                  ? 'SpringerProtocols'
+                                  : protocol.source === 'adapted'
+                                    ? 'DRM · adapted'
+                                    : 'DRM'}
                             </span>
                             {protocol.version ? (
                               <span className="text-[10px] text-slate-500">v{protocol.version}</span>
@@ -665,12 +983,15 @@ const ProtocolsPageRefactored: React.FC = () => {
                         className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-medium text-white bg-teal-700 rounded-lg hover:bg-teal-800 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
-                          openHighlightedProtocol(protocol);
+                          if (protocol.source === 'springer_protocols') void openSpringer(protocol);
+                          else if (protocol.source === 'protocols.io') void openExternalDetail(protocol);
+                          else openHighlightedProtocol(protocol);
                         }}
                       >
                         Open
                         <ArrowRightIcon className="w-3.5 h-3.5" />
                       </button>
+                      {protocol.source === 'protocols.io' || protocol.source === 'springer_protocols' ? null : (
                       <button
                         type="button"
                         className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-medium text-teal-900 bg-teal-50 border border-teal-100 rounded-lg hover:bg-teal-100 transition-colors"
@@ -684,6 +1005,7 @@ const ProtocolsPageRefactored: React.FC = () => {
                         <PlayIcon className="w-4 h-4" />
                         {isList ? 'Run' : null}
                       </button>
+                      )}
                     </div>
                   </article>
                 );
@@ -737,12 +1059,98 @@ const ProtocolsPageRefactored: React.FC = () => {
             setShowDetails(false);
             setShowCollaboration(true);
           }}
-          onTrackExperiment={() => {
-            navigate(
-              `/experiment-tracker?protocolId=${encodeURIComponent(selectedProtocol.id)}&title=${encodeURIComponent(selectedProtocol.title)}`
-            );
+          onTrackExperiment={
+            selectedProtocol.source === 'springer_protocols'
+              ? undefined
+              : () => {
+                  void (async () => {
+                    let protocolId = selectedProtocol.id;
+                    if (selectedProtocol.source === 'protocols.io' && selectedProtocol.externalId) {
+                      const adaptedId = await adaptExternal(selectedProtocol);
+                      if (!adaptedId) return;
+                      protocolId = adaptedId;
+                    }
+                    navigate(
+                      `/experiment-tracker?startRun=1&protocolId=${encodeURIComponent(protocolId)}&title=${encodeURIComponent(selectedProtocol.title)}`
+                    );
+                  })();
+                }
+          }
+          onSaveMetadata={
+            selectedProtocol.source === 'springer_protocols'
+              ? () => void saveSpringerMetadata(selectedProtocol).catch(() => setExternalNotice('Could not save this metadata.'))
+              : undefined
+          }
+          onFindOpenAlternative={
+            selectedProtocol.source === 'springer_protocols'
+              ? () => void findOpenAlternative(selectedProtocol).catch(() => setExternalNotice('Open alternatives could not be searched.'))
+              : undefined
+          }
+          onFindLiterature={
+            selectedProtocol.source === 'springer_protocols'
+              ? () => void findRelatedLiterature(selectedProtocol).catch(() => setLiteratureNote('Research Intelligence could not be loaded.'))
+              : undefined
+          }
+          onLinkMethod={
+            selectedProtocol.source === 'springer_protocols'
+              ? () => {
+                  const params = new URLSearchParams({ startRun: '1', title: selectedProtocol.title });
+                  if (selectedProtocol.doi) params.set('methodDoi', selectedProtocol.doi);
+                  if (selectedProtocol.sourceUrl) params.set('methodUrl', selectedProtocol.sourceUrl);
+                  navigate(`/experiment-tracker?${params.toString()}`);
+                }
+              : undefined
+          }
+          methodAlternatives={selectedProtocol.source === 'springer_protocols' ? methodAlternatives : []}
+          literatureNote={selectedProtocol.source === 'springer_protocols' ? literatureNote : null}
+          onOpenAlternative={(item) => {
+            if (item.kind === 'drm') {
+              setProtocolRoute(item.id);
+              return;
+            }
+            void openExternalDetail({
+              id: `pio-${item.id}`,
+              title: item.title,
+              description: '',
+              category: 'protocols.io',
+              version: '',
+              author: '',
+              usage_count: 0,
+              success_rate: 0,
+              rating: 0,
+              total_ratings: 0,
+              objective: '',
+              background: '',
+              materials: [],
+              equipment: [],
+              safety_notes: [],
+              procedure: [],
+              expected_results: '',
+              troubleshooting: [],
+              references: [],
+              tags: [],
+              source: 'protocols.io',
+              externalId: item.id,
+            });
           }}
-          onExecute={() => {
+          onSaveExternal={
+            selectedProtocol.source === 'protocols.io'
+              ? () => void saveExternal(selectedProtocol).catch(() => setExternalNotice('Save failed. Apply the protocols migration if this is a new install.'))
+              : undefined
+          }
+          onAdaptExternal={
+            selectedProtocol.source === 'protocols.io'
+              ? () => {
+                  void adaptExternal(selectedProtocol).then((id) => {
+                    if (!id) return;
+                    setExternalNotice('A private DRM adaptation was created. The public protocol was left unchanged.');
+                    setShowDetails(false);
+                    setProtocolRoute(id);
+                  });
+                }
+              : undefined
+          }
+          onExecute={selectedProtocol.source === 'protocols.io' || selectedProtocol.source === 'springer_protocols' ? undefined : () => {
             setShowDetails(false);
             setShowExecutionMode(true);
           }}

@@ -1,0 +1,8 @@
+{
+  "total": 77,
+  "passed": 77,
+  "failed": 0,
+  "verdict": "PASS",
+  "failedItems": []
+}
+Wrote /Users/m.salmanmalik/Development Projects/researchlab/qa-results/full-working-qa.json

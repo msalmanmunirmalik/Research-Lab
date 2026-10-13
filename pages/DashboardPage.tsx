@@ -6,7 +6,6 @@ import axios from 'axios';
 import {
   BeakerIcon,
   DocumentTextIcon,
-  FireIcon,
   BookOpenIcon,
   ArrowRightIcon,
   PlusIcon,
@@ -20,9 +19,15 @@ import {
   PencilSquareIcon,
   PencilIcon,
   TrashIcon,
+  ChartBarIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
+import { evidenceFromRecordUrl } from '../utils/evidenceChain';
 import { DASHBOARD_SYNC_EVENT, notifyDashboardSync } from '../utils/dashboardSync';
 import DashboardNoteForm, { type DashboardNoteFormValues } from '../components/DashboardNoteForm';
+import DashboardReminderForm, {
+  type DashboardReminderFormValues,
+} from '../components/DashboardReminderForm';
 import { PageHeader, PagePanel, PageStat } from '../components/PageHeader';
 
 const API_BASE = resolveApiBaseUrl();
@@ -149,6 +154,9 @@ const DashboardPage: React.FC = () => {
   const [editingNote, setEditingNote] = useState<NoteItem | null>(null);
   const [noteFormError, setNoteFormError] = useState('');
   const [savingNote, setSavingNote] = useState(false);
+  const [reminderFormOpen, setReminderFormOpen] = useState(false);
+  const [reminderFormError, setReminderFormError] = useState('');
+  const [savingReminder, setSavingReminder] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const authHeaders = useCallback(() => {
@@ -302,6 +310,46 @@ const DashboardPage: React.FC = () => {
     setNoteFormOpen(true);
   };
 
+  const openCreateReminder = () => {
+    setReminderFormError('');
+    setReminderFormOpen(true);
+  };
+
+  const handleReminderFormSubmit = async (values: DashboardReminderFormValues) => {
+    if (!user?.id) {
+      setReminderFormError('Sign in to add a reminder.');
+      return;
+    }
+    setSavingReminder(true);
+    setReminderFormError('');
+    try {
+      await axios.post(
+        apiUrl('/lab-workspace/tasks'),
+        {
+          title: values.title,
+          description: values.description || undefined,
+          due_date: values.due_date || undefined,
+          priority: values.priority,
+          status: 'to_do',
+          assignee_id: user.id,
+        },
+        { headers: authHeaders() }
+      );
+      setReminderFormOpen(false);
+      notifyDashboardSync('dashboard-reminder');
+      await fetchPulse(true);
+    } catch (err: any) {
+      console.error(err);
+      setReminderFormError(
+        err?.response?.data?.error ||
+          err?.message ||
+          'Could not save reminder. Check that you are signed in and have a lab workspace.'
+      );
+    } finally {
+      setSavingReminder(false);
+    }
+  };
+
   const openEditNote = (note: NoteItem) => {
     setNoteFormMode('edit');
     setEditingNote(note);
@@ -380,13 +428,41 @@ const DashboardPage: React.FC = () => {
     }
   };
 
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [demoMessage, setDemoMessage] = useState<string | null>(null);
+
+  const loadDemoChain = async () => {
+    setDemoLoading(true);
+    setDemoMessage(null);
+    try {
+      const { data } = await axios.post(
+        apiUrl('/onboarding/demo-chain'),
+        {},
+        { headers: authHeaders() }
+      );
+      setDemoMessage(data.message || 'Demo chain ready');
+      const nextUrl = data?.next?.evidence || evidenceFromRecordUrl({
+        protocolId: data?.chain?.protocolId,
+        experimentId: data?.chain?.experimentId,
+        notebookEntryId: data?.chain?.notebookEntryId,
+        evidenceId: data?.chain?.evidenceId,
+      });
+      navigate(nextUrl);
+    } catch (err: any) {
+      setDemoMessage(err?.response?.data?.error || 'Could not create demo chain');
+    } finally {
+      setDemoLoading(false);
+    }
+  };
+
+  /** Evidence chain shortcuts: protocol → experiment → notebook → evidence → write */
   const quickActions = [
     {
       icon: DocumentTextIcon,
       title: 'Add protocol',
       description: 'Idea → method',
       well: 'from-emerald-500 to-teal-700 shadow-emerald-200/50',
-      link: '/protocols',
+      link: '/experiment-tracker?tab=protocols',
     },
     {
       icon: BeakerIcon,
@@ -401,6 +477,13 @@ const DashboardPage: React.FC = () => {
       description: 'Run → record',
       well: 'from-slate-600 to-slate-800 shadow-slate-200/50',
       link: '/lab-notebook',
+    },
+    {
+      icon: ChartBarIcon,
+      title: 'Create evidence',
+      description: 'Record → pack',
+      well: 'from-cyan-500 to-sky-700 shadow-cyan-200/50',
+      link: evidenceFromRecordUrl({}),
     },
     {
       icon: PencilSquareIcon,
@@ -512,23 +595,41 @@ const DashboardPage: React.FC = () => {
                   </span>
                 }
                 action={
-                  <button
-                    type="button"
-                    onClick={() => navigate('/lab-workspace?section=tasks')}
-                    className="inline-flex items-center gap-0.5 text-[12px] font-medium text-slate-500 hover:text-slate-900"
-                  >
-                    Workspace
-                    <ArrowRightIcon className="h-3 w-3" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={openCreateReminder}
+                      className="inline-flex items-center gap-1 rounded-lg bg-amber-700 px-2.5 py-1 text-[11px] font-medium text-white shadow-sm hover:bg-amber-800"
+                    >
+                      <PlusIcon className="h-3.5 w-3.5" />
+                      Add
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/lab-workspace?section=tasks')}
+                      className="inline-flex items-center gap-0.5 text-[12px] font-medium text-slate-500 hover:text-slate-900"
+                    >
+                      Workspace
+                      <ArrowRightIcon className="h-3 w-3" />
+                    </button>
+                  </div>
                 }
               >
                 <div className="flex-1 space-y-1.5 overflow-y-auto max-h-[360px]">
                   {reminders.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-amber-200/80 bg-gradient-to-br from-amber-50/50 to-white px-3 py-10 text-center">
+                    <div className="rounded-xl border border-dashed border-amber-200/80 bg-gradient-to-br from-amber-50/50 to-white px-3 py-8 text-center">
                       <p className="text-[13px] text-slate-700">Nothing due right now</p>
-                      <p className="mt-1 text-[12px] text-slate-400">
-                        Assign tasks in Lab workspace to see them here
+                      <p className="mt-1 mb-3 text-[12px] text-slate-400">
+                        Add a reminder here — it becomes a task assigned to you
                       </p>
+                      <button
+                        type="button"
+                        onClick={openCreateReminder}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 px-3 py-1.5 text-[12px] font-medium text-white shadow-sm hover:bg-amber-800"
+                      >
+                        <PlusIcon className="h-3.5 w-3.5" />
+                        Create reminder
+                      </button>
                     </div>
                   ) : (
                     reminders.map((item) => (
@@ -653,8 +754,27 @@ const DashboardPage: React.FC = () => {
                 Quick actions
               </span>
             }
+            action={
+              <button
+                type="button"
+                onClick={() => void loadDemoChain()}
+                disabled={demoLoading}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-medium text-sky-900 hover:bg-sky-100 disabled:opacity-60"
+              >
+                <SparklesIcon className={`h-3.5 w-3.5 ${demoLoading ? 'animate-pulse' : ''}`} />
+                {demoLoading ? 'Creating…' : 'Load sample chain'}
+              </button>
+            }
           >
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {demoMessage ? (
+              <p className="mb-2 text-[12px] text-slate-600">{demoMessage}</p>
+            ) : (
+              <p className="mb-2 text-[12px] text-slate-500">
+                Follow the evidence chain, or load a linked demo protocol → experiment → notebook →
+                pack.
+              </p>
+            )}
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
               {quickActions.map((action) => {
                 const Icon = action.icon;
                 return (
@@ -877,6 +997,19 @@ const DashboardPage: React.FC = () => {
           }
         }}
         onSubmit={handleNoteFormSubmit}
+      />
+
+      <DashboardReminderForm
+        isOpen={reminderFormOpen}
+        submitting={savingReminder}
+        error={reminderFormError}
+        onClose={() => {
+          if (!savingReminder) {
+            setReminderFormOpen(false);
+            setReminderFormError('');
+          }
+        }}
+        onSubmit={handleReminderFormSubmit}
       />
     </div>
   );

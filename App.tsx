@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useSearchParams, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useSearchParams, useLocation, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import SideNav from './components/SideNav';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -9,22 +9,20 @@ import { isWritingStudioEditorPath } from './utils/writingStudioRoutes';
 // Import all pages
 import LabNotebookPage from './pages/LabNotebookPage';
 import DashboardPage from './pages/DashboardPage';
-import ProtocolsPageRefactored from './pages/ProtocolsPageRefactored';
 import DataResultsPage from './pages/DataResultsPage';
 import ResearchDataBankPage from './pages/ResearchDataBankPage';
 import ResearchDataBankOrgPage from './pages/ResearchDataBankOrgPage';
-import ConferenceNewsPage from './pages/ConferenceNewsPage';
 import MarketplacePage from './pages/MarketplacePage';
 import SupplierWorkspacePage from './pages/SupplierWorkspacePage';
 import ServiceProviderWorkspacePage from './pages/ServiceProviderWorkspacePage';
 import LabWorkspacePage from './pages/LabWorkspacePage';
 import NegativeResultsPage from './pages/NegativeResultsPage';
-import ProjectManagementPage from './pages/ProjectManagementPage';
 import PIReviewDashboardPage from './pages/PIReviewDashboardPage';
 import CollaborationNetworkingPage from './pages/CollaborationNetworkingPage';
 import EventsOpportunitiesPage from './pages/EventsOpportunitiesPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './pages/AccountRecoveryPages';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
@@ -32,7 +30,6 @@ import ProfilePage from './pages/ProfilePage';
 import DataAnalyticsPage from './pages/DataAnalyticsPage';
 import LandingPage from './pages/LandingPage';
 import SupportUsPage from './pages/SupportUsPage';
-import TeamManagementPage from './pages/TeamManagementPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import CookiePolicyPage from './pages/CookiePolicyPage';
 import CookiePreferencesPage from './pages/CookiePreferencesPage';
@@ -47,7 +44,10 @@ import CurrentTrendsPage from './pages/CurrentTrendsPage';
 import LabPublicPage from './pages/LabPublicPage';
 import WritingStudioPage from './pages/WritingStudioPage';
 import ExperimentTrackerPage from './pages/ExperimentTrackerPage';
-import LabFloorsPage from './pages/LabFloorsPage';
+import ExperimentWorkspacePage from './pages/ExperimentWorkspacePage';
+import DataResultWorkspacePage from './pages/DataResultWorkspacePage';
+import ToolsTrainingsPage from './pages/ToolsTrainingsPage';
+import ResearchToolsPage from './pages/ResearchToolsPage';
 import WellbeingPage from './pages/WellbeingPage';
 import ContextualResearchCopilot from './components/ContextualResearchCopilot';
 import { RedirectToWritingStudio } from './components/RedirectToWritingStudio';
@@ -61,12 +61,21 @@ const LabSectionRedirect: React.FC<{ section: string; tab?: string }> = ({ secti
   if (tab) next.set('tab', tab);
   return <Navigate to={`/lab-workspace?${next.toString()}`} replace />;
 };
+
+const ProtocolToExperimentRedirect: React.FC = () => {
+  const { protocolId } = useParams<{ protocolId: string }>();
+  const qs = new URLSearchParams({ tab: 'protocols' });
+  if (protocolId) qs.set('protocolId', protocolId);
+  return <Navigate to={`/experiment-tracker?${qs.toString()}`} replace />;
+};
+
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const immersiveStudio = isWritingStudioEditorPath(location.pathname);
+  const statsWorkbench = location.pathname === '/data-analysis';
   
   // Close dropdown when clicking outside
   React.useEffect(() => {
@@ -139,8 +148,12 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         )}
 
-        <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-40 h-14 border-b border-slate-200 bg-[#F8FAF9]">
+        <div
+          className={`flex-1 flex flex-col min-w-0 ${
+            statsWorkbench ? 'h-screen overflow-hidden' : ''
+          }`}
+        >
+          <header className="sticky top-0 z-40 h-14 shrink-0 border-b border-slate-200 bg-[#F8FAF9]">
             <div className="flex h-full items-center justify-between gap-4 px-4 sm:px-6">
               <div className="flex items-center gap-3 min-w-0">
                 <button
@@ -263,12 +276,22 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </div>
           </header>
 
-          <main className="flex-1 bg-gradient-to-br from-slate-50 via-white to-sky-50/40 min-h-screen">
-            <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-              {children}
-            </div>
+          <main
+            className={
+              statsWorkbench
+                ? 'flex-1 min-h-0 overflow-hidden bg-[#f4f5f7]'
+                : 'flex-1 bg-gradient-to-br from-slate-50 via-white to-sky-50/40 min-h-screen'
+            }
+          >
+            {statsWorkbench ? (
+              children
+            ) : (
+              <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                {children}
+              </div>
+            )}
           </main>
-          <ContextualResearchCopilot />
+          {!statsWorkbench && <ContextualResearchCopilot />}
         </div>
       </div>
     </div>
@@ -283,6 +306,9 @@ const AppContent: React.FC = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/privacy" element={<PrivacyPolicyPage />} />
       <Route path="/cookies" element={<CookiePolicyPage />} />
       <Route path="/cookie-policy" element={<Navigate to="/cookies" replace />} />
@@ -295,9 +321,16 @@ const AppContent: React.FC = () => {
       <Route path="/home" element={<Navigate to="/dashboard" replace />} />
       <Route path="/tasks/new" element={<Navigate to="/dashboard" replace />} />
       <Route path="/team" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/professional-protocols" element={<Navigate to="/protocols" replace />} />
+      <Route path="/professional-protocols" element={<Navigate to="/experiment-tracker?tab=protocols" replace />} />
       <Route path="/calculator-hub" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/research-tools" element={<Navigate to="/dashboard" replace />} />
+      <Route
+        path="/research-tools"
+        element={
+          <ProtectedRoute>
+            <AppLayout><ResearchToolsPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/ai-research-agent"
         element={
@@ -447,19 +480,26 @@ const AppContent: React.FC = () => {
         }
       />
       <Route
-        path="/lab-floors"
-        element={
-          <ProtectedRoute>
-            <AppLayout><LabFloorsPage /></AppLayout>
-          </ProtectedRoute>
-        }
-      />
-      
-      <Route
         path="/wellbeing"
         element={
           <ProtectedRoute>
             <AppLayout><WellbeingPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tools-trainings"
+        element={
+          <ProtectedRoute>
+            <AppLayout><ToolsTrainingsPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tools-trainings/courses/:courseId"
+        element={
+          <ProtectedRoute>
+            <AppLayout><ToolsTrainingsPage /></AppLayout>
           </ProtectedRoute>
         }
       />
@@ -472,16 +512,32 @@ const AppContent: React.FC = () => {
         }
       />
       <Route
+        path="/experiments/:experimentId"
+        element={
+          <ProtectedRoute>
+            <AppLayout><ExperimentWorkspacePage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/experiments/:experimentId/results/:resultId"
+        element={
+          <ProtectedRoute>
+            <AppLayout><DataResultWorkspacePage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/team-messaging"
         element={<LabSectionRedirect section="teams" tab="messages" />}
       />
 
       {/* Protocols - All authenticated users */}
-      <Route 
+      <Route
         path="/protocols"
         element={
           <ProtectedRoute>
-            <AppLayout><ProtocolsPageRefactored /></AppLayout>
+            <Navigate to="/experiment-tracker?tab=protocols" replace />
           </ProtectedRoute>
         }
       />
@@ -489,7 +545,7 @@ const AppContent: React.FC = () => {
         path="/protocols/:protocolId"
         element={
           <ProtectedRoute>
-            <AppLayout><ProtocolsPageRefactored /></AppLayout>
+            <ProtocolToExperimentRedirect />
           </ProtectedRoute>
         }
       />
@@ -503,6 +559,14 @@ const AppContent: React.FC = () => {
             <AppLayout><DataResultsPage /></AppLayout>
           </ProtectedRoute>
         } 
+      />
+      <Route
+        path="/data-results/:resultId"
+        element={
+          <ProtectedRoute>
+            <AppLayout><DataResultWorkspacePage /></AppLayout>
+          </ProtectedRoute>
+        }
       />
 
       {/* Research collaboration routes - All authenticated users */}
@@ -554,11 +618,12 @@ const AppContent: React.FC = () => {
           </ProtectedRoute>
         }
       />
-      <Route 
-        path="/project-management" 
+      {/* Canonical projects live in Lab Workspace; keep URL for bookmarks */}
+      <Route
+        path="/project-management"
         element={
           <ProtectedRoute>
-            <AppLayout><ProjectManagementPage /></AppLayout>
+            <LabSectionRedirect section="projects" />
           </ProtectedRoute>
         }
       />
@@ -578,13 +643,14 @@ const AppContent: React.FC = () => {
           </ProtectedRoute>
         } 
       />
-      <Route 
-        path="/data-analytics" 
+      {/* Alias → canonical Analysis entry */}
+      <Route
+        path="/data-analytics"
         element={
           <ProtectedRoute>
-            <AppLayout><DataAnalyticsPage /></AppLayout>
+            <Navigate to="/data-analysis" replace />
           </ProtectedRoute>
-        } 
+        }
       />
       {/* Collaboration Routes */}
       <Route 
@@ -648,7 +714,7 @@ const AppContent: React.FC = () => {
           </ProtectedRoute>
         } 
       />
-            {/* Conference News UI is empty; Events is the source of truth (RILOS alignment). */}
+      {/* Conference News UI is empty; Events is the source of truth (RILOS alignment). */}
       <Route path="/conference-news" element={<Navigate to="/events-opportunities" replace />} />
       <Route
         path="/notifications"

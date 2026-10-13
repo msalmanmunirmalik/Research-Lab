@@ -19,6 +19,7 @@ import axios from 'axios';
 import { getAuthHeaders } from '../utils/apiBase';
 
 interface ProtocolAIAssistantProps {
+  contentOrigin?: 'original' | 'adaptation' | 'drm' | 'springer';
   protocol?: {
     id?: string;
     title?: string;
@@ -41,9 +42,19 @@ type AssistantMode = 'optimize' | 'generate' | 'troubleshoot' | 'substitute' | n
 
 const ProtocolAIAssistant: React.FC<ProtocolAIAssistantProps> = ({
   protocol,
+  contentOrigin = 'drm',
   onOptimized,
   onClose
 }) => {
+  const originNote =
+    contentOrigin === 'original'
+      ? 'The steps below are the original protocols.io protocol. Anything this assistant writes is a suggestion, not part of that original.'
+      : contentOrigin === 'springer'
+        ? 'Only SpringerProtocols metadata is available. Do not treat AI text as the publisher protocol. AI suggestions are separate from that metadata.'
+        : contentOrigin === 'adaptation'
+          ? 'This is a DRM adaptation. Original protocols.io text and your lab changes stay separate from AI suggestions.'
+          : 'AI suggestions are not written into the protocol until you save them yourself.';
+
   const [activeMode, setActiveMode] = useState<AssistantMode>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -256,6 +267,9 @@ const ProtocolAIAssistant: React.FC<ProtocolAIAssistantProps> = ({
         </CardHeader>
 
         <CardContent className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
+          <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            {originNote}
+          </p>
           {!activeMode ? (
             <div className="space-y-4">
               <p className="text-gray-600 mb-6">
@@ -346,7 +360,7 @@ const ProtocolAIAssistant: React.FC<ProtocolAIAssistantProps> = ({
               ) : result ? (
                 <div className="space-y-4">
                   <div className="p-6 bg-green-50 border border-green-200 rounded-lg">
-                    <h4 className="font-bold text-green-900 mb-2">AI Result:</h4>
+                    <h4 className="font-bold text-green-900 mb-2">AI suggestion — not part of the original protocol</h4>
                     <div className="text-gray-800 whitespace-pre-wrap text-sm">
                       {result.optimizedProtocol ? (
                         <div>

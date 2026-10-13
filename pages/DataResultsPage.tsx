@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import DataResultForm, { DataResultFormValues } from '../components/DataResultForm';
 import CreateEvidencePackModal, { PackBasics } from '../components/evidence/CreateEvidencePackModal';
-import EvidencePackWorkspace from '../components/evidence/EvidencePackWorkspace';
 import DocumentImportModal from '../components/DocumentImportModal';
 import LinkedEntityChips, { buildWorkflowLinks } from '../components/LinkedEntityChips';
+import ProvenanceBadge from '../components/ProvenanceBadge';
 import { useEntityDeepLink } from '../hooks/useEntityDeepLink';
 import { smartParseDataResultText } from '../utils/dataResultImport';
 import { apiUrl, getAuthHeaders, formatApiNetworkError } from '../utils/apiBase';
+import { resultWorkspaceUrl } from '../utils/evidenceChain';
 import {
   ARTIFACT_META,
   ArtifactKind,
@@ -264,6 +265,7 @@ function CompletenessRing({ score, size = 40 }: { score: number; size?: number }
 
 const DataResultsPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeView, setActiveView] = useState<WorkspaceView>('library');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -342,9 +344,17 @@ const DataResultsPage: React.FC = () => {
     };
   }, []);
 
-  const openHighlightedResult = useCallback((entry: ResearchDataEntry) => {
-    setSelectedEntry(entry);
-  }, []);
+  const openHighlightedResult = useCallback(
+    (entry: ResearchDataEntry) => {
+      navigate(
+        resultWorkspaceUrl({
+          resultId: entry.id,
+          experimentId: entry.experimentId,
+        })
+      );
+    },
+    [navigate]
+  );
   const { focusedId } = useEntityDeepLink(dataEntries, openHighlightedResult);
 
   const fetchData = useCallback(async () => {
@@ -362,7 +372,7 @@ const DataResultsPage: React.FC = () => {
       setDataEntries(rows.map((r: any) => normalizeRow(r, user?.username || '')));
     } catch (err) {
       console.error('Error fetching data:', err);
-      setError(formatApiNetworkError(err, 'Could not load research evidence'));
+      setError(formatApiNetworkError(err, 'Could not load Evidence'));
       setDataEntries([]);
     } finally {
       setLoading(false);
@@ -406,7 +416,12 @@ const DataResultsPage: React.FC = () => {
     const newEntry = normalizeRow(r, user?.username || '');
     setDataEntries((prev) => [newEntry, ...prev]);
     setShowAddModal(false);
-    setSelectedEntry(newEntry);
+    navigate(
+      resultWorkspaceUrl({
+        resultId: newEntry.id,
+        experimentId: newEntry.experimentId,
+      })
+    );
   };
 
   const updateDataEntry = async (id: string, entryData: any) => {
@@ -597,7 +612,12 @@ const DataResultsPage: React.FC = () => {
   }, [dataEntries, completenessMap]);
 
   const openEntry = (entry: ResearchDataEntry) => {
-    setSelectedEntry(entry);
+    navigate(
+      resultWorkspaceUrl({
+        resultId: entry.id,
+        experimentId: entry.experimentId,
+      })
+    );
   };
 
   const DataEntryCard = ({ entry, compact = false }: { entry: ResearchDataEntry; compact?: boolean }) => {
@@ -619,7 +639,7 @@ const DataResultsPage: React.FC = () => {
           }
         }}
         className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-br from-white via-white to-sky-50/25 shadow-sm cursor-pointer transition-all hover:shadow-md hover:border-sky-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
-          focusedId === entry.id || selectedEntry?.id === entry.id
+          focusedId === entry.id
             ? 'border-sky-400 ring-2 ring-sky-200'
             : 'border-slate-200/90'
         } ${isList ? 'sm:flex sm:items-stretch' : 'flex flex-col'} ${compact ? 'p-0' : ''}`}
@@ -645,6 +665,14 @@ const DataResultsPage: React.FC = () => {
                 >
                   {STATUS_META[entry.status]?.label || formatLabel(entry.status)}
                 </span>
+                <ProvenanceBadge
+                  compact
+                  ids={{
+                    protocolId: entry.protocolId,
+                    experimentId: entry.experimentId,
+                    notebookEntryId: entry.notebookEntryId,
+                  }}
+                />
               </div>
               <h3 className="text-[15px] font-semibold text-slate-900 tracking-tight line-clamp-2 group-hover:text-sky-900 transition-colors">
                 {entry.title}
@@ -709,9 +737,9 @@ const DataResultsPage: React.FC = () => {
                 {entry.author || 'Unknown'}
               </span>
             )}
-            <span className="inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-1 text-slate-500">
               <LinkIcon className="w-3.5 h-3.5 text-sky-600" />
-              {linkedCount}/3 linked
+              {linkedCount === 3 ? 'Full chain' : `${linkedCount}/3 upstream`}
             </span>
             {(entry.files || []).length > 0 && (
               <span className="inline-flex items-center gap-1">
@@ -738,7 +766,7 @@ const DataResultsPage: React.FC = () => {
                 openEntry(entry);
               }}
             >
-              Inspect
+              Open
               <ArrowRightIcon className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -747,18 +775,16 @@ const DataResultsPage: React.FC = () => {
     );
   };
 
-  const selectedReport = selectedEntry ? completenessMap.get(selectedEntry.id) : null;
-
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-6 space-y-4">
         <PageHeader
-          title="Research evidence"
+          title="Data & Results"
           accent="sky"
           icon={<DatabaseIcon />}
           subtitle={
             <>
-              Curate experiment outputs with provenance, methods, and interpretation — so findings stay
+              Evidence packs with provenance, methods, and interpretation — so findings stay
               reproducible and publication-ready.{' '}
               <Link
                 to="/research-databank"
@@ -775,7 +801,7 @@ const DataResultsPage: React.FC = () => {
                 className="inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium text-teal-900 bg-white/90 border border-teal-200 rounded-md hover:bg-teal-50 transition-colors"
               >
                 <SparklesIcon className="w-4 h-4" />
-                Evidence → paper
+                Results → paper
               </Link>
               <button
                 type="button"
@@ -810,7 +836,7 @@ const DataResultsPage: React.FC = () => {
         />
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <PageStat label="Evidence records" value={stats.total} accent="sky" />
+          <PageStat label="Records" value={stats.total} accent="sky" />
           <PageStat
             label="Publication-ready"
             value={stats.ready}
@@ -869,7 +895,7 @@ const DataResultsPage: React.FC = () => {
           {(
             [
               { id: 'library' as const, name: 'Library', icon: DatabaseIcon },
-              { id: 'pipeline' as const, name: 'Evidence pipeline', icon: ClipboardDocumentCheckIcon },
+              { id: 'pipeline' as const, name: 'Results pipeline', icon: ClipboardDocumentCheckIcon },
               { id: 'insights' as const, name: 'Insights', icon: TrendingUpIcon },
             ] as const
           ).map((tab) => (
@@ -1031,7 +1057,7 @@ const DataResultsPage: React.FC = () => {
 
           {loading ? (
             <div className="rounded-2xl border border-slate-200 bg-white py-16 text-center text-[13px] text-slate-500">
-              Loading research evidence…
+              Loading Evidence…
             </div>
           ) : filteredData.length > 0 ? (
             <div
@@ -1443,58 +1469,6 @@ const DataResultsPage: React.FC = () => {
               setAddFormInitial(undefined);
             } catch (err) {
               setError(formatApiNetworkError(err, 'Could not create pack'));
-            } finally {
-              setIsUploading(false);
-            }
-          }}
-        />
-      )}
-
-      {/* Pack folder workspace */}
-      {selectedEntry && !showEditModal && (
-        <EvidencePackWorkspace
-          key={selectedEntry.id}
-          entry={selectedEntry}
-          pack={loadPackFromMetadata(selectedEntry.metadata)}
-          isSaving={isUploading}
-          onClose={() => setSelectedEntry(null)}
-          onDeletePack={() => {
-            if (confirm(`Delete pack "${selectedEntry.title}"?`)) {
-              void deleteDataEntry(selectedEntry.id).catch((err) =>
-                setError(formatApiNetworkError(err, 'Could not delete'))
-              );
-            }
-          }}
-          onSavePack={async ({ title, summary, methodology, conclusions, pack }) => {
-            setIsUploading(true);
-            setError('');
-            try {
-              const clean = sanitizePackForStorage(pack);
-              const files = buildFilesFromPack(clean.artifacts);
-              await updateDataEntry(selectedEntry.id, {
-                title,
-                type: selectedEntry.type,
-                category: selectedEntry.category,
-                summary,
-                description: selectedEntry.description,
-                methodology,
-                results: selectedEntry.results,
-                conclusions,
-                tags: selectedEntry.tags,
-                privacy_level: selectedEntry.privacyLevel || 'lab',
-                protocolId: selectedEntry.protocolId || null,
-                experimentId: selectedEntry.experimentId || null,
-                notebookEntryId: selectedEntry.notebookEntryId || null,
-                files,
-                metadata: {
-                  ...selectedEntry.metadata,
-                  pack: clean,
-                  artifactKinds: clean.artifacts.map((a) => a.kind),
-                },
-                status: selectedEntry.status,
-              });
-            } catch (err) {
-              setError(formatApiNetworkError(err, 'Could not save pack'));
             } finally {
               setIsUploading(false);
             }

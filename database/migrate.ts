@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
+import { resolveMysqlDatabaseName } from './databaseName.js';
 
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -20,7 +21,7 @@ const connect = async () =>
     port: Number(process.env.MYSQL_PORT || 3306),
     user: process.env.MYSQL_USER || 'root',
     password: process.env.MYSQL_PASSWORD || '',
-    database: process.env.MYSQL_DB || 'researchlab',
+    database: resolveMysqlDatabaseName(),
     multipleStatements: true,
   });
 
@@ -65,14 +66,30 @@ async function ensureMigrationsTable(conn: mysql.Connection) {
 async function applyFile(conn: mysql.Connection, file: string) {
   const sql = fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8');
   const warnings: string[] = [];
+  const deferred: string[] = [];
+
+  const accept = (e: any, stmt: string) => {
+    if (isIgnorable(e)) {
+      warnings.push(`${e.code || 'WARN'}: ${e.sqlMessage || e.message}`);
+      return;
+    }
+    // Alphabetical filenames run some ALTERs before the CREATE. Retry after every file.
+    if (e?.code === 'ER_NO_SUCH_TABLE' && /^\s*(ALTER\s+TABLE|UPDATE|DELETE\s+FROM)\b/i.test(stmt)) {
+      deferred.push(stmt);
+      warnings.push(`deferred until later: ${e.sqlMessage || e.message}`);
+      return;
+    }
+    throw e;
+  };
 
   // Prefer whole-file execution (needed for PREPARE/EXECUTE patterns)
   try {
     await conn.query(sql);
-    return { warnings };
+    return { warnings, deferred };
   } catch (err: any) {
-    if (!isIgnorable(err) && !/near|syntax|Duplicate/i.test(String(err.sqlMessage || ''))) {
-      // Fall through to per-statement
+    if (isIgnorable(err)) {
+      warnings.push(`${err.code || 'WARN'}: ${err.sqlMessage || err.message}`);
+      return { warnings, deferred };
     }
   }
 
@@ -80,14 +97,10 @@ async function applyFile(conn: mysql.Connection, file: string) {
     try {
       await conn.query(stmt);
     } catch (e: any) {
-      if (isIgnorable(e)) {
-        warnings.push(`${e.code || 'WARN'}: ${e.sqlMessage || e.message}`);
-      } else {
-        throw e;
-      }
+      accept(e, stmt);
     }
   }
-  return { warnings };
+  return { warnings, deferred };
 }
 
 async function main() {
@@ -109,6 +122,8 @@ async function main() {
 
   let ran = 0;
   let skipped = 0;
+  const deferred: { file: string; stmt: string }[] = [];
+  const waiting = new Set<string>();
 
   for (const file of files) {
     if (applied.has(file)) {
@@ -118,9 +133,39 @@ async function main() {
     process.stdout.write(`→ ${file} ... `);
     try {
       const result = await applyFile(conn, file);
-      await conn.query('INSERT INTO schema_migrations (id) VALUES (?)', [file]);
-      ran++;
-      console.log(result.warnings.length ? `ok (${result.warnings.length} ignorable)` : 'ok');
+      if (result.deferred.length > 0) {
+        waiting.add(file);
+        for (const stmt of result.deferred) deferred.push({ file, stmt });
+        console.log(`ok (${result.deferred.length} deferred)`);
+      } else {
+        await conn.query('INSERT INTO schema_migrations (id) VALUES (?)', [file]);
+        ran++;
+        console.log(result.warnings.length ? `ok (${result.warnings.length} ignorable)` : 'ok');
+      }
+    } catch (err: any) {
+      console.log('FAILED');
+      console.error(`  ${err.code || ''} ${err.sqlMessage || err.message}`);
+      console.error('Stopping. Fix the migration or database, then re-run.');
+      await conn.end();
+      process.exit(1);
+    }
+  }
+
+  if (deferred.length > 0) {
+    process.stdout.write(`→ deferred alters (${deferred.length}) ... `);
+    try {
+      for (const item of deferred) {
+        try {
+          await conn.query(item.stmt);
+        } catch (e: any) {
+          if (!isIgnorable(e)) throw e;
+        }
+      }
+      for (const file of waiting) {
+        await conn.query('INSERT INTO schema_migrations (id) VALUES (?)', [file]);
+        ran++;
+      }
+      console.log('ok');
     } catch (err: any) {
       console.log('FAILED');
       console.error(`  ${err.code || ''} ${err.sqlMessage || err.message}`);

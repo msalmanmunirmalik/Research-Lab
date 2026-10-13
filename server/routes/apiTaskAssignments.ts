@@ -198,6 +198,42 @@ router.delete('/assignments/:id', authenticateToken, async (req: any, res) => {
 });
 
 // Get API assignment for a specific task (used by AI Research Agent)
+async function decryptStoredApiKey(encryptedData: string): Promise<string> {
+  const crypto = await import('crypto');
+  const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '';
+  const ALGORITHM = 'aes-256-gcm';
+  const parts = encryptedData.split(':');
+  const iv = Buffer.from(parts[0], 'hex');
+  const authTag = Buffer.from(parts[1], 'hex');
+  const encrypted = parts[2];
+  const decipher = crypto.createDecipheriv(
+    ALGORITHM,
+    Buffer.from(ENCRYPTION_KEY, 'hex'),
+    iv
+  );
+  decipher.setAuthTag(authTag);
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
+async function resolvePlatformFallback(): Promise<{
+  apiKeyId: string;
+  provider: string;
+  providerName: string;
+  apiKey: string;
+} | null> {
+  const { resolvePlatformProvider } = await import('../services/platformAiAccess.js');
+  const platform = resolvePlatformProvider();
+  if (!platform) return null;
+  return {
+    apiKeyId: platform.apiKeyId,
+    provider: platform.provider,
+    providerName: platform.providerName,
+    apiKey: platform.apiKey,
+  };
+}
+
 export async function getApiForTask(userId: string, taskType: string): Promise<{
   apiKeyId: string;
   provider: string;
@@ -222,58 +258,46 @@ export async function getApiForTask(userId: string, taskType: string): Promise<{
       LIMIT 1`,
       [userId, taskType]
     );
-    
+
     if (result.rows.length > 0) {
       const row = result.rows[0];
-    
-      // Decrypt API key - need to access the decrypt function
-      // Since decryptApiKey is not exported, we'll need to decrypt here
-      // For now, import the crypto functions
-      const crypto = await import('crypto');
-      const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '';
-      const ALGORITHM = 'aes-256-gcm';
-    
-      function decryptApiKey(encryptedData: string): string {
-        const parts = encryptedData.split(':');
-        const iv = Buffer.from(parts[0], 'hex');
-        const authTag = Buffer.from(parts[1], 'hex');
-        const encrypted = parts[2];
-      
-        const decipher = crypto.createDecipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
-        decipher.setAuthTag(authTag);
-      
-        let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-      
-        return decrypted;
-      }
-    
-      const apiKey = decryptApiKey(row.encrypted_api_key);
-    
+      const apiKey = await decryptStoredApiKey(row.encrypted_api_key);
       return {
         apiKeyId: row.api_key_id,
         provider: row.provider,
         providerName: row.provider_name,
-        apiKey
+        apiKey,
       };
     }
 
-    // No user assignment — fall back to platform Gemini/OpenAI (quota enforced at chat entry)
-    const { resolvePlatformProvider } = await import('../services/platformAiAccess.js');
-    const platform = resolvePlatformProvider();
-    if (platform) {
-      return {
-        apiKeyId: platform.apiKeyId,
-        provider: platform.provider,
-        providerName: platform.providerName,
-        apiKey: platform.apiKey,
-      };
+    // Any active user key (if assignments table empty / no match)
+    try {
+      const keys = await pool.query(
+        `SELECT id, provider, provider_name, encrypted_api_key
+         FROM ai_provider_keys
+         WHERE user_id = $1 AND is_active = true
+         ORDER BY updated_at DESC
+         LIMIT 1`,
+        [userId]
+      );
+      if (keys.rows.length > 0) {
+        const row = keys.rows[0];
+        return {
+          apiKeyId: row.id,
+          provider: row.provider,
+          providerName: row.provider_name,
+          apiKey: await decryptStoredApiKey(row.encrypted_api_key),
+        };
+      }
+    } catch {
+      /* table may be missing */
     }
 
-    return null;
+    return resolvePlatformFallback();
   } catch (error) {
     console.error('Error getting API for task:', error);
-    return null;
+    // Missing assignments table or other DB issues — still try platform key
+    return resolvePlatformFallback();
   }
 }
 

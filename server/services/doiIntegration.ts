@@ -5,6 +5,8 @@
  */
 
 import axios from 'axios';
+import { openAlexProvider } from './scholarly/openalex.js';
+import type { CanonicalPaper } from './scholarly/types.js';
 
 // ==============================================
 // TYPES & INTERFACES
@@ -410,6 +412,32 @@ export class ArXivService {
   }
 }
 
+function canonicalToPaper(paper: CanonicalPaper): Paper {
+  const authors = (paper.authors || []).map((author) => {
+    const parts = author.name.trim().split(/\s+/);
+    const lastName = parts.length > 1 ? parts[parts.length - 1] : author.name;
+    const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : '';
+    return { firstName, lastName, orcid: author.orcid };
+  });
+  return {
+    doi: paper.doi || undefined,
+    pmid: paper.pmid || undefined,
+    title: paper.title,
+    authors,
+    abstract: paper.abstract || undefined,
+    journal: paper.journalName || undefined,
+    volume: paper.volume || undefined,
+    issue: paper.issue || undefined,
+    pages: paper.pages || undefined,
+    year: paper.publicationYear || new Date().getFullYear(),
+    publicationDate: paper.publicationDate || undefined,
+    url: paper.doi ? `https://doi.org/${paper.doi}` : paper.sourceUrl || undefined,
+    pdfUrl: paper.pdfUrl || undefined,
+    citationCount: paper.citationCount ?? undefined,
+    keywords: paper.keywords,
+  };
+}
+
 // ==============================================
 // UNIFIED PAPER FETCHING SERVICE
 // ==============================================
@@ -489,9 +517,13 @@ export class PaperFetchingService {
     }
 
     if (extracted.kind === 'doi') {
+      const fromOpenAlex = await openAlexProvider.getByDoi(extracted.value).catch(() => null);
+      if (fromOpenAlex) return canonicalToPaper(fromOpenAlex);
       return this.crossRef.fetchByDOI(extracted.value);
     }
     if (extracted.kind === 'pmid') {
+      const fromOpenAlex = await openAlexProvider.getByPmid(extracted.value).catch(() => null);
+      if (fromOpenAlex) return canonicalToPaper(fromOpenAlex);
       return this.pubMed.fetchByPMID(extracted.value);
     }
     if (extracted.kind === 'arxiv') {
@@ -530,10 +562,14 @@ export class PaperFetchingService {
     }
     const q = extracted.kind === 'query' ? extracted.value : extracted.value;
     if (extracted.kind === 'doi') {
+      const fromOpenAlex = await openAlexProvider.getByDoi(extracted.value).catch(() => null);
+      if (fromOpenAlex) return [canonicalToPaper(fromOpenAlex)];
       const p = await this.crossRef.fetchByDOI(extracted.value);
       return p ? [p] : [];
     }
     if (extracted.kind === 'pmid') {
+      const fromOpenAlex = await openAlexProvider.getByPmid(extracted.value).catch(() => null);
+      if (fromOpenAlex) return [canonicalToPaper(fromOpenAlex)];
       const p = await this.pubMed.fetchByPMID(extracted.value);
       return p ? [p] : [];
     }
@@ -543,6 +579,7 @@ export class PaperFetchingService {
     }
 
     const results = await Promise.allSettled([
+      openAlexProvider.search({ query: q, limit }).then((rows) => rows.map(canonicalToPaper)),
       this.crossRef.searchPapers(q, limit),
       this.arXiv.search(q, Math.max(1, Math.floor(limit / 2))),
     ]);

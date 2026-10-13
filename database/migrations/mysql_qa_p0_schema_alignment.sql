@@ -73,8 +73,14 @@ ALTER TABLE experiments ADD COLUMN IF NOT EXISTS template_id VARCHAR(64);
 ALTER TABLE experiments ADD COLUMN IF NOT EXISTS actual_cost DECIMAL(12,2) DEFAULT 0;
 ALTER TABLE experiments ADD COLUMN IF NOT EXISTS updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
--- Backfill title from legacy name when present
-UPDATE experiments SET title = name WHERE (title IS NULL OR title = '') AND name IS NOT NULL;
+-- Backfill title from legacy name when that column exists (thin experiments table).
+SET @has_experiment_name := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'experiments' AND COLUMN_NAME = 'name'
+);
+SET @sql := IF(@has_experiment_name = 0, 'SELECT 1',
+  'UPDATE experiments SET title = name WHERE (title IS NULL OR title = '''') AND name IS NOT NULL');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 CREATE TABLE IF NOT EXISTS experiment_templates (
   id VARCHAR(64) PRIMARY KEY,

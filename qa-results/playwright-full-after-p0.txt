@@ -1,0 +1,157 @@
+
+Running 35 tests using 4 workers
+
+  ✓   2 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:7:3 › Authentication › displays login form (1.6s)
+  ✓   4 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:22:3 › Authentication › logs in with demo credentials (2.2s)
+  ✓   1 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:26:3 › Authentication › logs out successfully (2.3s)
+  ✓   7 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:53:3 › API Smoke › health endpoint responds (75ms)
+  ✓   8 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:58:3 › API Smoke › demo login returns token (63ms)
+  ✓   5 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:40:3 › Navigation › opens Personal NoteBook from sidebar (1.5s)
+  ✓   3 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:14:3 › Authentication › rejects invalid credentials (3.8s)
+  ✓   6 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:45:3 › Navigation › opens protocol library from sidebar (1.6s)
+  ✓   9 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:115:3 › Experiment Tracker Module › displays dashboard overview (2.4s)
+  ✓  10 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:122:3 › Experiment Tracker Module › shows experiment filters in Experiments tab (2.8s)
+  ✓  11 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:129:3 › Experiment Tracker Module › activates templates tab (2.7s)
+  ✓  13 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:11:3 › Personal NoteBook Module › shows Personal NoteBook overview (1.2s)
+  ✓  12 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:135:3 › Experiment Tracker Module › shows analytics view (2.9s)
+  ✓  14 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:16:3 › Personal NoteBook Module › supports entry search interaction (995ms)
+  ✓  15 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:21:3 › Personal NoteBook Module › shows entry type selections (1.2s)
+  ✓  16 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:11:3 › Professional Protocols Module › renders protocol library overview (1.5s)
+  ✓  17 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:21:3 › Professional Protocols Module › filters protocols using search (1.4s)
+  ✘  18 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:27:3 › Professional Protocols Module › shows empty or results state without crashing (1.6s)
+  ✓  20 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:79:5 › Recommendations and Notebook Summaries E2E › Service Recommendations › should display recommendations widget on service marketplace (1.1s)
+  ✓  21 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:140:5 › Recommendations and Notebook Summaries E2E › Notebook Summary Generation › should generate weekly summary when button is clicked (1.1s)
+  ✓  23 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:157:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should return protocol recommendations (18ms)
+  ✓  24 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:171:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should return paper recommendations (11ms)
+  ✓  25 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:185:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should return service recommendations (91ms)
+  ✓  26 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:199:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should generate notebook summary (18ms)
+  ✓  22 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:89:5 › Recommendations and Notebook Summaries E2E › Dashboard Recommendations › should display recommendation widgets on dashboard (1.1s)
+  ✓  27 [chromium] › tests/e2e/research-tools.pw.spec.ts:12:3 › Research Tools Module › displays research tools overview (1.3s)
+  ✘  29 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:103:5 › Recommendations and Notebook Summaries E2E › Notebook Summary Generation › should display summary generation buttons on lab notebook page (1.2s)
+  ✓  28 [chromium] › tests/e2e/research-tools.pw.spec.ts:19:3 › Research Tools Module › filters tools by type (1.7s)
+  ✓  30 [chromium] › tests/e2e/research-tools.pw.spec.ts:28:3 › Research Tools Module › switches between grid and list view (1.5s)
+  ✓  31 [chromium] › tests/e2e/research-tools.pw.spec.ts:35:3 › Research Tools Module › opens calculator details drawer (1.4s)
+  ✓  32 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:118:5 › Recommendations and Notebook Summaries E2E › Notebook Summary Generation › should generate daily summary when button is clicked (948ms)
+  ✘  19 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:27:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should display recommendations widget on protocols page (11.8s)
+  ✘  33 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:38:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should load protocol recommendations (1.5s)
+  ✓  34 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:50:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should allow clicking on recommended protocol (989ms)
+  ✓  35 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:66:5 › Recommendations and Notebook Summaries E2E › Paper Recommendations › should display recommendations widget on research data bank page (875ms)
+
+
+  1) [chromium] › tests/e2e/professional-protocols.pw.spec.ts:27:3 › Professional Protocols Module › shows empty or results state without crashing 
+
+    Error: expect.toBeVisible: Error: strict mode violation: getByRole('heading', { name: /No protocols found/i }).or(getByText(/Recommended Protocols/i)) resolved to 2 elements:
+        1) <h3 class="text-xl font-semibold text-slate-800 flex items-center gap-2">…</h3> aka getByRole('heading', { name: 'Recommended Protocols for You' })
+        2) <h3 class="text-xl font-bold text-gray-900 mb-2">No protocols found</h3> aka getByRole('heading', { name: 'No protocols found' })
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: /No protocols found/i }).or(getByText(/Recommended Protocols/i))[22m
+
+
+      30 |     const library = page.getByRole('heading', { name: 'Protocol Library' });
+      31 |     await expect(library).toBeVisible();
+    > 32 |     await expect(emptyState.or(page.getByText(/Recommended Protocols/i))).toBeVisible();
+         |                                                                           ^
+      33 |   });
+      34 | });
+      35 |
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/professional-protocols.pw.spec.ts:32:75
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--9ed12-ults-state-without-crashing-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--9ed12-ults-state-without-crashing-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/professional-protocols.pw--9ed12-ults-state-without-crashing-chromium/error-context.md
+
+  2) [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:27:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should display recommendations widget on protocols page 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  locator('text=Recommended Protocols')
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  10000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('text=Recommended Protocols')[22m
+
+
+      33 |       // Check if recommendations widget is visible
+      34 |       const recommendationsWidget = page.locator('text=Recommended Protocols');
+    > 35 |       await expect(recommendationsWidget).toBeVisible({ timeout: 10000 });
+         |                                           ^
+      36 |     });
+      37 |
+      38 |     test('should load protocol recommendations', async ({ page }) => {
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/recommendations-notebook-summaries.pw.spec.ts:35:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/recommendations-notebook-s-ce4e0-ns-widget-on-protocols-page-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/recommendations-notebook-s-ce4e0-ns-widget-on-protocols-page-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/recommendations-notebook-s-ce4e0-ns-widget-on-protocols-page-chromium/error-context.md
+
+  3) [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:38:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should load protocol recommendations 
+
+    Error: locator.count: Unexpected token "=" while parsing css selector "[data-testid="recommendation-item"], .recommendation-item, text=/recommended/i". Did you mean to CSS.escape it?
+
+      42 |       // Check for recommendation items
+      43 |       const recommendationItems = page.locator('[data-testid="recommendation-item"], .recommendation-item, text=/recommended/i');
+    > 44 |       const count = await recommendationItems.count();
+         |                                               ^
+      45 |       
+      46 |       // Should have at least one recommendation or show "No recommendations" message
+      47 |       expect(count).toBeGreaterThanOrEqual(0);
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/recommendations-notebook-summaries.pw.spec.ts:44:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/recommendations-notebook-s-48e4d-ad-protocol-recommendations-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/recommendations-notebook-s-48e4d-ad-protocol-recommendations-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/recommendations-notebook-s-48e4d-ad-protocol-recommendations-chromium/error-context.md
+
+  4) [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:103:5 › Recommendations and Notebook Summaries E2E › Notebook Summary Generation › should display summary generation buttons on lab notebook page 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      113 |       const weeklyExists = await weeklyButton.count() > 0;
+      114 |       
+    > 115 |       expect(dailyExists || weeklyExists).toBeTruthy();
+          |                                           ^
+      116 |     });
+      117 |
+      118 |     test('should generate daily summary when button is clicked', async ({ page }) => {
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/recommendations-notebook-summaries.pw.spec.ts:115:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/recommendations-notebook-s-0975c-uttons-on-lab-notebook-page-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/recommendations-notebook-s-0975c-uttons-on-lab-notebook-page-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/recommendations-notebook-s-0975c-uttons-on-lab-notebook-page-chromium/error-context.md
+
+  4 failed
+    [chromium] › tests/e2e/professional-protocols.pw.spec.ts:27:3 › Professional Protocols Module › shows empty or results state without crashing 
+    [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:27:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should display recommendations widget on protocols page 
+    [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:38:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should load protocol recommendations 
+    [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:103:5 › Recommendations and Notebook Summaries E2E › Notebook Summary Generation › should display summary generation buttons on lab notebook page 
+  31 passed (26.7s)

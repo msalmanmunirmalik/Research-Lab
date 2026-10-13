@@ -69,7 +69,7 @@ type StepId = 'basics' | 'evidence' | 'wrap';
 
 const STEPS: { id: StepId; label: string; hint: string }[] = [
   { id: 'basics', label: 'Basics', hint: 'Name it' },
-  { id: 'evidence', label: 'Evidence', hint: 'Add data' },
+  { id: 'evidence', label: 'Evidence', hint: 'Add pack' },
   { id: 'wrap', label: 'Finish', hint: 'Link & save' },
 ];
 

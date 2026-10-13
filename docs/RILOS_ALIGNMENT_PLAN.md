@@ -37,32 +37,31 @@ Supported across both layers by Ask AI, provenance, team collaboration, and (pla
 | **Scientific records** | `/protocols`, `/lab-notebook`, `/data-results` | `/api/protocols*`, `/api/lab-notebooks`, evidence/results routes |
 | **Analysis & writing** | `/data-analysis`, `/writing-studio`, `/research-tools` | `/api/advanced-stats`, `/api/writing`, `/api/writing` collab |
 | **Research network** | `/collaboration-networking`, `/research-databank`, `/marketplace`, `/negative-results`, `/events-opportunities`, `/help-forum`, `/current-trends` | networking/*, databank, marketplace, negative-results, research-events, help-forum, community-news |
-| **Research education** | `/lab-floors`, `/tools-trainings` | `/api/lab-floors`, lab training routes |
+| **Research education** | `/tools-trainings` | lab training routes |
 | **Researcher wellbeing** | `/wellbeing` (MVP check-ins) | `/api/wellbeing` — private to user only |
 
 ### Ownership (decision owners)
 
 | Area | Canonical choice | Owner focus |
 |---|---|---|
-| **Projects** | Lab Workspace projects are day-to-day; fold or clearly separate `/project-management` later | Lab platform |
-| **Analysis** | One Analysis entry (`/data-analysis`); prefer Python `/api/advanced-stats` over a second client-only stack | Science record / analyze |
-| **Citations** | Shared paper library (`/api/research`) is spine; writing citations dual-write until migrated | Writing |
+| **Projects** | Lab Workspace `/lab-workspace?section=projects` (`research_projects`). `/project-management` redirects there. | Lab platform |
+| **Analysis** | `/data-analysis` calls `/api/advanced-stats/*` (Python) with local fallback; `/data-analytics` redirects | Science record / analyze |
+| **Citations** | Shared paper library (`/writing-studio/tools/library` + `/api/research`). `/evidence-references` redirects to library. Evidence packs are `/data-results` (Records → Evidence), not citations. | Writing |
 | **Wellbeing** | New pillar; no PI surveillance; ship behind flag after trust work | Product + privacy |
 
 ---
 
 ## 3. Information architecture (signed-in nav)
 
-Nav labels map to pillars (implemented in `components/SideNav.tsx`):
+Nav labels (implemented in `components/SideNav.tsx`):
 
-1. **Home** — Dashboard  
-2. **Intelligence** — Grants & funding; Literature (Studio library tool)  
-3. **Lab** — Lab workspace; Experiments  
-4. **Records** — Protocols; Notebook; Evidence  
-5. **Analyze & write** — Analysis; Writing studio; Research tools  
-6. **Network** — Networking; Data bank; Marketplace; Negative results; Events; Help forum  
-7. **Learn** — Lab Floors; Trainings  
+1. **Dashboard**  
+2. **Records** — Notebook; Protocols; Data & Results; Experiments  
+3. **Lab workspace** — Workspace; Trainings; Wellbeing  
+4. **Intelligence** — Data analysis; Literature; Writing studio; Research tools; Databank; Grants & funding  
+5. **Network** — Networking; Marketplace  
 
+Negative results, Events, and Help forum stay on the Dashboard (not in primary nav).  
 Account: Settings (sidebar footer), Profile / Notifications (header).
 
 ### Redirect / retire rules
@@ -72,7 +71,10 @@ Account: Settings (sidebar footer), Profile / Notifications (header).
 | `/conference-news` | Redirect → `/events-opportunities` (empty feed; Events is source of truth) |
 | `/scientist-passport`, `/my-portfolio` | Already → `/profile` |
 | Standalone AI agent pages | Already → Writing Studio |
-| `/project-management`, `/pi-review-dashboard` | Keep routed; not primary nav until folded into Workspace |
+| `/project-management` | Redirect → `/lab-workspace?section=projects` |
+| `/data-analytics` | Redirect → `/data-analysis` |
+| `/evidence-references` | Redirect → Writing Studio library |
+| `/pi-review-dashboard` | Keep routed; not primary nav until folded into Workspace |
 | `/current-trends` | Routed; optional Network link later if retention justifies |
 
 ---
@@ -84,9 +86,9 @@ Account: Settings (sidebar footer), Profile / Notifications (header).
 - [x] Alignment plan document  
 - [x] UI brand pass (RILOS wordmark / mark)  
 - [x] SideNav restructure to seven pillars  
-- [x] Re-route Lab Floors; Conference News → Events  
+- [x] Conference News → Events  
+- [x] Lab Floors removed (product decision; education via Trainings)  
 - [x] Pitch logo asset (`public/rilos-logo.png`) + favicon + BrandMark wordmark mode  
-- [x] Lab Floors progress persisted to MySQL (`lab_floors_progress`) with local cache  
 - [x] Dashboard quick actions follow evidence chain  
 - [ ] Package/repo rename (deferred)
 
@@ -95,7 +97,6 @@ Account: Settings (sidebar footer), Profile / Notifications (header).
 - [x] Ensure every deck pillar is reachable without a direct URL (incl. Wellbeing)  
 - [x] Dashboard shortcuts follow evidence chain  
 - [x] Forward handoffs: experiment → notebook → evidence → Writing Studio (`utils/evidenceChain.ts`)  
-- [x] Remount `/api/lab-floors` (progress + roleplay) after accidental retirement  
 - [ ] Network hub polish; hide unfinished surfaces  
 
 ### Phase 4 note — Wellbeing MVP shipped early
@@ -106,26 +107,36 @@ Private voluntary check-ins at `/wellbeing` (`researcher_wellbeing_checkins`). N
 
 Priority before net-new features (matches pitch):
 
-1. AuthZ / RBAC / IDOR audit on notebook, protocols, evidence, workspace  
-2. Smoke QA on beachhead path (idea → publication)  
-3. Kill duplicates (projects, stats, citation spine)  
-4. Ops hygiene (README, MySQL env, DirectAdmin pilots)  
-5. AI trust: platform quota vs user key; licensed scholarly sources only  
+1. [x] AuthZ / RBAC / IDOR on notebook, protocols, experiments, evidence  
+   - Policy: `server/policies/labAccess.ts` (`canReadLifecycleRecord`, `canWriteLifecycleRecord` / `assertCanWriteLifecycleRecord`)  
+   - Integration matrix: `tests/integration/idorLifecycle.test.ts`  
+   - JWT invalidate on logout / password change: `tokens_invalid_before` + `server/utils/tokenRevocation.ts`  
+2. [x] Smoke QA on beachhead path (idea → publication)  
+   - Manual: `docs/RILOS_WORKFLOW_QA_CHECKLIST.md`  
+   - API: `pnpm run smoke:beachhead` (`scripts/rilos-beachhead-smoke.mjs`)  
+3. [x] Kill duplicates — redirects + Evidence label; deleted orphan pages (`ProjectManagementPage`, `StatisticalAnalysisToolsPage`, `EvidenceReferencesPage`, `SimpleReferenceSystemPage`, `UnifiedReferenceSystem`). Analysis UI wired to `/api/advanced-stats` with local fallback. DB `projects` vs `research_projects` deferred.  
+4. [x] Ops hygiene baseline (README, `docs/LOCAL_DEV.md`, MySQL env notes, DirectAdmin pack scripts)  
+5. [x] AI trust baseline: platform quota vs user key (`server/services/platformAiAccess.ts`); scholarly source licensing remains ongoing  
 
 **Pilot metrics:** activation, workflow completion, time-to-first experiment record, 2–4 week retention — not signups alone.
 
 ### Phase 3 — Connected lifecycle (4–6 months)
 
-- Default create flows along the evidence chain  
-- Provenance badges on packs and manuscript claims  
-- Persist Lab Floors / roleplay progress on account (not only `localStorage`)  
-- Pilot onboarding pack (sample lab + demo chain)  
+- [x] Default create flows along the evidence chain  
+  - Dashboard Evidence quick action + “Load sample chain”  
+  - Evidence pack create shows provenance links by default  
+- [x] Provenance badges on packs (+ Writing Studio evidence attachment)  
+  - `components/ProvenanceBadge.tsx` on Evidence cards  
+  - Writing Studio keeps `ws_evidence_source` after `?notice=evidence`  
+  - Per-claim manuscript badges remain a follow-up  
+- [x] Pilot onboarding pack — `POST /api/onboarding/demo-chain` (sample lab if needed + linked protocol → experiment → notebook → evidence)  
+- [x] Lab Floors removed from product (nav, routes, API, content)  
 
 ### Phase 4 — Researcher wellbeing
 
 Voluntary, private, not clinical, not surveillance.
 
-**MVP personal:** optional check-ins, support links, educational tie-ins to Lab Floors.  
+**MVP personal:** optional check-ins, support links, educational tie-ins to Trainings.  
 **MVP workflow:** deadline/experiment load visibility; optional personal wellbeing plan.  
 **Non-goals:** manager mental-health dashboards; mandatory check-ins; diagnostic claims.
 
@@ -135,7 +146,7 @@ Pricing hypotheses for interviews (not willingness-to-pay facts):
 
 | Tier | Hypothesis |
 |---|---|
-| Free individual | Notebook, limited protocols/evidence, Lab Floors, limited AI |
+| Free individual | Notebook, limited protocols/evidence, Trainings, limited AI |
 | Researcher €9.99/mo | Writing Studio, grants, library, Ask AI quota |
 | Lab Starter €99/mo | Workspace, inventory/instruments, team messaging, shared protocols |
 | Lab Pro €249/mo | Data Bank org, marketplace workspaces, PI review, higher AI |
@@ -176,7 +187,7 @@ Initial priority: real users completing real experiments — not top-of-funnel s
 | Lab operations | Lab workspace |
 | Scientific records | Protocols + notebook + research evidence |
 | Analysis & writing | Data analytics + Writing Studio |
-| Research education | Lab Floors + Tools & Trainings |
+| Research education | Tools & Trainings |
 | Research intelligence | Grants + literature library + Ask AI |
 | Evidence pack | Research evidence / data-results entry |
 

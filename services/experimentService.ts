@@ -138,6 +138,32 @@ export interface ExperimentAnalytics {
   overdueExperiments: number;
 }
 
+export type ExperimentRunStatus = 'planned' | 'completed' | 'failed' | 'needs_repeat';
+
+export interface ExperimentRun {
+  id: string;
+  experimentId: string;
+  userId: string;
+  userName?: string | null;
+  recordedAt: string;
+  title?: string | null;
+  modifications: string;
+  observations: string;
+  outcomeSummary: string;
+  status: ExperimentRunStatus;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface CreateExperimentRunData {
+  recordedAt?: string;
+  title?: string;
+  modifications?: string;
+  observations?: string;
+  outcomeSummary?: string;
+  status?: ExperimentRunStatus;
+}
+
 class ExperimentService {
   private baseUrl = '/api/experiments';
 
@@ -310,6 +336,32 @@ class ExperimentService {
       endDate: new Date().toISOString(),
       notes: reason
     });
+  }
+
+  async listRuns(experimentId: string): Promise<ExperimentRun[]> {
+    const response = await apiService.get(`${this.baseUrl}/${experimentId}/runs`);
+    const payload = response.data;
+    if (Array.isArray(payload)) return payload;
+    if (payload && Array.isArray(payload.runs)) return payload.runs;
+    return [];
+  }
+
+  async createRun(experimentId: string, data: CreateExperimentRunData): Promise<ExperimentRun> {
+    const response = await apiService.post(`${this.baseUrl}/${experimentId}/runs`, data);
+    return response.data;
+  }
+
+  async updateRun(
+    experimentId: string,
+    runId: string,
+    data: Partial<CreateExperimentRunData>
+  ): Promise<ExperimentRun> {
+    const response = await apiService.put(`${this.baseUrl}/${experimentId}/runs/${runId}`, data);
+    return response.data;
+  }
+
+  async deleteRun(experimentId: string, runId: string): Promise<void> {
+    await apiService.delete(`${this.baseUrl}/${experimentId}/runs/${runId}`);
   }
 
   // Get experiment progress log

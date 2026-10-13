@@ -46,9 +46,8 @@ const CreateEvidencePackModal: React.FC<Props> = ({
   const [protocolId, setProtocolId] = useState(initial?.protocolId || '');
   const [experimentId, setExperimentId] = useState(initial?.experimentId || '');
   const [notebookEntryId, setNotebookEntryId] = useState(initial?.notebookEntryId || '');
-  const [showLinks, setShowLinks] = useState(
-    Boolean(initial?.protocolId || initial?.experimentId || initial?.notebookEntryId)
-  );
+  // Phase 3: provenance links are part of the default create flow, not buried.
+  const [showLinks, setShowLinks] = useState(true);
   const [error, setError] = useState('');
 
   const submit = async (e: React.FormEvent) => {
@@ -156,10 +155,23 @@ const CreateEvidencePackModal: React.FC<Props> = ({
               onClick={() => setShowLinks(true)}
               className="text-[13px] font-medium text-sky-700 hover:underline"
             >
-              + Link experiment / protocol (optional)
+              + Link protocol / experiment / notebook
             </button>
           ) : (
-            <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+            <div className="space-y-3 rounded-xl border border-sky-100 bg-sky-50/40 p-3">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-[12px] text-slate-600 leading-snug">
+                  <span className="font-semibold text-slate-800">Provenance</span> — link upstream
+                  records so the pack stays on the evidence chain.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowLinks(false)}
+                  className="shrink-0 text-[11px] text-slate-500 hover:text-slate-800"
+                >
+                  Hide
+                </button>
+              </div>
               <Field label="Experiment">
                 <EntityLinkSelect
                   value={experimentId}

@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS writing_documents (
   citation_style VARCHAR(40) DEFAULT 'APA',
   content JSON,
   metadata JSON,
+  content_revision INT NOT NULL DEFAULT 1,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_writing_docs_user (user_id),

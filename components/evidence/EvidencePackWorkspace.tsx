@@ -1,38 +1,31 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import LinkedEntityChips, { buildWorkflowLinks } from '../LinkedEntityChips';
-import ArtifactEditorHost from './ArtifactEditorHost';
-import PackReviewView from './PackReviewView';
-import EvidenceAIPanel from './EvidenceAIPanel';
-import { writingFromEvidenceUrl } from '../../utils/evidenceChain';
+import SpreadsheetGrid from './SpreadsheetGrid';
+import SheetQuickChart from './SheetQuickChart';
+import ResultAnalysisPanel from './ResultAnalysisPanel';
 import {
+  ArrowLeftIcon,
+  ChartBarIcon,
   CheckIcon,
-  DocumentTextIcon,
+  DocumentArrowUpIcon,
   EyeIcon,
-  FilesIcon,
-  FolderIcon,
+  EditIcon,
   PhotoIcon,
-  PlusIcon,
   TableCellsIcon,
   TrashIcon,
-  XMarkIcon,
-  EditIcon,
 } from '../icons';
 import {
-  ARTIFACT_META,
-  ArtifactKind,
+  DataSheetArtifact,
   EvidencePackData,
+  FigureArtifact,
   PackArtifact,
+  SummaryTableArtifact,
   artifactHasContent,
-  summarizePack,
+  createEmptyArtifact,
+  newArtifactId,
+  touchArtifact,
 } from '../../utils/evidencePack';
-
-const KIND_ICON: Record<ArtifactKind, React.FC<React.SVGProps<SVGSVGElement>>> = {
-  text: DocumentTextIcon,
-  table: TableCellsIcon,
-  sheet: FilesIcon,
-  image: PhotoIcon,
-};
+import { importSpreadsheetFile } from '../../utils/spreadsheet';
 
 export type PackWorkspaceEntry = {
   id: string;
@@ -56,7 +49,9 @@ type Props = {
   entry: PackWorkspaceEntry;
   pack: EvidencePackData;
   isSaving?: boolean;
-  onClose: () => void;
+  backHref: string;
+  backLabel?: string;
+  experimentTitle?: string | null;
   onSavePack: (patch: {
     title: string;
     summary: string;
@@ -67,323 +62,676 @@ type Props = {
   onDeletePack?: () => void;
 };
 
+type ResultKind = 'sheet' | 'table' | 'image';
+type Mode =
+  | { kind: 'home' }
+  | { kind: 'edit'; id: string }
+  | { kind: 'view'; id: string }
+  | { kind: 'analyze'; id: string };
+
+const ENTRY_CARDS: {
+  kind: ResultKind | 'upload';
+  title: string;
+  blurb: string;
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+}[] = [
+  {
+    kind: 'sheet',
+    title: 'Spreadsheet',
+    blurb: 'Type or paste numbers in a grid — like Excel.',
+    icon: TableCellsIcon,
+  },
+  {
+    kind: 'table',
+    title: 'Summary table',
+    blurb: 'A small table for means, n, or p-values — like Word.',
+    icon: TableCellsIcon,
+  },
+  {
+    kind: 'image',
+    title: 'Figure',
+    blurb: 'Add a gel, blot, plot, or photo with a caption.',
+    icon: PhotoIcon,
+  },
+  {
+    kind: 'upload',
+    title: 'Upload file',
+    blurb: 'Import an Excel or CSV file as a spreadsheet.',
+    icon: DocumentArrowUpIcon,
+  },
+];
+
+function kindLabel(kind: string): string {
+  if (kind === 'sheet') return 'Spreadsheet';
+  if (kind === 'table') return 'Summary table';
+  if (kind === 'image') return 'Figure';
+  return 'Result';
+}
+
+function previewLine(a: PackArtifact): string {
+  if (a.kind === 'sheet') {
+    const s = a as DataSheetArtifact;
+    const filled = s.rows.filter((r) => r.some((c) => String(c).trim())).length;
+    return `${s.headers.length} columns · ${filled} rows with data`;
+  }
+  if (a.kind === 'table') {
+    const t = a as SummaryTableArtifact;
+    return `${t.columns.length} columns · ${t.rows.length} rows`;
+  }
+  if (a.kind === 'image') {
+    const f = a as FigureArtifact;
+    return f.title || f.fileName || 'No caption yet';
+  }
+  return '';
+}
+
 /**
- * Evidence pack workspace (v2):
- * Four artifact kinds only — text, table, sheet, image —
- * each with a distinct scientific job (claim / derived / raw / visual).
+ * Results hub: four clear ways to add data, then View / Edit on what you saved.
  */
 const EvidencePackWorkspace: React.FC<Props> = ({
   entry,
   pack: initialPack,
   isSaving,
-  onClose,
+  backHref,
+  backLabel = 'Back',
+  experimentTitle,
   onSavePack,
   onDeletePack,
 }) => {
   const [title, setTitle] = useState(entry.title);
   const [summary, setSummary] = useState(entry.summary);
-  const [methodology, setMethodology] = useState(entry.methodology || '');
-  const [conclusions, setConclusions] = useState(entry.conclusions || '');
-  const [artifacts, setArtifacts] = useState<PackArtifact[]>([...initialPack.artifacts]);
-  const [filter, setFilter] = useState<ArtifactKind | 'all'>('all');
-  const [editor, setEditor] = useState<
-    | { mode: 'create'; kind: ArtifactKind }
-    | { mode: 'edit'; artifact: PackArtifact }
-    | null
-  >(null);
-  const [dirty, setDirty] = useState(false);
-  const [showReview, setShowReview] = useState(false);
-  const [showInterp, setShowInterp] = useState(
-    Boolean(entry.methodology?.trim() || entry.conclusions?.trim())
+  const [artifacts, setArtifacts] = useState<PackArtifact[]>(() =>
+    initialPack.artifacts.filter((a) => a.kind === 'sheet' || a.kind === 'table' || a.kind === 'image')
   );
+  const [dirty, setDirty] = useState(false);
+  const [mode, setMode] = useState<Mode>({ kind: 'home' });
+  const [error, setError] = useState('');
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
 
   const visible = useMemo(
-    () => (filter === 'all' ? artifacts : artifacts.filter((a) => a.kind === filter)),
-    [artifacts, filter]
+    () => artifacts.filter((a) => a.kind === 'sheet' || a.kind === 'table' || a.kind === 'image'),
+    [artifacts]
   );
 
-  const saveArtifact = (artifact: PackArtifact) => {
-    setArtifacts((prev) => {
-      const idx = prev.findIndex((a) => a.id === artifact.id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = artifact;
-        return next;
-      }
-      return [...prev, artifact];
-    });
-    setEditor(null);
-    setDirty(true);
-  };
+  const active = useMemo(() => {
+    if (mode.kind === 'home') return null;
+    return visible.find((a) => a.id === mode.id) || null;
+  }, [mode, visible]);
 
-  const removeArtifact = (id: string) => {
-    if (!confirm('Remove this item from the pack?')) return;
-    setArtifacts((prev) => prev.filter((a) => a.id !== id));
-    setDirty(true);
-  };
+  const markDirty = () => setDirty(true);
 
-  const persist = async () => {
+  const persist = async (nextArtifacts?: PackArtifact[]) => {
+    const list = nextArtifacts ?? artifacts;
     await onSavePack({
       title: title.trim() || entry.title,
       summary: summary.trim() || title.trim(),
-      methodology,
-      conclusions,
-      pack: { version: 2, artifacts },
+      methodology: entry.methodology || '',
+      conclusions: entry.conclusions || '',
+      pack: { version: 2, artifacts: list },
     });
     setDirty(false);
   };
 
-  const addButtons: { kind: ArtifactKind; label: string }[] = [
-    { kind: 'text', label: 'Text result' },
-    { kind: 'table', label: 'Summary table' },
-    { kind: 'sheet', label: 'Datasheet' },
-    { kind: 'image', label: 'Figure' },
-  ];
+  const updateActive = (next: PackArtifact) => {
+    setArtifacts((prev) => prev.map((a) => (a.id === next.id ? touchArtifact(next) : a)));
+    markDirty();
+  };
 
-  const previewLine = (a: PackArtifact): string => {
-    switch (a.kind) {
-      case 'text':
-        return a.finding || a.body.slice(0, 90) || 'Open to write the finding';
-      case 'table':
-        return `${a.columns.length} cols · ${a.rows.length} rows${a.footnotes ? ' · footnotes' : ''}`;
-      case 'sheet':
-        return `${a.rows.length} × ${a.headers.length}${a.assay ? ` · ${a.assay}` : ''}${a.fileName ? ` · ${a.fileName}` : ''}`;
-      case 'image':
-        return [a.modality, a.title || a.fileName || 'No caption yet'].filter(Boolean).join(' · ');
+  const startNew = (kind: ResultKind) => {
+    const count = artifacts.filter((a) => a.kind === kind).length + 1;
+    const name =
+      kind === 'sheet'
+        ? `Spreadsheet ${count}`
+        : kind === 'table'
+          ? `Table ${count}`
+          : `Figure ${count}`;
+    const created = createEmptyArtifact(kind, name);
+    setArtifacts((prev) => [...prev, created]);
+    setMode({ kind: 'edit', id: created.id });
+    markDirty();
+  };
+
+  const handleUpload = async (file: File | null) => {
+    if (!file) return;
+    setError('');
+    try {
+      const imported = await importSpreadsheetFile(file);
+      const created = createEmptyArtifact(
+        'sheet',
+        file.name.replace(/\.[^.]+$/, '') || 'Uploaded sheet'
+      ) as DataSheetArtifact;
+      const sheet: DataSheetArtifact = {
+        ...created,
+        fileName: imported.fileName,
+        headers: imported.headers,
+        rows: imported.rows,
+        columnMeta: imported.headers.map((h) => ({ header: h, type: 'text' as const })),
+      };
+      setArtifacts((prev) => [...prev, sheet]);
+      setMode({ kind: 'edit', id: sheet.id });
+      markDirty();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not import file');
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      <button
-        type="button"
-        className="absolute inset-0 bg-slate-900/40"
-        aria-label="Close pack"
-        onClick={() => {
-          if (dirty && !confirm('Discard unsaved changes to this pack?')) return;
-          onClose();
-        }}
-      />
-      <aside className="relative h-full w-full max-w-3xl bg-white shadow-2xl border-l border-slate-200 flex flex-col">
-        <div className="shrink-0 border-b border-slate-100 bg-gradient-to-br from-slate-50 via-white to-white px-5 py-4">
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-white shadow-sm">
-              <FolderIcon className="w-5 h-5" />
+  const removeArtifact = async (id: string) => {
+    if (!confirm('Remove this result?')) return;
+    const next = artifacts.filter((a) => a.id !== id);
+    setArtifacts(next);
+    if (mode.kind !== 'home' && mode.id === id) setMode({ kind: 'home' });
+    markDirty();
+    try {
+      await persist(next);
+    } catch {
+      /* parent shows error */
+    }
+  };
+
+  const doneEditing = async () => {
+    try {
+      await persist();
+      setMode({ kind: 'home' });
+    } catch {
+      /* keep editor open */
+    }
+  };
+
+  const onPickFigure = async (artifact: FigureArtifact, file: File | null) => {
+    if (!file) return;
+    const previewUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+    updateActive({
+      ...artifact,
+      fileName: file.name,
+      mimeType: file.type || 'image/*',
+      size: file.size,
+      previewUrl,
+      title: artifact.title || file.name.replace(/\.[^.]+$/, ''),
+      name: artifact.name.startsWith('Figure')
+        ? file.name.replace(/\.[^.]+$/, '')
+        : artifact.name,
+    });
+  };
+
+  /* ─── Editor / viewer / analyze for one result ─── */
+  if (mode.kind !== 'home' && active) {
+    const editing = mode.kind === 'edit';
+    const analyzing = mode.kind === 'analyze';
+    const sheetHeaders =
+      active.kind === 'sheet'
+        ? (active as DataSheetArtifact).headers
+        : active.kind === 'table'
+          ? (active as SummaryTableArtifact).columns.map((c) => c.header)
+          : [];
+    const sheetRows =
+      active.kind === 'sheet'
+        ? (active as DataSheetArtifact).rows
+        : active.kind === 'table'
+          ? (active as SummaryTableArtifact).rows
+          : [];
+    const canAnalyze = active.kind === 'sheet' || active.kind === 'table';
+
+    return (
+      <div className="relative max-w-7xl mx-auto pb-16 px-1">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 -top-4 h-48 bg-[radial-gradient(ellipse_at_top,_rgba(14,165,233,0.07),_transparent_60%)]"
+        />
+        <div className="relative">
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (editing && dirty && !confirm('Leave without saving this result?')) return;
+                setMode({ kind: 'home' });
+              }}
+              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-slate-600 hover:text-slate-900"
+            >
+              <ArrowLeftIcon className="w-4 h-4" />
+              All results on this page
+            </button>
+            <span className="text-slate-300">·</span>
+            <span className="text-[13px] text-slate-500">
+              {analyzing ? 'Analyze' : kindLabel(active.kind)}
+            </span>
+            <div className="flex-1" />
+            {canAnalyze && !analyzing && (
+              <button
+                type="button"
+                onClick={() => setMode({ kind: 'analyze', id: active.id })}
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-medium text-sky-900 border border-sky-200 bg-sky-50 rounded-md hover:bg-sky-100"
+              >
+                <ChartBarIcon className="w-4 h-4" />
+                Analyze
+              </button>
+            )}
+            {editing ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setMode({ kind: 'view', id: active.id })}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-medium text-slate-700 border border-slate-200 rounded-md hover:bg-slate-50"
+                >
+                  <EyeIcon className="w-4 h-4" />
+                  Preview
+                </button>
+                <button
+                  type="button"
+                  disabled={isSaving}
+                  onClick={() => void doneEditing()}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium text-white bg-sky-700 rounded-md hover:bg-sky-800 disabled:opacity-40"
+                >
+                  <CheckIcon className="w-4 h-4" />
+                  {isSaving ? 'Saving…' : 'Save to page'}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setMode({ kind: 'edit', id: active.id })}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800"
+              >
+                <EditIcon className="w-4 h-4" />
+                Edit
+              </button>
+            )}
+          </div>
+
+          {analyzing && canAnalyze ? (
+            <div className="space-y-6">
+              <ResultAnalysisPanel
+                headers={sheetHeaders}
+                rows={sheetRows}
+                resultName={active.name}
+                experimentId={entry.experimentId}
+                resultId={entry.id}
+              />
+              <div className="rounded-xl border border-slate-200 bg-white p-4 opacity-90">
+                <p className="text-[12px] font-medium text-slate-500 mb-2">Data preview</p>
+                <div className="pointer-events-none max-h-64 overflow-auto rounded-lg border border-slate-200">
+                  <SpreadsheetGrid
+                    headers={sheetHeaders}
+                    rows={sheetRows}
+                    onChange={() => undefined}
+                    minRows={4}
+                    minCols={4}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
+          ) : (
+            <>
+          <input
+            value={active.name}
+            disabled={!editing}
+            onChange={(e) => updateActive({ ...active, name: e.target.value })}
+            className="w-full mb-6 text-[1.5rem] font-semibold text-slate-900 bg-transparent border-0 border-b border-slate-200 focus:border-sky-400 focus:outline-none py-1 disabled:border-transparent"
+            placeholder="Name this result"
+          />
+
+          {active.kind === 'sheet' && (
+            <div className="grid xl:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.85fr)] gap-6 items-start">
+              <div className="space-y-3 min-w-0">
+                {editing && (
+                  <p className="text-[13px] text-slate-500">
+                    Enter data in the grid, or paste from Excel with ⌘V / Ctrl+V.
+                  </p>
+                )}
+                <div
+                  className={`rounded-xl border border-slate-300 shadow-sm overflow-hidden bg-white ${
+                    !editing ? 'pointer-events-none opacity-95' : ''
+                  }`}
+                >
+                  <SpreadsheetGrid
+                    headers={(active as DataSheetArtifact).headers}
+                    rows={(active as DataSheetArtifact).rows}
+                    onChange={({ headers, rows }) => {
+                      if (!editing) return;
+                      const sheet = active as DataSheetArtifact;
+                      updateActive({
+                        ...sheet,
+                        headers,
+                        rows,
+                        columnMeta: headers.map((h, i) => ({
+                          header: h,
+                          type: sheet.columnMeta[i]?.type || 'text',
+                          unit: sheet.columnMeta[i]?.unit,
+                        })),
+                      });
+                    }}
+                    minRows={14}
+                    minCols={8}
+                  />
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-5 min-h-[280px]">
+                <SheetQuickChart
+                  headers={(active as DataSheetArtifact).headers}
+                  rows={(active as DataSheetArtifact).rows}
+                  title={active.name}
+                />
+              </div>
+            </div>
+          )}
+
+          {active.kind === 'table' && (
+            <div className="max-w-5xl space-y-3">
+              {editing && (
+                <p className="text-[13px] text-slate-500">
+                  Build a compact summary table (for papers or slides).
+                </p>
+              )}
+              <p className="text-[13px] italic text-slate-600">{active.name}</p>
+              <div
+                className={`rounded-xl border border-slate-300 shadow-sm overflow-hidden bg-white ${
+                  !editing ? 'pointer-events-none' : ''
+                }`}
+              >
+                <SpreadsheetGrid
+                  headers={(active as SummaryTableArtifact).columns.map((c) => c.header)}
+                  rows={(active as SummaryTableArtifact).rows}
+                  onChange={({ headers, rows }) => {
+                    if (!editing) return;
+                    const table = active as SummaryTableArtifact;
+                    updateActive({
+                      ...table,
+                      columns: headers.map((header, i) => ({
+                        id: table.columns[i]?.id || newArtifactId(),
+                        header,
+                        type: table.columns[i]?.type || 'text',
+                        unit: table.columns[i]?.unit,
+                        decimals: table.columns[i]?.decimals,
+                      })),
+                      rows,
+                    });
+                  }}
+                  minRows={6}
+                  minCols={5}
+                />
+              </div>
+              <input
+                value={(active as SummaryTableArtifact).footnotes}
+                disabled={!editing}
+                onChange={(e) =>
+                  updateActive({
+                    ...(active as SummaryTableArtifact),
+                    footnotes: e.target.value,
+                  })
+                }
+                className="w-full text-[12px] text-slate-500 bg-transparent border-0 focus:outline-none disabled:opacity-80"
+                placeholder="Footnote (optional)"
+              />
+            </div>
+          )}
+
+          {active.kind === 'image' && (
+            <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-8 items-start">
+              <button
+                type="button"
+                disabled={!editing}
+                onClick={() => editing && imageRef.current?.click()}
+                className="w-full flex flex-col items-center justify-center min-h-[320px] rounded-xl border border-slate-300 bg-white shadow-sm disabled:cursor-default overflow-hidden"
+              >
+                {(active as FigureArtifact).previewUrl ? (
+                  <img
+                    src={(active as FigureArtifact).previewUrl}
+                    alt=""
+                    className="max-h-[520px] max-w-full object-contain"
+                  />
+                ) : (
+                  <span className="py-20 text-[13px] text-slate-400 font-medium">
+                    {editing ? 'Click to add an image' : 'No image'}
+                  </span>
+                )}
+              </button>
+              <input
+                ref={imageRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  void onPickFigure(active as FigureArtifact, e.target.files?.[0] || null);
+                  e.target.value = '';
+                }}
+              />
+              <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  Caption
+                </p>
+                <input
+                  value={(active as FigureArtifact).title}
+                  disabled={!editing}
+                  onChange={(e) =>
+                    updateActive({ ...(active as FigureArtifact), title: e.target.value })
+                  }
+                  className="w-full text-[14px] font-medium border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500/20 disabled:border-transparent disabled:bg-slate-50"
+                  placeholder="Figure title"
+                />
+                <textarea
+                  value={(active as FigureArtifact).legend}
+                  disabled={!editing}
+                  onChange={(e) =>
+                    updateActive({ ...(active as FigureArtifact), legend: e.target.value })
+                  }
+                  rows={5}
+                  className="w-full text-[13px] text-slate-600 border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500/20 disabled:border-transparent disabled:bg-slate-50"
+                  placeholder="Legend (optional)"
+                />
+              </div>
+            </div>
+          )}
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Home: four buttons + saved list ─── */
+  return (
+    <div className="relative max-w-7xl mx-auto pb-16 px-1">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -top-4 h-56 bg-[radial-gradient(ellipse_at_top,_rgba(14,165,233,0.08),_transparent_55%)]"
+      />
+
+      <div className="relative">
+        <div className="mb-6 flex flex-wrap items-center gap-2 text-[13px] text-slate-500">
+          <Link to={backHref} className="font-medium text-slate-600 hover:text-slate-900">
+            ← {backLabel}
+          </Link>
+          {entry.experimentId && (
+            <>
+              <span className="text-slate-300">·</span>
+              <Link
+                to={`/experiments/${encodeURIComponent(entry.experimentId)}`}
+                className="font-medium text-slate-800 hover:underline"
+              >
+                {experimentTitle || 'Experiment'}
+              </Link>
+              <span className="text-slate-300">·</span>
+              <span>Results</span>
+            </>
+          )}
+        </div>
+
+        <header className="mb-10 rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-sm px-6 py-6 sm:px-8 sm:py-7 shadow-sm">
+          <div className="flex flex-col lg:flex-row lg:items-start gap-5 justify-between">
+            <div className="min-w-0 flex-1 max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700/80 mb-2">
+                Results page
+              </p>
               <input
                 value={title}
                 onChange={(e) => {
                   setTitle(e.target.value);
-                  setDirty(true);
+                  markDirty();
                 }}
-                className="w-full text-lg font-semibold text-slate-900 tracking-tight bg-transparent border-0 focus:outline-none p-0"
-                placeholder="Pack name"
+                className="w-full text-[1.85rem] sm:text-[2rem] font-semibold tracking-tight text-slate-900 bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-sky-400 focus:outline-none py-1"
+                placeholder="Name this results page"
               />
               <input
                 value={summary}
                 onChange={(e) => {
                   setSummary(e.target.value);
-                  setDirty(true);
+                  markDirty();
                 }}
-                className="mt-1 w-full text-[13px] text-slate-600 bg-transparent border-0 focus:outline-none p-0"
-                placeholder="One line: what experiment / analysis this pack covers"
+                className="mt-3 w-full text-[15px] text-slate-600 bg-transparent border-0 focus:outline-none"
+                placeholder="What experiment or analysis is this for?"
               />
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                <span className="capitalize px-1.5 py-0.5 rounded-md bg-white border border-slate-200">
-                  {String(entry.status || 'draft').replace(/_/g, ' ')}
-                </span>
-                <span>{summarizePack(artifacts)}</span>
-              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (dirty && !confirm('Discard unsaved changes?')) return;
-                onClose();
-              }}
-              className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </button>
+            <div className="flex gap-2 shrink-0">
+              {onDeletePack && (
+                <button
+                  type="button"
+                  onClick={onDeletePack}
+                  className="text-[13px] font-medium text-rose-600 px-3 py-2 rounded-md hover:bg-rose-50"
+                >
+                  Delete page
+                </button>
+              )}
+              <button
+                type="button"
+                disabled={isSaving || !dirty}
+                onClick={() => void persist()}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium text-white bg-sky-700 rounded-md disabled:opacity-40"
+              >
+                <CheckIcon className="w-4 h-4" />
+                {isSaving ? 'Saving…' : dirty ? 'Save' : 'Saved'}
+              </button>
+            </div>
           </div>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <LinkedEntityChips
-              links={buildWorkflowLinks({
-                protocolId: entry.protocolId,
-                experimentId: entry.experimentId,
-                notebookEntryId: entry.notebookEntryId,
-              })}
-            />
-            <Link
-              to={writingFromEvidenceUrl({
-                evidenceId: entry.id,
-                title: entry.title,
-                summary: entry.summary,
-              })}
-              className="inline-flex items-center rounded-md border border-teal-200 bg-teal-50 px-2.5 py-1 text-[11px] font-medium text-teal-950 hover:bg-teal-100"
-            >
-              Continue in Writing Studio →
-            </Link>
-          </div>
-        </div>
+        </header>
 
-        <div className="shrink-0 px-5 py-3 border-b border-slate-100 bg-slate-50/70">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">
-            Add to pack
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {addButtons.map(({ kind, label }) => {
-              const Icon = KIND_ICON[kind];
+        {error && (
+          <div className="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] text-rose-800">
+            {error}
+          </div>
+        )}
+
+        <section className="mb-12">
+          <div className="mb-5">
+            <h2 className="text-[17px] font-semibold text-slate-900">Add results</h2>
+            <p className="text-[14px] text-slate-500 mt-1 max-w-2xl">
+              Choose how your data looks. You can add as many as you need — each one is saved on
+              this page.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            {ENTRY_CARDS.map((card) => {
+              const Icon = card.icon;
               return (
                 <button
-                  key={kind}
+                  key={card.kind}
                   type="button"
-                  onClick={() => setEditor({ mode: 'create', kind })}
-                  className="flex flex-col items-start gap-1.5 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-left hover:border-sky-300 hover:bg-sky-50/40 shadow-sm"
+                  onClick={() => {
+                    if (card.kind === 'upload') uploadRef.current?.click();
+                    else startNew(card.kind);
+                  }}
+                  className="group text-left rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-sm hover:border-sky-300 hover:shadow-md hover:bg-gradient-to-br hover:from-white hover:to-sky-50/50 transition-all"
                 >
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                    <PlusIcon className="w-3 h-3" />
-                    {ARTIFACT_META[kind].role}
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-700 group-hover:bg-sky-100 group-hover:text-sky-800 mb-4 transition-colors">
+                    <Icon className="w-5 h-5" />
                   </span>
-                  <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-slate-900">
-                    <Icon className="w-4 h-4 text-sky-700" />
-                    {label}
+                  <span className="block text-[15px] font-semibold text-slate-900">{card.title}</span>
+                  <span className="block text-[13px] text-slate-500 mt-1.5 leading-relaxed">
+                    {card.blurb}
                   </span>
                 </button>
               );
             })}
           </div>
-          <p className="mt-2 text-[11px] text-slate-500 leading-relaxed">
-            Sheet = raw · Table = paper-ready · Figure = visual · Text = claim + caveats
-          </p>
-        </div>
-
-        <div className="shrink-0 px-5 py-3 border-b border-slate-100">
-          <EvidenceAIPanel
-            title={title}
-            summary={summary}
-            methodology={methodology}
-            conclusions={conclusions}
-            pack={{ version: 2, artifacts }}
-            onApplySummary={(s) => {
-              setSummary(s);
-              setDirty(true);
-            }}
-            onApplyMethodology={(m) => {
-              setMethodology(m);
-              setShowInterp(true);
-              setDirty(true);
-            }}
-            onApplyConclusions={(c) => {
-              setConclusions(c);
-              setShowInterp(true);
-              setDirty(true);
+          <input
+            ref={uploadRef}
+            type="file"
+            accept=".csv,.tsv,.txt,.xlsx,.xls,.xlsm"
+            className="hidden"
+            onChange={(e) => {
+              void handleUpload(e.target.files?.[0] || null);
+              e.target.value = '';
             }}
           />
-        </div>
+        </section>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              type="button"
-              onClick={() => setFilter('all')}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-medium border ${
-                filter === 'all'
-                  ? 'bg-slate-900 text-white border-slate-900'
-                  : 'bg-white text-slate-600 border-slate-200'
-              }`}
-            >
-              All ({artifacts.length})
-            </button>
-            {(Object.keys(ARTIFACT_META) as ArtifactKind[]).map((k) => {
-              const n = artifacts.filter((a) => a.kind === k).length;
-              if (!n) return null;
-              return (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => setFilter(k)}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium border ${
-                    filter === k
-                      ? 'bg-sky-800 text-white border-sky-800'
-                      : 'bg-white text-slate-600 border-slate-200'
-                  }`}
-                >
-                  {ARTIFACT_META[k].short} ({n})
-                </button>
-              );
-            })}
+        <section>
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h2 className="text-[17px] font-semibold text-slate-900">Saved on this page</h2>
+              <p className="text-[14px] text-slate-500 mt-1">
+                {visible.length === 0
+                  ? 'Nothing saved yet — use a button above to start.'
+                  : `${visible.length} result${visible.length === 1 ? '' : 's'}. View or edit anytime.`}
+              </p>
+            </div>
           </div>
 
           {visible.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 py-14 px-6 text-center">
-              <FolderIcon className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <p className="text-[14px] font-medium text-slate-800">Start with raw data</p>
-              <p className="text-[13px] text-slate-500 mt-1 max-w-sm mx-auto">
-                Add a datasheet (or import Excel), then a summary table and figure, then write the
-                text result that ties them together.
-              </p>
-              <button
-                type="button"
-                onClick={() => setEditor({ mode: 'create', kind: 'sheet' })}
-                className="mt-4 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-sky-700 text-white text-[13px] font-medium"
-              >
-                <PlusIcon className="w-4 h-4" />
-                Add datasheet
-              </button>
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 py-16 text-center text-[14px] text-slate-500">
+              Your spreadsheets, tables, and figures will appear here.
             </div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="grid md:grid-cols-2 gap-3">
               {visible.map((a) => {
-                const Icon = KIND_ICON[a.kind];
                 const filled = artifactHasContent(a);
                 return (
                   <li
                     key={a.id}
-                    className="group flex items-stretch rounded-xl border border-slate-200 bg-white hover:border-sky-200 overflow-hidden"
+                    className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm hover:border-slate-300 transition-colors"
                   >
-                    <button
-                      type="button"
-                      onClick={() => setEditor({ mode: 'edit', artifact: a })}
-                      className="flex-1 flex items-center gap-3 px-3.5 py-3 text-left min-w-0"
-                    >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-sky-800 border border-slate-100 shrink-0">
-                        <Icon className="w-4 h-4" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-2">
-                          <span className="text-[13px] font-semibold text-slate-900 truncate">
-                            {a.name || ARTIFACT_META[a.kind].label}
-                          </span>
-                          <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                            {ARTIFACT_META[a.kind].short}
-                          </span>
-                          {!filled && (
-                            <span className="text-[10px] text-amber-800 bg-amber-50 border border-amber-100 px-1.5 py-0.5 rounded">
-                              incomplete
-                            </span>
-                          )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                          {kindLabel(a.kind)}
                         </span>
-                        <span className="block text-[12px] text-slate-500 truncate mt-0.5">
-                          {previewLine(a)}
-                        </span>
-                      </span>
-                    </button>
-                    <div className="flex items-center pr-2 gap-0.5">
+                        {!filled && (
+                          <span className="text-[10px] font-medium text-amber-800 bg-amber-50 border border-amber-100 px-1.5 py-0.5 rounded">
+                            Incomplete
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[15px] font-medium text-slate-900 truncate mt-1">
+                        {a.name || kindLabel(a.kind)}
+                      </p>
+                      <p className="text-[12px] text-slate-500 truncate mt-0.5">{previewLine(a)}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
                       <button
                         type="button"
-                        title="Edit"
-                        onClick={() => setEditor({ mode: 'edit', artifact: a })}
-                        className="p-2 rounded-lg text-slate-400 hover:text-sky-700 hover:bg-sky-50"
+                        onClick={() => setMode({ kind: 'view', id: a.id })}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] font-medium text-slate-700 border border-slate-200 rounded-md hover:bg-slate-50"
                       >
-                        <EditIcon className="w-4 h-4" />
+                        <EyeIcon className="w-3.5 h-3.5" />
+                        View
                       </button>
                       <button
                         type="button"
-                        title="Remove"
-                        onClick={() => removeArtifact(a.id)}
-                        className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                        onClick={() => setMode({ kind: 'edit', id: a.id })}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800"
+                      >
+                        <EditIcon className="w-3.5 h-3.5" />
+                        Edit
+                      </button>
+                      {(a.kind === 'sheet' || a.kind === 'table') && (
+                        <button
+                          type="button"
+                          onClick={() => setMode({ kind: 'analyze', id: a.id })}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] font-medium text-sky-900 border border-sky-200 bg-sky-50 rounded-md hover:bg-sky-100"
+                        >
+                          <ChartBarIcon className="w-3.5 h-3.5" />
+                          Analyze
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => void removeArtifact(a.id)}
+                        className="p-2 text-slate-400 hover:text-rose-600 rounded-md hover:bg-rose-50"
+                        aria-label="Remove"
                       >
                         <TrashIcon className="w-4 h-4" />
                       </button>
@@ -393,142 +741,8 @@ const EvidencePackWorkspace: React.FC<Props> = ({
               })}
             </ul>
           )}
-
-          <div className="pt-2">
-            {!showInterp ? (
-              <button
-                type="button"
-                onClick={() => setShowInterp(true)}
-                className="text-[13px] font-medium text-sky-800 hover:underline"
-              >
-                + Pack methods & overall conclusions
-              </button>
-            ) : (
-              <div className="rounded-xl border border-slate-200 p-4 space-y-3 bg-slate-50/40">
-                <p className="text-[12px] font-semibold text-slate-800">Pack-level notes</p>
-                <div>
-                  <label className="text-[12px] text-slate-500">Methods (how this pack was produced)</label>
-                  <textarea
-                    value={methodology}
-                    onChange={(e) => {
-                      setMethodology(e.target.value);
-                      setDirty(true);
-                    }}
-                    rows={2}
-                    className="mt-1 w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2"
-                    placeholder="Assay protocol, analysis pipeline, software versions…"
-                  />
-                </div>
-                <div>
-                  <label className="text-[12px] text-slate-500">Overall conclusions</label>
-                  <textarea
-                    value={conclusions}
-                    onChange={(e) => {
-                      setConclusions(e.target.value);
-                      setDirty(true);
-                    }}
-                    rows={2}
-                    className="mt-1 w-full text-[13px] border border-slate-200 rounded-lg px-3 py-2"
-                    placeholder="What this pack supports as a whole…"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="shrink-0 border-t border-slate-100 px-5 py-3 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex gap-2">
-            {onDeletePack && (
-              <button
-                type="button"
-                onClick={onDeletePack}
-                className="text-[13px] font-medium text-rose-600 hover:bg-rose-50 px-2 py-2 rounded-lg"
-              >
-                Delete pack
-              </button>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setShowReview(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[13px] font-medium text-teal-900 border border-teal-200 bg-teal-50 rounded-lg hover:bg-teal-100"
-            >
-              <EyeIcon className="w-4 h-4" />
-              Review
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-3.5 py-2 text-[13px] font-medium text-slate-600 border border-slate-200 rounded-lg"
-            >
-              Close
-            </button>
-            <button
-              type="button"
-              disabled={isSaving || !dirty}
-              onClick={() => void persist()}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium text-white bg-sky-700 rounded-lg disabled:opacity-40"
-            >
-              <CheckIcon className="w-4 h-4" />
-              {isSaving ? 'Saving…' : dirty ? 'Save pack' : 'Saved'}
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {editor?.mode === 'create' && (
-        <ArtifactEditorHost
-          artifact={null}
-          createKind={editor.kind}
-          packArtifacts={artifacts}
-          onCancel={() => setEditor(null)}
-          onSave={saveArtifact}
-        />
-      )}
-      {editor?.mode === 'edit' && (
-        <ArtifactEditorHost
-          artifact={editor.artifact}
-          packArtifacts={artifacts}
-          onCancel={() => setEditor(null)}
-          onSave={saveArtifact}
-        />
-      )}
-      {showReview && (
-        <PackReviewView
-          entry={{
-            id: entry.id,
-            title,
-            summary,
-            status: entry.status,
-            type: entry.type,
-            category: entry.category,
-            author: entry.author,
-            date: entry.date,
-            tags: entry.tags,
-            methodology,
-            conclusions,
-            protocolId: entry.protocolId,
-            experimentId: entry.experimentId,
-            notebookEntryId: entry.notebookEntryId,
-          }}
-          pack={{ version: 2, artifacts }}
-          onClose={() => setShowReview(false)}
-          onEdit={() => setShowReview(false)}
-          onUpdateArtifact={(next) => {
-            setArtifacts((prev) => prev.map((a) => (a.id === next.id ? next : a)));
-            setDirty(true);
-          }}
-          onUpdateEntry={(patch) => {
-            if (patch.title != null) setTitle(patch.title);
-            if (patch.summary != null) setSummary(patch.summary);
-            if (patch.methodology != null) setMethodology(patch.methodology);
-            if (patch.conclusions != null) setConclusions(patch.conclusions);
-            setDirty(true);
-          }}
-        />
-      )}
+        </section>
+      </div>
     </div>
   );
 };

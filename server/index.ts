@@ -24,6 +24,14 @@ import {
   registerSchema,
   resolveSignupRole
 } from './validation/authSchemas.js';
+import authRecoveryRoutes from './routes/authRecovery.js';
+import { replacePassword, revokeUserTokens, startEmailVerification, verificationNotice } from './services/accountRecovery.js';
+import {
+  assertActiveLabMember,
+  assertCanWriteLifecycleRecord,
+  canReadLifecycleRecord,
+  findActiveLabMembership,
+} from './policies/labAccess.js';
 import { getRequiredJwtSecret } from './utils/authEnvironment.js';
 
 // Revolutionary features route modules
@@ -42,6 +50,8 @@ import protocolCollaborationRoutes from './routes/protocolCollaboration.js';
 import protocolSemanticSearchRoutes from './routes/protocolSemanticSearch.js';
 import protocolAIRoutes from './routes/protocolAI.js';
 import protocolComparisonRoutes from './routes/protocolComparison.js';
+import protocolsExternalRoutes from './routes/protocolsExternal.js';
+import springerProtocolRoutes from './routes/springerProtocols.js';
 import experimentTrackerRoutes from './routes/experimentTracker.js';
 import projectManagementRoutes from './routes/projectManagement.js';
 import recommendationsRoutes from './routes/recommendations.js';
@@ -60,9 +70,11 @@ import helpForumRoutes from './routes/helpForum.js';
 import notificationsRoutes from './routes/notifications.js';
 import communityNewsRoutes from './routes/communityNews.js';
 import aiResearchAgentRoutes from './routes/aiResearchAgent.js';
-import labFloorsRoleplayRoutes from './routes/labFloorsRoleplay.js';
 import wellbeingRoutes from './routes/wellbeing.js';
+import onboardingDemoRoutes from './routes/onboardingDemo.js';
+import labTrainingRoutes from './routes/labTraining.js';
 import evidenceAIRoutes from './routes/evidenceAI.js';
+import statsGuideRoutes from './routes/statsGuide.js';
 import writingRoutes from './routes/writing.js';
 import researchRoutes from './routes/research.js';
 import dashboardRoutes from './routes/dashboard.js';
@@ -197,8 +209,15 @@ app.post('/api/auth/register', authRateLimit, async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    let emailDelivery = { delivered: false };
+    try {
+      emailDelivery = await startEmailVerification(userId, email.toLowerCase());
+    } catch (verifyError) {
+      console.error('Verification record failed:', verifyError);
+    }
+
     res.status(201).json({
-      message: 'User registered successfully',
+      message: `Account created. ${verificationNotice(emailDelivery.delivered)}`,
       user: {
         id: user.id,
         email: user.email,
@@ -206,8 +225,10 @@ app.post('/api/auth/register', authRateLimit, async (req, res) => {
         first_name: user.first_name,
         last_name: user.last_name,
         role: user.role,
-        status: user.status
+        status: user.status,
+        email_verified: false
       },
+      emailDelivery,
       token
     });
 
@@ -325,9 +346,19 @@ app.post('/api/auth/demo-login', authRateLimit, async (req, res) => {
   });
 });
 
-// Logout - allow without auth so client can notify server before discarding token
+// Logout - missing or invalid tokens still return 200 and revoke nothing.
 app.post('/api/auth/logout', async (req, res) => {
   try {
+    const header = req.headers.authorization;
+    const token = header?.startsWith('Bearer ') ? header.slice('Bearer '.length) : '';
+    if (token && !(ENABLE_DEMO_AUTH && token === DEMO_AUTH_TOKEN)) {
+      try {
+        const payload = jwt.verify(token, JWT_SECRET) as { userId?: string };
+        if (payload.userId) await revokeUserTokens(payload.userId);
+      } catch {
+        // Expired or forged tokens do not revoke another session.
+      }
+    }
     return res.json({ message: 'Logged out' });
   } catch (error) {
     return res.status(500).json({ error: 'Internal server error' });
@@ -379,27 +410,48 @@ app.put('/api/auth/profile', authenticateToken, async (req, res) => {
     }
 
     const { first_name, last_name, email } = parsed.data;
+    const nextEmail = email ? email.toLowerCase() : null;
 
-    if (email) {
+    if (nextEmail) {
       const conflict = await pool.query(
         'SELECT id FROM users WHERE email = $1 AND id != $2',
-        [email.toLowerCase(), req.user!.id]
+        [nextEmail, req.user!.id]
       );
       if (conflict.rows.length > 0) {
         return res.status(400).json({ error: 'Email is already in use' });
       }
     }
 
+    const current = await pool.query('SELECT email FROM users WHERE id = $1', [req.user!.id]);
+    const previousEmail = String(current.rows[0]?.email || '').toLowerCase();
+    const emailChanged = Boolean(nextEmail && nextEmail !== previousEmail);
+
     await pool.query(
-      `UPDATE users SET first_name = COALESCE($1, first_name), last_name = COALESCE($2, last_name), email = COALESCE($3, email), updated_at = CURRENT_TIMESTAMP
+      `UPDATE users SET first_name = COALESCE($1, first_name), last_name = COALESCE($2, last_name), email = COALESCE($3, email), email_verified = CASE WHEN $5 = 1 THEN 0 ELSE email_verified END, updated_at = CURRENT_TIMESTAMP
        WHERE id = $4`,
-      [first_name ?? null, last_name ?? null, email ? email.toLowerCase() : null, req.user!.id]
+      [first_name ?? null, last_name ?? null, nextEmail, req.user!.id, emailChanged ? 1 : 0]
     );
     const userResult = await pool.query(
-      'SELECT id, email, username, first_name, last_name, role, status FROM users WHERE id = $1',
+      'SELECT id, email, username, first_name, last_name, role, status, email_verified FROM users WHERE id = $1',
       [req.user!.id]
     );
-    return res.json({ user: userResult.rows[0] });
+
+    let emailDelivery: { delivered: boolean } | undefined;
+    if (emailChanged && nextEmail) {
+      try {
+        emailDelivery = await startEmailVerification(req.user!.id, nextEmail);
+      } catch (verifyError) {
+        console.error('Verification after email change failed:', verifyError);
+        emailDelivery = { delivered: false };
+      }
+    }
+
+    return res.json({
+      user: userResult.rows[0],
+      ...(emailDelivery
+        ? { emailDelivery, message: verificationNotice(emailDelivery.delivered) }
+        : {})
+    });
   } catch (error) {
     return res.status(500).json({ error: 'Internal server error' });
   }
@@ -418,13 +470,14 @@ app.put('/api/auth/change-password', authenticateToken, authRateLimit, async (re
     if (!isValid) {
       return res.status(401).json({ error: 'Invalid current password' });
     }
-    const newHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
-    await pool.query('UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [newHash, req.user!.id]);
+    await replacePassword(req.user!.id, newPassword);
     return res.json({ message: 'Password updated successfully' });
   } catch (error) {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+app.use('/api/auth', authRecoveryRoutes);
 
 // User Management Routes
 app.get('/api/users', authenticateToken, async (req, res) => {
@@ -1181,12 +1234,9 @@ app.post('/api/protocols', authenticateToken, async (req, res) => {
     }
 
     if (lab_id) {
-      const labAccess = await pool.query(`
-        SELECT role FROM lab_members WHERE lab_id = $1 AND user_id = $2
-      `, [lab_id, req.user.id]);
-
-      if (labAccess.rows.length === 0 && req.user.role !== 'admin') {
-        return res.status(403).json({ error: 'Access denied to this lab' });
+      const membership = await assertActiveLabMember(pool, req.user.id, lab_id);
+      if (!membership.ok) {
+        return res.status(membership.status).json({ error: membership.error });
       }
     }
 
@@ -1323,22 +1373,23 @@ app.get('/api/protocols', authenticateToken, async (req, res) => {
       params.push(privacy);
     }
 
-    // Non-admins: own protocols, public protocols, or lab-member protocols
-    // Push user id twice - MySQL placeholder adapter cannot reuse the same $N twice.
-    if (req.user.role !== 'admin') {
-      paramCount++;
-      const authorParam = paramCount;
-      paramCount++;
-      const memberParam = paramCount;
-      query += ` AND (
-        p.author_id = $${authorParam}
-        OR p.privacy_level = 'public'
-        OR (p.lab_id IS NOT NULL AND p.lab_id IN (
-          SELECT lab_id FROM lab_members WHERE user_id = $${memberParam} AND is_active = true
-        ))
-      )`;
-      params.push(req.user.id, req.user.id);
-    }
+    // Owner, world-visible, or lab-visible rows for an active member. Account admin is not a bypass.
+    paramCount++;
+    const authorParam = paramCount;
+    paramCount++;
+    const memberParam = paramCount;
+    query += ` AND (
+      p.author_id = $${authorParam}
+      OR p.privacy_level IN ('public', 'global')
+      OR (
+        p.lab_id IS NOT NULL
+        AND COALESCE(p.privacy_level, 'lab') IN ('lab', 'shared', 'institution')
+        AND p.lab_id IN (
+          SELECT lab_id FROM lab_members WHERE user_id = $${memberParam} AND COALESCE(is_active, 1) = 1
+        )
+      )
+    )`;
+    params.push(req.user.id, req.user.id);
 
     query += ' ORDER BY p.created_at DESC';
 
@@ -1356,6 +1407,9 @@ app.get('/api/protocols', authenticateToken, async (req, res) => {
     res.status(500).json({ error: errorMessage });
   }
 });
+
+app.use('/api/protocols/external/springer', authenticateToken, springerProtocolRoutes);
+app.use('/api/protocols/external', authenticateToken, protocolsExternalRoutes);
 
 app.get('/api/protocols/:id', authenticateToken, async (req, res) => {
   try {
@@ -1376,20 +1430,19 @@ app.get('/api/protocols/:id', authenticateToken, async (req, res) => {
     }
 
     const protocol = protocolResult.rows[0];
-
-    // Check access permissions (author always allowed; otherwise public or lab member)
-    const isAuthor = protocol.author_id === req.user.id;
-    if (!isAuthor && protocol.privacy_level !== 'public' && req.user.role !== 'admin') {
-      if (!protocol.lab_id) {
-        return res.status(403).json({ error: 'Access denied to this protocol' });
-      }
-      const labAccess = await pool.query(`
-        SELECT role FROM lab_members WHERE lab_id = $1 AND user_id = $2
-      `, [protocol.lab_id, req.user.id]);
-
-      if (labAccess.rows.length === 0) {
-        return res.status(403).json({ error: 'Access denied to this protocol' });
-      }
+    const protocolMember = protocol.lab_id
+      ? await findActiveLabMembership(pool, req.user.id, protocol.lab_id)
+      : null;
+    const protocolRead = canReadLifecycleRecord({
+      resource: 'protocol',
+      userId: req.user.id,
+      ownerId: protocol.author_id,
+      labId: protocol.lab_id,
+      privacyLevel: protocol.privacy_level,
+      activeMember: Boolean(protocolMember),
+    });
+    if (!protocolRead.allowed) {
+      return res.status(protocolRead.status).json({ error: 'Access denied to this protocol' });
     }
 
     // Get sharing information
@@ -1431,16 +1484,13 @@ app.put('/api/protocols/:id', authenticateToken, async (req, res) => {
 
     const protocol = currentProtocol.rows[0];
 
-    // Check permissions (creator, lab PI, or admin)
-    if (protocol.author_id !== req.user.id && req.user.role !== 'admin') {
-      const labAccess = await pool.query(`
-        SELECT role FROM lab_members 
-        WHERE lab_id = $1 AND user_id = $2 AND role = 'principal_researcher'
-      `, [protocol.lab_id, req.user.id]);
-
-      if (labAccess.rows.length === 0) {
-        return res.status(403).json({ error: 'Insufficient permissions to edit this protocol' });
-      }
+    const canEditProtocol = await assertCanWriteLifecycleRecord(pool, {
+      userId: req.user.id,
+      ownerId: protocol.author_id,
+      labId: protocol.lab_id,
+    });
+    if (!canEditProtocol) {
+      return res.status(403).json({ error: 'Insufficient permissions to edit this protocol' });
     }
 
     // Update protocol (MySQL schema uses last_updated, not updated_at)
@@ -1485,16 +1535,14 @@ app.delete('/api/protocols/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Protocol not found' });
     }
 
-    // Check permissions (creator, lab PI, or admin)
-    if (protocol.rows[0].author_id !== req.user.id && req.user.role !== 'admin') {
-      const labAccess = await pool.query(`
-        SELECT role FROM lab_members 
-        WHERE lab_id = $1 AND user_id = $2 AND role = 'principal_researcher'
-      `, [protocol.rows[0].lab_id, req.user.id]);
-
-      if (labAccess.rows.length === 0) {
-        return res.status(403).json({ error: 'Insufficient permissions to delete this protocol' });
-      }
+    const protocolRow = protocol.rows[0];
+    const canDeleteProtocol = await assertCanWriteLifecycleRecord(pool, {
+      userId: req.user.id,
+      ownerId: protocolRow.author_id,
+      labId: protocolRow.lab_id,
+    });
+    if (!canDeleteProtocol) {
+      return res.status(403).json({ error: 'Insufficient permissions to delete this protocol' });
     }
 
     // Soft delete (mark as not approved) - MySQL schema uses last_updated
@@ -1526,16 +1574,14 @@ app.post('/api/protocols/:id/share', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Protocol not found' });
     }
 
-    // Check permissions (creator, lab PI, or admin)
-    if (protocol.rows[0].author_id !== req.user.id && req.user.role !== 'admin') {
-      const labAccess = await pool.query(`
-        SELECT role FROM lab_members 
-        WHERE lab_id = $1 AND user_id = $2 AND role = 'principal_researcher'
-      `, [protocol.rows[0].lab_id, req.user.id]);
-
-      if (labAccess.rows.length === 0) {
-        return res.status(403).json({ error: 'Insufficient permissions to share this protocol' });
-      }
+    const protocolRow = protocol.rows[0];
+    const canShareProtocol = await assertCanWriteLifecycleRecord(pool, {
+      userId: req.user.id,
+      ownerId: protocolRow.author_id,
+      labId: protocolRow.lab_id,
+    });
+    if (!canShareProtocol) {
+      return res.status(403).json({ error: 'Insufficient permissions to share this protocol' });
     }
 
     // Check if sharing already exists
@@ -1654,6 +1700,13 @@ app.post('/api/lab-notebooks', authenticateToken, async (req, res) => {
 
     const linkedProtocolId = protocol_id || protocolId || null;
     const linkedExperimentId = experiment_id || experimentId || null;
+
+    if (lab_id) {
+      const membership = await assertActiveLabMember(pool, req.user.id, lab_id);
+      if (!membership.ok) {
+        return res.status(membership.status).json({ error: membership.error });
+      }
+    }
 
     // Create Personal NoteBook entry - include all fields from the form
     const entryId = crypto.randomUUID();
@@ -1955,16 +2008,19 @@ app.get('/api/lab-notebooks/:id', authenticateToken, async (req, res) => {
     }
 
     const entry = entryResult.rows[0];
-
-    // Check access permissions
-    if (entry.privacy_level !== 'public' && entry.user_id !== req.user.id) {
-      const labAccess = await pool.query(`
-        SELECT role FROM lab_members WHERE lab_id = $1 AND user_id = $2
-      `, [entry.lab_id, req.user.id]);
-
-      if (labAccess.rows.length === 0 && req.user.role !== 'admin') {
-        return res.status(403).json({ error: 'Access denied to this entry' });
-      }
+    const entryMember = entry.lab_id
+      ? await findActiveLabMembership(pool, req.user.id, entry.lab_id)
+      : null;
+    const entryRead = canReadLifecycleRecord({
+      resource: 'notebook',
+      userId: req.user.id,
+      ownerId: entry.user_id,
+      labId: entry.lab_id,
+      privacyLevel: entry.privacy_level,
+      activeMember: Boolean(entryMember),
+    });
+    if (!entryRead.allowed) {
+      return res.status(entryRead.status).json({ error: 'Access denied to this entry' });
     }
 
     res.json({
@@ -1997,16 +2053,13 @@ app.put('/api/lab-notebooks/:id', authenticateToken, async (req, res) => {
 
     const entry = currentEntry.rows[0];
 
-    // Check permissions (creator, lab PI, or admin)
-    if (entry.user_id !== req.user.id && req.user.role !== 'admin') {
-      const labAccess = await pool.query(`
-        SELECT role FROM lab_members 
-        WHERE lab_id = $1 AND user_id = $2 AND role = 'principal_researcher'
-      `, [entry.lab_id, req.user.id]);
-
-      if (labAccess.rows.length === 0) {
-        return res.status(403).json({ error: 'Insufficient permissions to edit this entry' });
-      }
+    const canEditEntry = await assertCanWriteLifecycleRecord(pool, {
+      userId: req.user.id,
+      ownerId: entry.user_id,
+      labId: entry.lab_id,
+    });
+    if (!canEditEntry) {
+      return res.status(403).json({ error: 'Insufficient permissions to edit this entry' });
     }
 
     // Update entry with all fields
@@ -2070,16 +2123,13 @@ app.delete('/api/lab-notebooks/:id', authenticateToken, async (req, res) => {
 
     const entry = currentEntry.rows[0];
 
-    // Check permissions (creator, lab PI, or admin)
-    if (entry.user_id !== req.user.id && req.user.role !== 'admin') {
-      const labAccess = await pool.query(`
-        SELECT role FROM lab_members 
-        WHERE lab_id = $1 AND user_id = $2 AND role = 'principal_researcher'
-      `, [entry.lab_id, req.user.id]);
-
-      if (labAccess.rows.length === 0) {
-        return res.status(403).json({ error: 'Insufficient permissions to delete this entry' });
-      }
+    const canDeleteEntry = await assertCanWriteLifecycleRecord(pool, {
+      userId: req.user.id,
+      ownerId: entry.user_id,
+      labId: entry.lab_id,
+    });
+    if (!canDeleteEntry) {
+      return res.status(403).json({ error: 'Insufficient permissions to delete this entry' });
     }
 
     // Delete entry
@@ -2116,16 +2166,13 @@ app.post('/api/lab-notebooks/:id/share', authenticateToken, async (req, res) => 
 
     const entry = entryResult.rows[0];
 
-    // Check permissions (creator, lab PI, or admin)
-    if (entry.user_id !== req.user.id && req.user.role !== 'admin') {
-      const labAccess = await pool.query(`
-        SELECT role FROM lab_members 
-        WHERE lab_id = $1 AND user_id = $2 AND role = 'principal_researcher'
-      `, [entry.lab_id, req.user.id]);
-
-      if (labAccess.rows.length === 0) {
-        return res.status(403).json({ error: 'Insufficient permissions to share this entry' });
-      }
+    const canShareEntry = await assertCanWriteLifecycleRecord(pool, {
+      userId: req.user.id,
+      ownerId: entry.user_id,
+      labId: entry.lab_id,
+    });
+    if (!canShareEntry) {
+      return res.status(403).json({ error: 'Insufficient permissions to share this entry' });
     }
 
     // Get current collaborators or initialize empty array
@@ -2247,16 +2294,19 @@ app.post('/api/lab-notebooks/:id/comments', authenticateToken, async (req, res) 
     }
 
     const entry = entryAccess.rows[0];
-
-    // Check access permissions
-    if (entry.privacy_level !== 'public' && entry.user_id !== req.user.id) {
-      const labAccess = await pool.query(`
-        SELECT role FROM lab_members WHERE lab_id = $1 AND user_id = $2
-      `, [entry.lab_id, req.user.id]);
-
-      if (labAccess.rows.length === 0 && req.user.role !== 'admin') {
-        return res.status(403).json({ error: 'Access denied to this entry' });
-      }
+    const commentMember = entry.lab_id
+      ? await findActiveLabMembership(pool, req.user.id, entry.lab_id)
+      : null;
+    const commentRead = canReadLifecycleRecord({
+      resource: 'notebook',
+      userId: req.user.id,
+      ownerId: entry.user_id,
+      labId: entry.lab_id,
+      privacyLevel: entry.privacy_level,
+      activeMember: Boolean(commentMember),
+    });
+    if (!commentRead.allowed) {
+      return res.status(commentRead.status).json({ error: 'Access denied to this entry' });
     }
 
     // Create comment
@@ -2292,8 +2342,29 @@ app.post('/api/lab-notebooks/:id/comments', authenticateToken, async (req, res) 
 app.get('/api/lab-notebooks/:id/comments', authenticateToken, async (req, res) => {
   try {
     const { id: entryId } = req.params;
+    const entryAccess = await pool.query(
+      `SELECT id, privacy_level, lab_id, user_id FROM lab_notebook_entries WHERE id = $1`,
+      [entryId]
+    );
+    if (entryAccess.rows.length === 0) {
+      return res.status(404).json({ error: 'Personal NoteBook entry not found' });
+    }
+    const entry = entryAccess.rows[0];
+    const commentMember = entry.lab_id
+      ? await findActiveLabMembership(pool, req.user.id, entry.lab_id)
+      : null;
+    const commentRead = canReadLifecycleRecord({
+      resource: 'notebook',
+      userId: req.user.id,
+      ownerId: entry.user_id,
+      labId: entry.lab_id,
+      privacyLevel: entry.privacy_level,
+      activeMember: Boolean(commentMember),
+    });
+    if (!commentRead.allowed) {
+      return res.status(commentRead.status).json({ error: 'Access denied to this entry' });
+    }
 
-    // Get comments for the entry
     const result = await pool.query(`
       SELECT c.*, u.first_name, u.last_name, u.username
       FROM lab_notebook_comments c
@@ -4864,7 +4935,23 @@ app.get('/api/data/results/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Result not found' });
     }
 
-    res.json({ result: normalizeResearchDataRow(result.rows[0]) });
+    const row = result.rows[0];
+    const evidenceMember = row.lab_id
+      ? await findActiveLabMembership(pool, req.user.id, row.lab_id)
+      : null;
+    const evidenceRead = canReadLifecycleRecord({
+      resource: 'research_data',
+      userId: req.user.id,
+      ownerId: row.user_id,
+      labId: row.lab_id,
+      privacyLevel: row.privacy_level,
+      activeMember: Boolean(evidenceMember),
+    });
+    if (!evidenceRead.allowed) {
+      return res.status(evidenceRead.status).json({ error: 'Access denied to this result' });
+    }
+
+    res.json({ result: normalizeResearchDataRow(row) });
   } catch (error) {
     console.error('Error fetching result:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -4901,6 +4988,13 @@ app.post('/api/data/results', authenticateToken, async (req, res) => {
 
     if (!title) {
       return res.status(400).json({ error: 'Title is required' });
+    }
+
+    if (lab_id) {
+      const membership = await assertActiveLabMember(pool, userId, lab_id);
+      if (!membership.ok) {
+        return res.status(membership.status).json({ error: membership.error });
+      }
     }
 
     const id = crypto.randomUUID();
@@ -4985,14 +5079,14 @@ app.put('/api/data/results/:id', authenticateToken, async (req, res) => {
     }
 
     const owned = ownershipCheck.rows[0];
-    if (owned.user_id !== userId) {
-      const labMemberCheck = await pool.query(`
-        SELECT role FROM lab_members WHERE lab_id = $1 AND user_id = $2
-      `, [owned.lab_id, userId]);
-
-      if (labMemberCheck.rows.length === 0 || !['principal_researcher', 'co_supervisor'].includes(labMemberCheck.rows[0].role)) {
-        return res.status(403).json({ error: 'Insufficient permissions' });
-      }
+    const canEditEvidence = await assertCanWriteLifecycleRecord(pool, {
+      userId,
+      ownerId: owned.user_id,
+      labId: owned.lab_id,
+      allowCoSupervisor: true,
+    });
+    if (!canEditEvidence) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
     const linkedProtocol = protocol_id ?? protocolId;
@@ -5062,14 +5156,13 @@ app.delete('/api/data/results/:id', authenticateToken, async (req, res) => {
     }
 
     const owned = ownershipCheck.rows[0];
-    if (owned.user_id !== userId) {
-      const labMemberCheck = await pool.query(`
-        SELECT role FROM lab_members WHERE lab_id = $1 AND user_id = $2
-      `, [owned.lab_id, userId]);
-
-      if (labMemberCheck.rows.length === 0 || !['principal_researcher'].includes(labMemberCheck.rows[0].role)) {
-        return res.status(403).json({ error: 'Insufficient permissions' });
-      }
+    const canDeleteEvidence = await assertCanWriteLifecycleRecord(pool, {
+      userId,
+      ownerId: owned.user_id,
+      labId: owned.lab_id,
+    });
+    if (!canDeleteEvidence) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
     await pool.query('DELETE FROM research_data WHERE id = $1', [id]);
@@ -6044,9 +6137,11 @@ app.use('/api/help-forum', authenticateToken, helpForumRoutes);
 app.use('/api/notifications', authenticateToken, notificationsRoutes);
 app.use('/api/community-news', authenticateToken, communityNewsRoutes);
 app.use('/api/ai-research-agent', authenticateToken, aiResearchAgentRoutes);
-app.use('/api/lab-floors', authenticateToken, labFloorsRoleplayRoutes);
 app.use('/api/wellbeing', authenticateToken, wellbeingRoutes);
+app.use('/api/onboarding', authenticateToken, onboardingDemoRoutes);
+app.use('/api/lab-training', authenticateToken, labTrainingRoutes);
 app.use('/api/evidence-ai', authenticateToken, evidenceAIRoutes);
+app.use('/api/stats-guide', authenticateToken, statsGuideRoutes);
 app.use('/api/writing', authenticateToken, writingRoutes);
 app.use('/api/research', authenticateToken, researchRoutes);
 
@@ -6058,7 +6153,7 @@ app.get('/api/data-results', authenticateToken, async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const { lab_id, data_type, search, tags, date_from, date_to } = req.query;
+    const { lab_id, data_type, search, tags, date_from, date_to, experiment_id } = req.query;
     const userId = (req as any).user.id;
 
     let query = `
@@ -6095,6 +6190,13 @@ app.get('/api/data-results', authenticateToken, async (req, res) => {
       paramCount++;
       query += ` AND r.lab_id = $${paramCount}`;
       queryParams.push(lab_id);
+    }
+
+    // Filter by linked experiment
+    if (experiment_id) {
+      paramCount++;
+      query += ` AND r.experiment_id = $${paramCount}`;
+      queryParams.push(experiment_id);
     }
 
     // Filter by data_type

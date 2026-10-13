@@ -166,7 +166,7 @@ const MODES: {
     blurb: 'Interpret results, figures, and evidence packs',
     icon: LightBulbIcon,
     accent: 'amber',
-    link: { to: '/data-results', label: 'Research evidence' },
+    link: { to: '/data-results', label: 'Data & Results' },
     starters: [
       {
         id: 'interpret',

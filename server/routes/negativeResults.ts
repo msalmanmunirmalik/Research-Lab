@@ -486,7 +486,7 @@ router.post('/:id/vote-saved-me', authenticateToken, async (req: any, res) => {
 
     // Record the save
     await pool.query(`
-      INSERT INTO saved_negative_results (
+      INSERT INTO negative_result_saves (
         user_id, negative_result_id, save_reason, 
         avoided_repeating_mistake, estimated_time_saved_hours, estimated_cost_saved_usd
       )
@@ -528,7 +528,7 @@ router.get('/my/saved', authenticateToken, async (req: any, res) => {
         snr.notes,
         snr.saved_at,
         CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as researcher_name
-      FROM saved_negative_results snr
+      FROM negative_result_saves snr
       JOIN negative_results nr ON snr.negative_result_id = nr.id
       JOIN users u ON nr.researcher_id = u.id
       WHERE snr.user_id = $1
@@ -550,7 +550,7 @@ router.post('/:id/save', authenticateToken, async (req: any, res) => {
     const { save_reason, notes } = req.body;
 
     const result = await pool.query(`
-      INSERT INTO saved_negative_results (
+      INSERT INTO negative_result_saves (
         user_id, negative_result_id, save_reason, notes
       )
       VALUES ($1, $2, $3, $4)
@@ -573,7 +573,7 @@ router.delete('/:id/save', authenticateToken, async (req: any, res) => {
     const { id } = req.params;
 
     await pool.query(`
-      DELETE FROM saved_negative_results
+      DELETE FROM negative_result_saves
       WHERE user_id = $1 AND negative_result_id = $2
     `, [userId, id]);
 

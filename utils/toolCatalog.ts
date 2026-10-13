@@ -112,6 +112,10 @@ const empty = (hint: string): ToolResult => ({
 
 export const cleanDna = (seq: string) => seq.toUpperCase().replace(/[^ATGC]/g, '');
 
+/** Shared demo DNA with common restriction sites for Load example */
+const DEMO_DNA =
+  'ATGGCCATGGAATTCGGATCCGTCGACAAGCTTCTCGAGGCGGCCGCATGCATCATCATCATCATCACGGATCCGAATTCAAGCTTGTCGAC';
+
 export const gcContent = (seq: string) => {
   const s = cleanDna(seq);
   if (!s.length) return 0;
@@ -212,6 +216,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'volume', label: 'Volume', unit: 'L', kind: 'number' },
       { id: 'mw', label: 'Molecular weight', unit: 'g/mol', kind: 'number' },
     ],
+    sample: { concentration: '0.1', volume: '0.5', mw: '58.44' },
     compute: (v) => {
       const c = num(v.concentration);
       const m = num(v.mass);
@@ -240,6 +245,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'steps', label: 'Serial steps', kind: 'number', placeholder: '1', hint: '1 = single dilution; >1 builds a serial ladder' },
     ],
     defaults: { c1: '100', c2: '10', v2: '10', steps: '1' },
+    sample: { c1: '100', c2: '10', v2: '10', steps: '4' },
     compute: (v) => {
       const c1 = num(v.c1);
       const c2 = num(v.c2);
@@ -290,6 +296,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'acid', label: '[HA]', unit: 'M', kind: 'number', placeholder: '0.1' },
     ],
     defaults: { pka: '4.76', base: '0.1', acid: '0.1' },
+    sample: { pka: '4.76', base: '0.1', acid: '0.1' },
     compute: (v) => {
       const pka = num(v.pka);
       const base = num(v.base);
@@ -343,6 +350,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'c', label: 'Concentration', unit: 'M', kind: 'number' },
     ],
     defaults: { eps: '10000', path: '1' },
+    sample: { a: '0.75', eps: '10000', path: '1' },
     compute: (v) => {
       const a = num(v.a);
       const eps = num(v.eps);
@@ -387,6 +395,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'smax', label: 'Plot max [S]', unit: 'μM', kind: 'number', placeholder: '500' },
     ],
     defaults: { vmax: '100', km: '50', s: '50', smax: '500' },
+    sample: { vmax: '100', km: '50', s: '50', smax: '500' },
     compute: (v) => {
       const vmax = num(v.vmax);
       const km = num(v.km);
@@ -436,8 +445,7 @@ export const LAB_TOOLS: ToolDef[] = [
     ],
     defaults: { primerLen: '20', targetTm: '60', ampliconStart: '1' },
     sample: {
-      template:
-        'ATGGCCATGGAATTCGGATCCGTCGACAAGCTTCTCGAGGCGGCCGCATGCATCATCATCATCATCACGGATCCGAATTCAAGCTTGTCGAC',
+      template: DEMO_DNA,
       ampliconStart: '1',
       ampliconEnd: '90',
       primerLen: '20',
@@ -556,6 +564,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'fwd', label: 'Forward (5′→3′)', kind: 'text', placeholder: 'ATGC…' },
       { id: 'rev', label: 'Reverse (5′→3′)', kind: 'text', placeholder: 'ATGC…' },
     ],
+    sample: { fwd: 'ATGGCCATGGAATTCGGATC', rev: 'GTCGACAAGCTTGTCGACGG' },
     compute: (v) => {
       const fwd = cleanDna(v.fwd || '');
       const rev = cleanDna(v.rev || '');
@@ -604,6 +613,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'productBp', label: 'Amplicon size', unit: 'bp', kind: 'number', placeholder: '500' },
     ],
     defaults: { templateNg: '10', efficiency: '0.95', cycles: '30', productBp: '500' },
+    sample: { templateNg: '10', efficiency: '0.95', cycles: '30', productBp: '500' },
     compute: (v) => {
       const n0 = num(v.templateNg);
       const e = num(v.efficiency) ?? 0.95;
@@ -651,6 +661,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'masterPct', label: '2× mix fraction', kind: 'number', placeholder: '0.5' },
     ],
     defaults: { rxn: '50', nRxn: '8', templatePct: '0.1', primerPct: '0.05', masterPct: '0.5' },
+    sample: { rxn: '50', nRxn: '8', templatePct: '0.1', primerPct: '0.05', masterPct: '0.5' },
     compute: (v) => {
       const rxn = num(v.rxn) ?? 50;
       const n = Math.max(1, num(v.nRxn) ?? 1);
@@ -691,6 +702,14 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'vectorConc', label: 'Vector conc.', unit: 'ng/μL', kind: 'number' },
     ],
     defaults: { vectorNg: '50', ratio: '3' },
+    sample: {
+      insertBp: '800',
+      vectorBp: '5400',
+      vectorNg: '50',
+      ratio: '3',
+      insertConc: '20',
+      vectorConc: '50',
+    },
     compute: (v) => {
       const iBp = num(v.insertBp);
       const vBp = num(v.vectorBp);
@@ -733,6 +752,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'window', label: 'GC window', unit: 'bp', kind: 'number', placeholder: '50' },
     ],
     defaults: { window: '50' },
+    sample: { seq: DEMO_DNA, window: '50' },
     compute: (v) => {
       const seq = cleanDna(v.seq || '');
       if (!seq) return empty('Paste a DNA sequence.');
@@ -780,6 +800,7 @@ export const LAB_TOOLS: ToolDef[] = [
     category: 'sequence',
     kind: 'visualizer',
     fields: [{ id: 'seq', label: 'DNA sequence', kind: 'text', placeholder: 'Paste ATGC…' }],
+    sample: { seq: DEMO_DNA },
     compute: (v) => {
       const seq = cleanDna(v.seq || '');
       if (!seq) return empty('Paste a DNA sequence.');
@@ -815,6 +836,7 @@ export const LAB_TOOLS: ToolDef[] = [
     category: 'sequence',
     kind: 'calculator',
     fields: [{ id: 'seq', label: 'DNA sequence', kind: 'text', placeholder: 'Paste ATGC…' }],
+    sample: { seq: DEMO_DNA },
     compute: (v) => {
       const seq = cleanDna(v.seq || '');
       if (!seq) return empty('Paste a DNA sequence.');
@@ -855,6 +877,7 @@ export const LAB_TOOLS: ToolDef[] = [
       },
     ],
     defaults: { frame: '1' },
+    sample: { seq: DEMO_DNA, frame: '1' },
     compute: (v) => {
       let seq = cleanDna(v.seq || '');
       if (seq.length < 3) return empty('Need at least one codon.');
@@ -890,6 +913,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'viability', label: 'Viability', unit: '%', kind: 'number', placeholder: '95' },
     ],
     defaults: { dilution: '2', volume: '0.1', viability: '95' },
+    sample: { count: '120', dilution: '2', volume: '0.1', viability: '95' },
     compute: (v) => {
       const count = num(v.count);
       const dil = num(v.dilution) ?? 1;
@@ -931,6 +955,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'harvest', label: 'Harvest target', unit: 'cells/mL', kind: 'number', placeholder: '1e6' },
     ],
     defaults: { n0: '100000', k: '2000000', r: '0.15', hours: '48', harvest: '1000000' },
+    sample: { n0: '100000', k: '2000000', r: '0.15', hours: '48', harvest: '1000000' },
     compute: (v) => {
       const n0 = num(v.n0);
       const k = num(v.k);
@@ -972,6 +997,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'target', label: 'Target density', unit: 'cells/mL', kind: 'number' },
       { id: 'finalVol', label: 'Final volume', unit: 'mL', kind: 'number' },
     ],
+    sample: { stock: '1000000', target: '50000', finalVol: '10' },
     compute: (v) => {
       const stock = num(v.stock);
       const target = num(v.target);
@@ -1002,6 +1028,7 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'dilution', label: 'Dilution factor', kind: 'number', placeholder: '1' },
     ],
     defaults: { intercept: '0', dilution: '1' },
+    sample: { a: '0.42', slope: '0.85', intercept: '0.05', dilution: '2' },
     compute: (v) => {
       const a = num(v.a);
       const slope = num(v.slope);
@@ -1102,6 +1129,13 @@ export const LAB_TOOLS: ToolDef[] = [
       ctRefCtrl: '18',
       efficiency: '1',
     },
+    sample: {
+      ctTargetSample: '22',
+      ctRefSample: '18',
+      ctTargetCtrl: '25',
+      ctRefCtrl: '18',
+      efficiency: '1',
+    },
     compute: (v) => {
       const ts = num(v.ctTargetSample);
       const rs = num(v.ctRefSample);
@@ -1156,6 +1190,18 @@ export const LAB_TOOLS: ToolDef[] = [
       { id: 'ramp', label: 'Ramp', unit: '°C/s', kind: 'number', placeholder: '3' },
     ],
     defaults: {
+      denatureC: '95',
+      denatureS: '30',
+      annealC: '58',
+      annealS: '30',
+      extendC: '72',
+      extendS: '60',
+      cycles: '30',
+      initDenatureS: '180',
+      finalExtendS: '300',
+      ramp: '3',
+    },
+    sample: {
       denatureC: '95',
       denatureS: '30',
       annealC: '58',
@@ -1265,6 +1311,7 @@ export const LAB_TOOLS: ToolDef[] = [
       },
     ],
     defaults: { mode: 'volume', value: '100', from: 'uL' },
+    sample: { mode: 'volume', value: '100', from: 'uL' },
     compute: (v) => {
       const value = num(v.value);
       if (value == null) return empty('Enter a value.');

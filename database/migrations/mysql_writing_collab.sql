@@ -3,7 +3,11 @@
 SET @db := DATABASE();
 SET @q := (
   SELECT IF(
-    EXISTS(
+    NOT EXISTS(
+      SELECT 1 FROM information_schema.TABLES
+      WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'writing_documents'
+    )
+    OR EXISTS(
       SELECT 1 FROM information_schema.COLUMNS
       WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'writing_documents' AND COLUMN_NAME = 'content_revision'
     ),

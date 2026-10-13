@@ -51,9 +51,21 @@ CREATE TABLE IF NOT EXISTS protocol_executions (
   INDEX idx_protocol_executions_user (user_id)
 );
 
-ALTER TABLE protocols ADD COLUMN IF NOT EXISTS usage_count INT NOT NULL DEFAULT 0;
-ALTER TABLE protocols ADD COLUMN IF NOT EXISTS last_used_at DATETIME NULL;
-ALTER TABLE protocols ADD COLUMN IF NOT EXISTS success_count INT NOT NULL DEFAULT 0;
+-- protocols is created later by mysql_migration.sql. Skip when this file runs first.
+SET @db := DATABASE();
+SET @has_protocols := (
+  SELECT COUNT(*) FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'protocols'
+);
+SET @sql := IF(@has_protocols = 0, 'SELECT 1',
+  'ALTER TABLE protocols ADD COLUMN IF NOT EXISTS usage_count INT NOT NULL DEFAULT 0');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+SET @sql := IF(@has_protocols = 0, 'SELECT 1',
+  'ALTER TABLE protocols ADD COLUMN IF NOT EXISTS last_used_at DATETIME NULL');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+SET @sql := IF(@has_protocols = 0, 'SELECT 1',
+  'ALTER TABLE protocols ADD COLUMN IF NOT EXISTS success_count INT NOT NULL DEFAULT 0');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 -- Marketplace requests / portfolio
 CREATE TABLE IF NOT EXISTS service_requests (
@@ -96,8 +108,17 @@ CREATE TABLE IF NOT EXISTS service_portfolio_items (
   INDEX idx_portfolio_service (service_id)
 );
 
-ALTER TABLE service_listings ADD COLUMN IF NOT EXISTS inquiries_count INT NOT NULL DEFAULT 0;
-ALTER TABLE service_listings ADD COLUMN IF NOT EXISTS provider_id VARCHAR(64) NULL;
+-- service_listings is created later by mysql_forms_crud_alignment.sql.
+SET @has_listings := (
+  SELECT COUNT(*) FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'service_listings'
+);
+SET @sql := IF(@has_listings = 0, 'SELECT 1',
+  'ALTER TABLE service_listings ADD COLUMN IF NOT EXISTS inquiries_count INT NOT NULL DEFAULT 0');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+SET @sql := IF(@has_listings = 0, 'SELECT 1',
+  'ALTER TABLE service_listings ADD COLUMN IF NOT EXISTS provider_id VARCHAR(64) NULL');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 -- Professional protocols (simplified MySQL shape; JSON/TEXT for complex fields)
 CREATE TABLE IF NOT EXISTS professional_protocols (

@@ -44,8 +44,18 @@ Health: `curl http://127.0.0.1:5002/api/health`
 | `pnpm run dev:app` | Frontend + API |
 | `pnpm run build` | Production build |
 | `pnpm run test` | Jest |
+| `pnpm run smoke:beachhead` | Health + optional evidence-chain API smoke |
 | `pnpm run test:playwright` | Playwright e2e |
 | `pnpm run pack:directadmin` | DirectAdmin deploy package |
+
+Beachhead smoke (API running on `:5002`):
+
+```bash
+pnpm run smoke:beachhead
+SMOKE_EMAIL=you@lab.edu SMOKE_PASSWORD='…' SMOKE_LAB_ID=optional-lab-id pnpm run smoke:beachhead
+```
+
+UI checklist: [`docs/RILOS_WORKFLOW_QA_CHECKLIST.md`](docs/RILOS_WORKFLOW_QA_CHECKLIST.md). AuthZ policy: `server/policies/labAccess.ts` (JWT revoke on logout/password via `tokens_invalid_before`).
 
 ## Project structure
 
@@ -56,7 +66,6 @@ researchlab/
 ├── server/         # Express API
 ├── database/       # MySQL config + migrations
 ├── docs/           # LOCAL_DEV, RILOS_ALIGNMENT_PLAN, …
-├── content/        # Lab Floors scenarios, etc.
 └── App.tsx         # Routes + shell
 ```
 

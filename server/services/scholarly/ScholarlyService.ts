@@ -109,13 +109,15 @@ export class ScholarlyService {
         providersUsed.push('crossref', 'openalex');
       } else if (isPmid(query)) {
         const pmid = query.replace(/\D/g, '');
-        const [pm, epmc] = await Promise.all([
+        const [pm, epmc, oaPmid] = await Promise.all([
           pubMedProvider.getByPmid(pmid),
           europePmcProvider.getByPmid(pmid),
+          openAlexProvider.getByPmid(pmid),
         ]);
+        if (oaPmid) papers.push(oaPmid);
         if (pm) papers.push(pm);
         if (epmc) papers.push(epmc);
-        providersUsed.push('pubmed', 'europepmc');
+        providersUsed.push('openalex', 'pubmed', 'europepmc');
       } else {
         const bio = opts.biomedicalOnly || looksBiomedical(query);
         const oa = await openAlexProvider
@@ -141,7 +143,7 @@ export class ScholarlyService {
         }
       }
     } catch (e) {
-      console.error('Scholarly search error:', e);
+      console.error('Scholarly search error:', e instanceof Error ? e.message : 'failed');
     }
 
     papers = rank(dedupeResults(papers), query, opts.sort || 'relevance');

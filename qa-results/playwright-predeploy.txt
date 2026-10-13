@@ -1,0 +1,511 @@
+
+Running 38 tests using 4 workers
+
+  ✓   3 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:14:3 › Authentication › rejects invalid credentials (3.5s)
+  ✓   1 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:7:3 › Authentication › displays login form (3.5s)
+  ✓   2 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:22:3 › Authentication › logs in with demo credentials (3.7s)
+  ✓   7 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:53:3 › API Smoke › health endpoint responds (48ms)
+  ✓   8 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:58:3 › API Smoke › demo login returns token (22ms)
+  ✓   4 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:26:3 › Authentication › logs out successfully (3.9s)
+  ✓   5 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:40:3 › Navigation › opens Personal NoteBook from sidebar (6.1s)
+  ✓   6 [chromium] › tests/e2e/digital-research-manager.pw.spec.ts:45:3 › Navigation › opens protocol library from sidebar (6.3s)
+  ✘   9 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:115:3 › Experiment Tracker Module › displays dashboard overview (12.6s)
+  ✓  13 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:11:3 › Personal NoteBook Module › shows Personal NoteBook overview (951ms)
+  ✘  14 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:16:3 › Personal NoteBook Module › supports entry search interaction (6.1s)
+  ✘  15 [chromium] › tests/e2e/lab-notebook.pw.spec.ts:21:3 › Personal NoteBook Module › shows entry type selections (7.1s)
+  ✘  10 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:122:3 › Experiment Tracker Module › shows experiment filters in Experiments tab (32.3s)
+  ✘  16 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:11:3 › Professional Protocols Module › renders protocol library overview (7.4s)
+  ✘  11 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:129:3 › Experiment Tracker Module › activates templates tab (33.6s)
+  ✘  12 [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:135:3 › Experiment Tracker Module › shows analytics view (34.1s)
+  ✓  18 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:27:3 › Professional Protocols Module › shows empty or results state without crashing (1.8s)
+  ✓  20 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:26:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should display recommendations widget on protocols page (3.2s)
+  ✓  21 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:67:5 › Recommendations and Notebook Summaries E2E › Service Recommendations › should display recommendations widget on service marketplace (2.6s)
+  ✓  19 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:106:5 › Recommendations and Notebook Summaries E2E › Notebook Summary Generation › should generate weekly summary when button is clicked (5.7s)
+  ✓  24 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:120:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should return protocol recommendations (66ms)
+  ✓  22 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:35:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should load protocol recommendations (1.9s)
+  ✓  25 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:128:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should return paper recommendations (46ms)
+  ✓  27 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:136:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should return service recommendations (17ms)
+  ✓  28 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:144:5 › Recommendations and Notebook Summaries E2E › API Endpoints › should generate notebook summary (309ms)
+  ✓  23 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:76:5 › Recommendations and Notebook Summaries E2E › Dashboard Recommendations › should display recommendation widgets on dashboard (2.1s)
+  ✓  26 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:45:5 › Recommendations and Notebook Summaries E2E › Protocol Recommendations › should allow clicking on recommended protocol (3.3s)
+  ✓  30 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:85:5 › Recommendations and Notebook Summaries E2E › Notebook Summary Generation › should display summary generation buttons on lab notebook page (2.7s)
+  ✓  31 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:58:5 › Recommendations and Notebook Summaries E2E › Paper Recommendations › should display recommendations widget on research data bank page (3.2s)
+  ✘  29 [chromium] › tests/e2e/research-assistant.pw.spec.ts:116:3 › Research Assistant Module › shows AI assistant overview and handles chat submission (8.6s)
+  ✓  32 [chromium] › tests/e2e/recommendations-notebook-summaries.pw.spec.ts:94:5 › Recommendations and Notebook Summaries E2E › Notebook Summary Generation › should generate daily summary when button is clicked (6.7s)
+  ✘  34 [chromium] › tests/e2e/research-tools.pw.spec.ts:12:3 › Research Tools Module › displays research tools overview (7.4s)
+  ✘  17 [chromium] › tests/e2e/professional-protocols.pw.spec.ts:21:3 › Professional Protocols Module › filters protocols using search (32.1s)
+  ✘  36 [chromium] › tests/e2e/research-tools.pw.spec.ts:19:3 › Research Tools Module › filters tools by type (7.1s)
+  ✘  37 [chromium] › tests/e2e/research-tools.pw.spec.ts:28:3 › Research Tools Module › switches between grid and list view (8.9s)
+  ✘  38 [chromium] › tests/e2e/research-tools.pw.spec.ts:35:3 › Research Tools Module › opens calculator details drawer (6.7s)
+  ✘  33 [chromium] › tests/e2e/research-assistant.pw.spec.ts:138:3 › Research Assistant Module › displays literature tab and renders library content (31.4s)
+  ✘  35 [chromium] › tests/e2e/research-assistant.pw.spec.ts:151:3 › Research Assistant Module › fetches a paper manually and supports ORCID import (31.4s)
+
+
+  1) [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:115:3 › Experiment Tracker Module › displays dashboard overview 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByRole('heading', { name: 'Experiment Planner & Tracker' })
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: 'Experiment Planner & Tracker' })[22m
+
+
+      114 |
+      115 |   test('displays dashboard overview', async ({ page }) => {
+    > 116 |     await expect(page.getByRole('heading', { name: 'Experiment Planner & Tracker' })).toBeVisible();
+          |                                                                                       ^
+      117 |     await expect(page.getByText('Plan, track, and manage your research experiments')).toBeVisible();
+      118 |     await expect(page.getByText('Total Experiments')).toBeVisible();
+      119 |     await expect(page.getByText('Running')).toBeVisible();
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/experiment-tracker.pw.spec.ts:116:87
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/experiment-tracker.pw-Expe-da288-displays-dashboard-overview-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/experiment-tracker.pw-Expe-da288-displays-dashboard-overview-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:122:3 › Experiment Tracker Module › shows experiment filters in Experiments tab 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('main').locator('nav').getByRole('button', { name: 'Experiments' })[22m
+
+
+      122 |   test('shows experiment filters in Experiments tab', async ({ page }) => {
+      123 |     const experimentsTab = page.locator('main').locator('nav').getByRole('button', { name: 'Experiments' });
+    > 124 |     await experimentsTab.click();
+          |                          ^
+      125 |     await expect(page.getByPlaceholder('Search experiments...')).toBeVisible();
+      126 |     await expect(experimentsTab).toHaveClass(/border-blue-500/);
+      127 |   });
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/experiment-tracker.pw.spec.ts:124:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/experiment-tracker.pw-Expe-cc04e--filters-in-Experiments-tab-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/experiment-tracker.pw-Expe-cc04e--filters-in-Experiments-tab-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:129:3 › Experiment Tracker Module › activates templates tab 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('main').locator('nav').getByRole('button', { name: 'Templates' })[22m
+
+
+      129 |   test('activates templates tab', async ({ page }) => {
+      130 |     const templatesTab = page.locator('main').locator('nav').getByRole('button', { name: 'Templates' });
+    > 131 |     await templatesTab.click();
+          |                        ^
+      132 |     await expect(templatesTab).toHaveClass(/border-blue-500/);
+      133 |   });
+      134 |
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/experiment-tracker.pw.spec.ts:131:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/experiment-tracker.pw-Expe-3f3da-ule-activates-templates-tab-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/experiment-tracker.pw-Expe-3f3da-ule-activates-templates-tab-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:135:3 › Experiment Tracker Module › shows analytics view 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('main').locator('nav').getByRole('button', { name: 'Analytics' })[22m
+
+
+      135 |   test('shows analytics view', async ({ page }) => {
+      136 |     const analyticsTab = page.locator('main').locator('nav').getByRole('button', { name: 'Analytics' });
+    > 137 |     await analyticsTab.click();
+          |                        ^
+      138 |     await expect(analyticsTab).toHaveClass(/border-blue-500/);
+      139 |     await expect(page.locator('text=Analytics Dashboard')).toBeVisible();
+      140 |   });
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/experiment-tracker.pw.spec.ts:137:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/experiment-tracker.pw-Expe-956c6-Module-shows-analytics-view-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/experiment-tracker.pw-Expe-956c6-Module-shows-analytics-view-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [chromium] › tests/e2e/lab-notebook.pw.spec.ts:16:3 › Personal NoteBook Module › supports entry search interaction 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveValue[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByPlaceholder('Search entries...')
+    Expected string: [32m"Sample"[39m
+    Received: <element(s) not found>
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveValue" with timeout 5000ms[22m
+    [2m  - waiting for getByPlaceholder('Search entries...')[22m
+
+
+      16 |   test('supports entry search interaction', async ({ page }) => {
+      17 |     await page.getByPlaceholder('Search entries...').fill('Sample');
+    > 18 |     await expect(page.getByPlaceholder('Search entries...')).toHaveValue('Sample');
+         |                                                              ^
+      19 |   });
+      20 |
+      21 |   test('shows entry type selections', async ({ page }) => {
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/lab-notebook.pw.spec.ts:18:62
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/lab-notebook.pw-Personal-N-20a6a-ts-entry-search-interaction-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/lab-notebook.pw-Personal-N-20a6a-ts-entry-search-interaction-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [chromium] › tests/e2e/lab-notebook.pw.spec.ts:21:3 › Personal NoteBook Module › shows entry type selections 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByRole('heading', { name: 'Experiment', exact: true })
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: 'Experiment', exact: true })[22m
+
+
+      20 |
+      21 |   test('shows entry type selections', async ({ page }) => {
+    > 22 |     await expect(page.getByRole('heading', { name: 'Experiment', exact: true })).toBeVisible();
+         |                                                                                  ^
+      23 |     await expect(page.getByRole('heading', { name: 'Idea', exact: true })).toBeVisible();
+      24 |     await expect(page.getByRole('heading', { name: 'Sample Management', exact: true })).toBeVisible();
+      25 |   });
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/lab-notebook.pw.spec.ts:22:82
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/lab-notebook.pw-Personal-N-8b6f8-shows-entry-type-selections-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/lab-notebook.pw-Personal-N-8b6f8-shows-entry-type-selections-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/lab-notebook.pw-Personal-N-8b6f8-shows-entry-type-selections-chromium/error-context.md
+
+  7) [chromium] › tests/e2e/professional-protocols.pw.spec.ts:11:3 › Professional Protocols Module › renders protocol library overview 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByRole('button', { name: /Generate Protocol/i }).first()
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('button', { name: /Generate Protocol/i }).first()[22m
+
+
+      13 |     await expect(
+      14 |       page.getByRole('button', { name: /Generate Protocol/i }).first()
+    > 15 |     ).toBeVisible();
+         |       ^
+      16 |     await expect(
+      17 |       page.getByPlaceholder(/Search or describe a protocol/i)
+      18 |     ).toBeVisible();
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/professional-protocols.pw.spec.ts:15:7
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--81aa1-s-protocol-library-overview-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--81aa1-s-protocol-library-overview-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/professional-protocols.pw--81aa1-s-protocol-library-overview-chromium/error-context.md
+
+  8) [chromium] › tests/e2e/professional-protocols.pw.spec.ts:21:3 › Professional Protocols Module › filters protocols using search 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByPlaceholder(/Search or describe a protocol/i)[22m
+
+
+      21 |   test('filters protocols using search', async ({ page }) => {
+      22 |     const search = page.getByPlaceholder(/Search or describe a protocol/i);
+    > 23 |     await search.fill('Western');
+         |                  ^
+      24 |     await expect(search).toHaveValue('Western');
+      25 |   });
+      26 |
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/professional-protocols.pw.spec.ts:23:18
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--d91c8-ters-protocols-using-search-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/professional-protocols.pw--d91c8-ters-protocols-using-search-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/professional-protocols.pw--d91c8-ters-protocols-using-search-chromium/error-context.md
+
+  9) [chromium] › tests/e2e/research-assistant.pw.spec.ts:116:3 › Research Assistant Module › shows AI assistant overview and handles chat submission 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByTestId('assistant-tab-panel')
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('assistant-tab-panel')[22m
+
+
+      115 |
+      116 |   test('shows AI assistant overview and handles chat submission', async ({ page }) => {
+    > 117 |     await expect(page.getByTestId('assistant-tab-panel')).toBeVisible();
+          |                                                           ^
+      118 |     const assistantHeading = page
+      119 |       .getByTestId('assistant-tab-panel')
+      120 |       .locator('h3')
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/research-assistant.pw.spec.ts:117:59
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/research-assistant.pw-Rese-ddea5-and-handles-chat-submission-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/research-assistant.pw-Rese-ddea5-and-handles-chat-submission-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/research-assistant.pw-Rese-ddea5-and-handles-chat-submission-chromium/error-context.md
+
+  10) [chromium] › tests/e2e/research-assistant.pw.spec.ts:138:3 › Research Assistant Module › displays literature tab and renders library content 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('research-assistant-tab-literature-papers')[22m
+
+
+      137 |
+      138 |   test('displays literature tab and renders library content', async ({ page }) => {
+    > 139 |     await page.getByTestId('research-assistant-tab-literature-papers').click();
+          |                                                                        ^
+      140 |     await expect(page.getByTestId('literature-tab-panel')).toBeVisible();
+      141 |     await expect(
+      142 |       page.getByTestId('literature-header').getByRole('heading', { name: 'Literature & Papers' })
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/research-assistant.pw.spec.ts:139:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/research-assistant.pw-Rese-bf69a-and-renders-library-content-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/research-assistant.pw-Rese-bf69a-and-renders-library-content-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/research-assistant.pw-Rese-bf69a-and-renders-library-content-chromium/error-context.md
+
+  11) [chromium] › tests/e2e/research-assistant.pw.spec.ts:151:3 › Research Assistant Module › fetches a paper manually and supports ORCID import 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('research-assistant-tab-literature-papers')[22m
+
+
+      150 |
+      151 |   test('fetches a paper manually and supports ORCID import', async ({ page }) => {
+    > 152 |     await page.getByTestId('research-assistant-tab-literature-papers').click();
+          |                                                                        ^
+      153 |     await page.getByTestId('literature-header').getByRole('button', { name: 'Add Paper' }).click();
+      154 |     await expect(page.getByTestId('paper-add-view')).toBeVisible();
+      155 |
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/research-assistant.pw.spec.ts:152:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/research-assistant.pw-Rese-a6cd0-y-and-supports-ORCID-import-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/research-assistant.pw-Rese-a6cd0-y-and-supports-ORCID-import-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/research-assistant.pw-Rese-a6cd0-y-and-supports-ORCID-import-chromium/error-context.md
+
+  12) [chromium] › tests/e2e/research-tools.pw.spec.ts:12:3 › Research Tools Module › displays research tools overview 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/research-tools$/[39m
+    Received string:  [31m"http://localhost:5173/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 × unexpected value "http://localhost:5173/dashboard"[22m
+
+
+       7 |     await page.goto('/research-tools');
+       8 |     await page.waitForLoadState('networkidle');
+    >  9 |     await expect(page).toHaveURL(/\/research-tools$/);
+         |                        ^
+      10 |   });
+      11 |
+      12 |   test('displays research tools overview', async ({ page }) => {
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/research-tools.pw.spec.ts:9:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/research-tools.pw-Research-eca97-ays-research-tools-overview-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/research-tools.pw-Research-eca97-ays-research-tools-overview-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/research-tools.pw-Research-eca97-ays-research-tools-overview-chromium/error-context.md
+
+  13) [chromium] › tests/e2e/research-tools.pw.spec.ts:19:3 › Research Tools Module › filters tools by type 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/research-tools$/[39m
+    Received string:  [31m"http://localhost:5173/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 × unexpected value "http://localhost:5173/dashboard"[22m
+
+
+       7 |     await page.goto('/research-tools');
+       8 |     await page.waitForLoadState('networkidle');
+    >  9 |     await expect(page).toHaveURL(/\/research-tools$/);
+         |                        ^
+      10 |   });
+      11 |
+      12 |   test('displays research tools overview', async ({ page }) => {
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/research-tools.pw.spec.ts:9:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/research-tools.pw-Research-5997d-odule-filters-tools-by-type-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/research-tools.pw-Research-5997d-odule-filters-tools-by-type-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/research-tools.pw-Research-5997d-odule-filters-tools-by-type-chromium/error-context.md
+
+  14) [chromium] › tests/e2e/research-tools.pw.spec.ts:28:3 › Research Tools Module › switches between grid and list view 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/research-tools$/[39m
+    Received string:  [31m"http://localhost:5173/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 × unexpected value "http://localhost:5173/dashboard"[22m
+
+
+       7 |     await page.goto('/research-tools');
+       8 |     await page.waitForLoadState('networkidle');
+    >  9 |     await expect(page).toHaveURL(/\/research-tools$/);
+         |                        ^
+      10 |   });
+      11 |
+      12 |   test('displays research tools overview', async ({ page }) => {
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/research-tools.pw.spec.ts:9:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/research-tools.pw-Research-2c92c--between-grid-and-list-view-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/research-tools.pw-Research-2c92c--between-grid-and-list-view-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/research-tools.pw-Research-2c92c--between-grid-and-list-view-chromium/error-context.md
+
+  15) [chromium] › tests/e2e/research-tools.pw.spec.ts:35:3 › Research Tools Module › opens calculator details drawer 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/research-tools$/[39m
+    Received string:  [31m"http://localhost:5173/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 × unexpected value "http://localhost:5173/dashboard"[22m
+
+
+       7 |     await page.goto('/research-tools');
+       8 |     await page.waitForLoadState('networkidle');
+    >  9 |     await expect(page).toHaveURL(/\/research-tools$/);
+         |                        ^
+      10 |   });
+      11 |
+      12 |   test('displays research tools overview', async ({ page }) => {
+        at /Users/m.salmanmalik/Development Projects/researchlab/tests/e2e/research-tools.pw.spec.ts:9:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/research-tools.pw-Research-59ed0-s-calculator-details-drawer-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/research-tools.pw-Research-59ed0-s-calculator-details-drawer-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/research-tools.pw-Research-59ed0-s-calculator-details-drawer-chromium/error-context.md
+
+  15 failed
+    [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:115:3 › Experiment Tracker Module › displays dashboard overview 
+    [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:122:3 › Experiment Tracker Module › shows experiment filters in Experiments tab 
+    [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:129:3 › Experiment Tracker Module › activates templates tab 
+    [chromium] › tests/e2e/experiment-tracker.pw.spec.ts:135:3 › Experiment Tracker Module › shows analytics view 
+    [chromium] › tests/e2e/lab-notebook.pw.spec.ts:16:3 › Personal NoteBook Module › supports entry search interaction 
+    [chromium] › tests/e2e/lab-notebook.pw.spec.ts:21:3 › Personal NoteBook Module › shows entry type selections 
+    [chromium] › tests/e2e/professional-protocols.pw.spec.ts:11:3 › Professional Protocols Module › renders protocol library overview 
+    [chromium] › tests/e2e/professional-protocols.pw.spec.ts:21:3 › Professional Protocols Module › filters protocols using search 
+    [chromium] › tests/e2e/research-assistant.pw.spec.ts:116:3 › Research Assistant Module › shows AI assistant overview and handles chat submission 
+    [chromium] › tests/e2e/research-assistant.pw.spec.ts:138:3 › Research Assistant Module › displays literature tab and renders library content 
+    [chromium] › tests/e2e/research-assistant.pw.spec.ts:151:3 › Research Assistant Module › fetches a paper manually and supports ORCID import 
+    [chromium] › tests/e2e/research-tools.pw.spec.ts:12:3 › Research Tools Module › displays research tools overview 
+    [chromium] › tests/e2e/research-tools.pw.spec.ts:19:3 › Research Tools Module › filters tools by type 
+    [chromium] › tests/e2e/research-tools.pw.spec.ts:28:3 › Research Tools Module › switches between grid and list view 
+    [chromium] › tests/e2e/research-tools.pw.spec.ts:35:3 › Research Tools Module › opens calculator details drawer 
+  23 passed (1.6m)
